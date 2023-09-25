@@ -1,0 +1,95 @@
+//---------------------------------------------------------------------------------------------
+//	Fill screen test code for SIFP (c) 2023-... zpekic@hotmail.com
+//  Compile with https://github.com/zpekic/MicroCodeCompiler
+//---------------------------------------------------------------------------------------------
+// Test code to load into internal ROM of SIFP microcomputer
+// Full description: 
+// https://hackaday.io/project/173996-sifp-single-instruction-format-processor
+//---------------------------------------------------------------------------------------------
+			.code 8, 16, fillscreen_code.mif, fillscreen_code.cgf, fillscreen_code.coe, fls:fillscreen_code.vhd, fillscreen_code.hex, fillscreen_code.bin, 2;
+			.symbol 8, 256, fillscreen_sym.mif, fillscreen_sym.cgf, fillscreen_sym.coe, fls:fillscreen_sym.vhd, fillscreen_sym.hex, fillscreen_sym.bin, 32;
+
+#include "sifp.mcc";
+
+VGA_ROWS	.alias 60;		// 80*60 characters in 640*480 basic VGA mode
+VGA_COLS	.alias 80;		// each character is 8*8 matrix
+VGA_BASE	.alias 0x1000;	// text video memory base address
+
+//	---------------------------------------------------------------------------
+			.org 0;
+//	Execution starts at location 0
+//	---------------------------------------------------------------------------
+			NOP;
+			LDA, M[IMM];
+			.data ' ';		// start filling screen with space
+ALOOP:		LDY, M[IMM];	// Y (row) = 0
+			.data 0;
+YLOOP:		LDX, M[IMM];	// X (col) = 0
+			.data 0;
+XLOOP:		MARK2;				// push return address onto stack
+			JMP;				// 0
+			.into @DISPLAYAT;	// 1
+			INX;				// 2, RTS from DISPLAYAT will return here
+			CPX, M[IMM];
+			.data VGA_COLS - 1;
+			IF_XC;
+			.branchto @XLOOP - $;
+			INY;
+			CPY, M[IMM];
+			.data VGA_ROWS - 1;
+			IF_YC;
+			.branchto @YLOOP - $;
+			MARK2;
+			JMP;
+			.into @CLC;
+			ADC, M[IMM];
+			.data 1;
+STOP:		IF_AZ;
+			.branchto @STOP - $;	// if A reached 0, dead loop
+			BRANCH;
+			.to @ALOOP - $;
+			
+// Display ASCII in A at row Y, column X	
+DISPLAYAT:  NOP;			// just to more easily identify the entry in assembled code
+			STY, M[PUSH];	// save Y (row)
+			STA, M[PUSH];	// save A (ASCII character code)
+			LDA, Y;			// A <= Y
+			MARK2;
+			JUMP;
+			.into @CLC;
+			SLC;
+			SLC;
+			SLC;
+			SLC;
+			STA, M[PUSH];	// push Y*16
+			SLC;
+			SLC;			// Y*64
+			ADC, M[POP];	// Y*64 + Y*16
+			ADC, M[IMM];// base + Y*80
+			.data VGA_BASE;
+			LDY, A;			// Y = base + Y*80
+			LDA, M[POP];	// restore character
+			STA, M[Y+X];	// store to video RAM
+			LDY, M[POP];	// restore Y
+			RTS;
+			
+// Clear carry flag
+CLC:		NOP;
+			STA, M[PUSH];	// save A
+			LDA, M[IMM];	// clear A
+			.data 0;
+ACSet:		SRC;			// clear AC
+			LDA, M[POP];	// restore A
+ACDone:		RTS;
+
+// Set carry flag
+SEC:		NOP;
+			IF_AC;
+			.branchto @ACDone - $;
+CSet:		STA, M[PUSH];
+			LDA, M[IMM];
+			.data 1;
+			BRANCH;
+			.to @ACSet - $;
+			
+			

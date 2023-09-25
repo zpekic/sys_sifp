@@ -1,0 +1,94 @@
+//---------------------------------------------------------------------------------------------
+//	Include to adapt mcc as assembler SIFP (c) 2023-... zpekic@hotmail.com
+//  More about mcc:  https://github.com/zpekic/MicroCodeCompiler
+//---------------------------------------------------------------------------------------------
+// Full description: 
+// https://hackaday.io/project/173996-sifp-single-instruction-format-processor
+//---------------------------------------------------------------------------------------------
+// define slices of the instruction word format
+//
+// 16-bit program counter (has no flags)
+r_p			.valfield 4 values
+				NOP,		// continue, increment P
+				LDP|JMP|JUMP|GOTO,	// load from incoming data (jump)
+				ADP|BRANCH, 		// add incoming data (relative jump / branch)
+				STP2,				// output P+x as data (usually for push)
+				STP3,
+				STP4,
+				STP5,
+				M[IMM],		// output value as address, increment (used for immediate values)
+				BAC|IF_AC,	// branch if A flag C set
+				BAZ|IF_AZ,	// branch if A flag Z set
+				BXC|IF_XC,
+				BXZ|IF_XZ,
+				BYC|IF_YC,
+				BYZ|IF_YZ,
+				BSC|IF_SC,
+				BSZ|IF_SZ	// branch is S flag Z set
+				default NOP;
+//				
+// 16-bit accumulator (has own carry (AC) and zero (AZ) flags)
+r_a			.regfield 3 values
+				NOA,	// no operation on A register 
+				LDA,	// load with incoming data (AZ)
+				XOR,	// logical xor with incoming data (AZ)
+				SLC,	// shift left through carry	(AC, AZ)
+				SRC,	// shift right through carry (AC, AZ)
+				ADC,	// add incoming data and carry flag (AC, AZ)
+				SBC,	// substract incoming data and carry flag (AC, AZ)
+				STA|A	// output value as data
+				default NOA;
+//
+// 16-bit index register X (has own carry (XC) and zero (XZ) flags)
+r_x			.valfield 3 values
+				NOX,	// no operation on X register 
+				CPX,	// compare with incoming data (XC, XZ)
+				INX,	// increment by 1	(XC, XZ)
+				DEX,	// decrement by 1	(XC, XZ)
+				LDX,	// load with incoming data (XZ)
+				ADX,	// add incoming data (XC, XZ)
+				M[X],	// output value as address 
+				STX|X	// output value as data
+				default NOX;
+//				
+// 16-bit index register Y (has own carry (YC) and zero (YZ) flags)			
+r_y			.valfield 3 values
+				NOY,	// no operation on Y register 
+				CPY,	// compare with incoming data (YC, YZ)
+				INY,	// increment by 1	(YC, YZ)
+				DEY,	// decrement by 1	(YC, YZ)
+				LDY,	// load with incoming data (YZ)
+				ADY,	// add incoming data (YC, YZ)
+				M[Y],	// output value as address 
+				STY|Y	// output value as data
+				default NOY;
+// 16-bit stack pointer S  (has own carry (SC) and zero (SZ) flags)
+r_s			.valfield 3 values
+				NOS,	// no operation on X register 
+				CPS,	// compare with incoming data (SC, SZ)
+				M[POP],	// address is S, then increment
+				M[PUSH],// address is S - 1, then decrement
+				LDS,	// load with incoming data (SZ)
+				ADS,	// add incoming data (SC, SZ)
+				M[S],	// output value as address (use to access stack top in memory) 
+				STS|S	// output value as data
+				default NOS;
+
+// 16-bit data can be directly in instruction stream (immediate value, relative or absolute address)
+data16		.valfield r_p .. r_s values * default 0;
+						
+// "aliases" are evaluated as simple text replacement of label with everything between .alias and ; 
+.data		.alias  data16 = ;
+.to			.alias  data16 = ;
+.branchto	.alias  data16 = ;
+.into		.alias 	data16 = ;
+RTS			.alias 	r_p = JMP, r_s = M[POP];
+MARK2		.alias 	r_p = STP2, r_s = M[PUSH];
+// Base + offset addressing mode
+M[Y+X]		.alias  r_x = M[X], r_y = M[Y];
+M[X+Y]		.alias  r_x = M[X], r_y = M[Y];
+//
+// two special case instruction combinations to push and pop flag register
+PUSHF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[PUSH];
+POPF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[POP];
+
