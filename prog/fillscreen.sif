@@ -10,17 +10,19 @@
 			.symbol 8, 256, fillscreen_sym.mif, fillscreen_sym.cgf, fillscreen_sym.coe, fls:fillscreen_sym.vhd, fillscreen_sym.hex, fillscreen_sym.bin, 32;
 
 #include "sifp.mcc";
-
-VGA_ROWS	.alias 60;		// 80*60 characters in 640*480 basic VGA mode
-VGA_COLS	.alias 80;		// each character is 8*8 matrix
-VGA_BASE	.alias 0x1000;	// text video memory base address
+#include "sifp_sys.mcc";
 
 //	---------------------------------------------------------------------------
 			.org 0;
 //	Execution starts at location 0
 //	---------------------------------------------------------------------------
-			NOP;
-			LDA, M[IMM];
+			BRANCH;
+			.to @Start - $;
+			
+#include "utils.sif";			
+#include "vga.sif";
+			
+Start:		LDA, M[IMM];
 			.data ' ';		// start filling screen with space
 ALOOP:		LDY, M[IMM];	// Y (row) = 0
 			.data 0;
@@ -49,47 +51,5 @@ STOP:		IF_AZ;
 			BRANCH;
 			.to @ALOOP - $;
 			
-// Display ASCII in A at row Y, column X	
-DISPLAYAT:  NOP;			// just to more easily identify the entry in assembled code
-			STY, M[PUSH];	// save Y (row)
-			STA, M[PUSH];	// save A (ASCII character code)
-			LDA, Y;			// A <= Y
-			MARK2;
-			JUMP;
-			.into @CLC;
-			SLC;
-			SLC;
-			SLC;
-			SLC;
-			STA, M[PUSH];	// push Y*16
-			SLC;
-			SLC;			// Y*64
-			ADC, M[POP];	// Y*64 + Y*16
-			ADC, M[IMM];// base + Y*80
-			.data VGA_BASE;
-			LDY, A;			// Y = base + Y*80
-			LDA, M[POP];	// restore character
-			STA, M[Y+X];	// store to video RAM
-			LDY, M[POP];	// restore Y
-			RTS;
-			
-// Clear carry flag
-CLC:		NOP;
-			STA, M[PUSH];	// save A
-			LDA, M[IMM];	// clear A
-			.data 0;
-ACSet:		SRC;			// clear AC
-			LDA, M[POP];	// restore A
-ACDone:		RTS;
-
-// Set carry flag
-SEC:		NOP;
-			IF_AC;
-			.branchto @ACDone - $;
-CSet:		STA, M[PUSH];
-			LDA, M[IMM];
-			.data 1;
-			BRANCH;
-			.to @ACSet - $;
 			
 			

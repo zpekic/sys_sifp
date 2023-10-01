@@ -17,18 +17,18 @@ r_p			.valfield 4 values
 				STP4,
 				STP5,
 				M[IMM],		// output value as address, increment (used for immediate values)
-				BAC|IF_AC,	// branch if A flag C set
-				BAZ|IF_AZ,	// branch if A flag Z set
-				BXC|IF_XC,
-				BXZ|IF_XZ,
-				BYC|IF_YC,
-				BYZ|IF_YZ,
-				BSC|IF_SC,
-				BSZ|IF_SZ	// branch is S flag Z set
+				BAC|IF_AC|IF_A_GE,	// branch if A flag C set
+				BAZ|IF_AZ|IF_A_EQ,	// branch if A flag Z set
+				BXC|IF_XC|IF_X_GE,
+				BXZ|IF_XZ|IF_X_EQ,
+				BYC|IF_YC|IF_Y_GE,
+				BYZ|IF_YZ|IF_Y_EQ,
+				BSC|IF_SC|IF_S_GE,
+				BSZ|IF_SZ|IF_S_EQ	// branch is S flag Z set
 				default NOP;
 //				
 // 16-bit accumulator (has own carry (AC) and zero (AZ) flags)
-r_a			.regfield 3 values
+r_a			.valfield 3 values
 				NOA,	// no operation on A register 
 				LDA,	// load with incoming data (AZ)
 				XOR,	// logical xor with incoming data (AZ)
@@ -87,8 +87,28 @@ MARK2		.alias 	r_p = STP2, r_s = M[PUSH];
 // Base + offset addressing mode
 M[Y+X]		.alias  r_x = M[X], r_y = M[Y];
 M[X+Y]		.alias  r_x = M[X], r_y = M[Y];
+// Convenient stack operations
+PUSHA		.alias  r_p = NOP, r_a = STA, r_x = NOX, r_y = NOY, r_s = M[PUSH];
+POPA		.alias  r_p = NOP, r_a = LDA, r_x = NOX, r_y = NOY, r_s = M[POP];
+PUSHX		.alias  r_p = NOP, r_a = NOA, r_x = STX, r_y = NOY, r_s = M[PUSH];
+POPX		.alias  r_p = NOP, r_a = NOA, r_x = LDX, r_y = NOY, r_s = M[POP];
+PUSHY		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = STY, r_s = M[PUSH];
+POPY		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = LDY, r_s = M[POP];
+// Convenient immediate operations
+LDAI		.alias  r_p = M[IMM], r_a = LDA, r_x = NOX, r_y = NOY, r_s = NOS;
+XORI		.alias  r_p = M[IMM], r_a = XOR, r_x = NOX, r_y = NOY, r_s = NOS;
+ADCI		.alias  r_p = M[IMM], r_a = ADC, r_x = NOX, r_y = NOY, r_s = NOS;
+SBCI		.alias  r_p = M[IMM], r_a = SBC, r_x = NOX, r_y = NOY, r_s = NOS;
+LDXI		.alias  r_p = M[IMM], r_a = NOA, r_x = LDX, r_y = NOY, r_s = NOS;
+ADXI		.alias  r_p = M[IMM], r_a = NOA, r_x = ADX, r_y = NOY, r_s = NOS;
+CPXI		.alias  r_p = M[IMM], r_a = NOA, r_x = CPX, r_y = NOY, r_s = NOS;
+LDYI		.alias  r_p = M[IMM], r_a = NOA, r_x = NOX, r_y = LDY, r_s = NOS;
+ADYI		.alias  r_p = M[IMM], r_a = NOA, r_x = NOX, r_y = ADY, r_s = NOS;
+CPYI		.alias  r_p = M[IMM], r_a = NOA, r_x = NOX, r_y = CPY, r_s = NOS;
+
 //
-// two special case instruction combinations to push and pop flag register
+// Special case instruction combinations
 PUSHF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[PUSH];
 POPF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[POP];
+HALT		.alias  r_p = NOP, r_a = A, r_x = X, r_y = Y, r_s = S;
 

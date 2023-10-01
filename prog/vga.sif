@@ -1,0 +1,100 @@
+CURSOR_X	.alias RAM_BASE + 0;
+CURSOR_Y	.alias RAM_BASE + 1;
+
+// Display ASCII in A at row Y, column X	
+			.org $;
+
+DisplayAt:	PUSHX;	// save column
+			PUSHA;	// save ASCII code
+			LDXI;
+			.data VGA_COLS;
+			MARK2;
+			BRANCH;
+			.into @MulU;	// A.Y <= Y * VGA_COLS
+			POPA;
+			POPX;
+			ADYI;
+			.data VGA_BASE;
+			STA, M[Y+X];
+			RTS;
+			
+// Print string pointed by X to VGA			
+Str2VGA:	NOP;
+			STY, M[PUSH];	// save Y
+
+Str2VGALoop:LDA, M[X];
+			IF_AZ,;
+			.branchto @Str2VGAExit - $;
+			XORI;
+			.data CR;		// is it clear screen?
+			IF_AZ;
+			.branchto @CarReturn - $;
+
+			LDA, M[X];
+			XORI;
+			.data LF;		
+			IF_AZ; 
+			.branchto @LineFeed - $;
+
+			LDA, M[X];
+			XORI;
+			.data HOME;
+			IF_AZ; 
+			.branchto @Cur2Home - $;
+			
+			LDA, M[X];
+			XORI;
+			.data CLS;
+			IF_AZ; 
+			.branchto @ClrScreen - $;
+			
+//			default output
+			STX, M[PUSH];		// save character pointer
+			MARK2;
+			JMP;
+			.into @GetCursorXY;	// get cursor row, col from RAM
+			MARK2;
+			JMP;
+			.into @DisplayAt;
+			INX;
+			CPX, M[IMM];
+			.data VGA_COLS;
+			IF_X_GE;
+			.branchto @NextRow - $;
+NoScroll:	MARK2;
+			JMP;
+			.into @SetCursorXY;
+			BRANCH;
+			.to @NextChar - $;
+NextRow:	LDX, M[IMM];
+			.data 0;
+			INY;
+			CPY, M[IMM];
+			.data VGA_ROWS;
+			IF_Y_GE;
+			.branchto @ScrollUp - $;
+			BRANCH;
+			.to @NoScroll - $;
+
+ScrollUp:	HALT; // TODO			
+			
+CarReturn:	HALT; // TODO
+
+LineFeed:	HALT; // TODO
+
+Cur2Home:	HALT; // TODO
+
+ClrScreen:	HALT; // TODO
+
+// 			next character in the string
+NextChar:	POPX;		// restore character pointer
+			INX, BRANCH;
+			.to @Str2VGALoop - $;
+			
+Str2VGAExit:POPY;	// restore Y
+			RTS;
+			
+SetCursorXY:RTS;	// TODO
+
+GetCursorXY:RTS;	// TODO
+

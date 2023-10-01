@@ -1,0 +1,15 @@
+// Some useful system definitions
+
+VGA_ROWS	.alias 32;	// 64*32 characters in 640*480 basic VGA mode (fits in 2k RAM)
+VGA_COLS	.alias 64;	// each character is 8*8 matrix
+VGA_BASE	.alias 0x1000;	// text video memory base address
+RAM_BASE	.alias 0xFF00;	// only 256 words of RAM is sufficient
+UART_TX_DATA	.alias 0xE000;	// when writing
+UART_TX_STATUS	.alias 0xE000;	// when reading
+//UART_RX_DATA	.alias 0xE001;	// when reading
+//UART_RX_STATUS	.alias 0xE001;
+
+CLS:		.alias 0x1;			// ASCII code, clear device
+HOME:		.alias 0x2;			// ASCII code, cursor to top, left
+CR:			.alias 0xD;			// ASCII code, carriage return
+LF:			.alias 0xA;			// ASCII code, newline

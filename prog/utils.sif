@@ -1,0 +1,52 @@
+			.org $;
+// Clear carry flag
+CLC:		PUSHA;	// save A
+			LDAI;	// clear A
+			.data 0;
+ACSet:		SRC;	// clear or set AC
+			POPA;	// restore A
+ACDone:		RTS;
+
+// Set carry flag
+SEC:		IF_AC;
+			.branchto @ACDone - $;
+CSet:		PUSHA;
+			LDAI;
+			.data 1;
+			BRANCH;
+			.to @ACSet - $;
+
+// Unsigned Multiply 
+// A.Y <= X * Y
+MulU:		PUSHX;		// multiplicand will be at the top of stack
+			LDXI;
+			.data 16;	// 16 iterations
+			LDAI;
+			.data 0;	// clear upper 16-bits of product
+
+CheckY0:	PUSHA;		// check LSB of Y
+			LDA, Y;
+			SRC;
+			POPA;
+			IF_AC;
+			.branchto @Y01 - $;
+Y00:		ADCI;		// carry-in is already 0
+			.data 0;
+			BRANCH;
+			.to @Nextbit - $;
+Y01:		MARK2;		// clear carry
+			BRANCH;
+			.into @CLC - $;
+			ADC, M[S];	// add original X
+Nextbit:	SRC;	
+			PUSHA;
+			LDA, Y;
+			SRC;
+			LDY, A;
+			DEX, LDA, M[POP];	// decrement iteration count and restore A
+			IF_XZ;	
+			.branchto @CheckY0 - $;
+			POPX;
+			RTS;
+			
+			

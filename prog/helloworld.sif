@@ -1,0 +1,76 @@
+//---------------------------------------------------------------------------------------------
+//	Hello world test code for SIFP (c) 2023-... zpekic@hotmail.com
+//  Compile with https://github.com/zpekic/MicroCodeCompiler
+//---------------------------------------------------------------------------------------------
+// Test code to load into internal ROM of SIFP microcomputer
+// Full description: 
+// https://hackaday.io/project/173996-sifp-single-instruction-format-processor
+//---------------------------------------------------------------------------------------------
+			.code 8, 16, helloworld_code.mif, helloworld_code.cgf, helloworld_code.coe, hwd:helloworld_code.vhd, helloworld_code.hex, helloworld_code.bin, 2;
+			.symbol 8, 256, helloworld_sym.mif, helloworld_sym.cgf, helloworld_sym.coe, fls:helloworld_sym.vhd, helloworld_sym.hex, helloworld_sym.bin, 32;
+
+#include "sifp.mcc";
+#include "sifp_sys.mcc";
+
+//	---------------------------------------------------------------------------
+			.org 0;
+//	Execution starts at location 0
+//	---------------------------------------------------------------------------
+			NOP;
+			LDXI;
+			.data @StrClear;	// points to clear string
+DeadLoop:	MARK2;
+			JMP;
+			.into @Str2UART;
+			MARK2;
+			JMP;
+			.into @Str2VGA;
+			LDXI;
+			.data @StrHWorld;	// points to "Hello World!"
+			BRANCH,;
+			.to @DeadLoop - $;
+			
+StrClear:	.data CLS;
+			.data 0;
+			
+StrHWorld:	.data 'H';
+			.data 'e';
+			.data 'l';
+			.data 'l';
+			.data 'o';
+			.data ' ';
+			.data 'W';
+			.data 'o';
+			.data 'r';
+			.data 'l';
+			.data 'd';
+			.data '!';
+			.data CR;
+			.data LF;
+			.data 0;
+			
+// Print string pointed by X to UART
+//			
+Str2UART:	NOP;
+			PUSHY;
+			LDYI;			// Y points to UART memory mapped register
+			.data UART_TX_DATA;
+Str2ULoop:	LDA, M[X];		// check if reached end (nul end char)
+			IF_AZ,;
+			.branchto @Done - $;
+ChkTxdRdy:	LDA, M[Y];		// read UART status
+			SLC;			// LSB is the READY bit
+			IF_AC,;
+			.branchto @Str2UOut - $;
+			BRANCH;
+			.to @ChkTxdRdy - $;
+Str2UOut:	LDA, M[X];		// get current char from string
+			STA, M[Y];		// output to UART
+			INX, BRANCH,;
+			.to @Str2ULoop - $;
+Done:		POPY;
+			RTS;
+			
+#include "utils.sif";			
+#include "vga.sif";			
+			
