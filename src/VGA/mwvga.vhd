@@ -33,7 +33,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity mwvga is
     Port ( reset : in  STD_LOGIC;
            clk : in  STD_LOGIC;
-			  mem_char: in STD_LOGIC_VECTOR (7 downto 0);
+			  border_char: in STD_LOGIC_VECTOR (7 downto 0);
 			  win_char: in STD_LOGIC_VECTOR (7 downto 0);
 			  win: in STD_LOGIC;
 			  win_color: in STD_LOGIC;
@@ -152,8 +152,8 @@ begin
 	end if;
 end process;
 
-reverse <= mem_char(7) xor (cursor_enable and ((cursor_type and v(2) and v(1)) or (not cursor_type)));
-a <= reverse & mem_char(6 downto 0) when (win = '0') else win_char;
+reverse <= win_char(7) xor (cursor_enable and ((cursor_type and v(2) and v(1)) or (not cursor_type)));
+a <= reverse & win_char(6 downto 0) when (win = '1') else border_char;
 
 chargen: chargen_rom port map (
 		a(10 downto 3) => a,					-- 256 chars (128 duplicated, upper 128 reversed)

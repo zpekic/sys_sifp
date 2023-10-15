@@ -6,8 +6,8 @@
 // Full description: 
 // https://hackaday.io/project/173996-sifp-single-instruction-format-processor
 //---------------------------------------------------------------------------------------------
-			.code 8, 16, helloworld_code.mif, helloworld_code.cgf, helloworld_code.coe, hwd:helloworld_code.vhd, helloworld_code.hex, helloworld_code.bin, 2;
-			.symbol 8, 256, helloworld_sym.mif, helloworld_sym.cgf, helloworld_sym.coe, fls:helloworld_sym.vhd, helloworld_sym.hex, helloworld_sym.bin, 32;
+			.code 9, 16, helloworld_code.mif, helloworld_code.cgf, helloworld_code.coe, hwd:helloworld_code.vhd, helloworld_code.hex, helloworld_code.bin, 2;
+			.symbol 9, 256, helloworld_sym.mif, helloworld_sym.cgf, helloworld_sym.coe, fls:helloworld_sym.vhd, helloworld_sym.hex, helloworld_sym.bin, 32;
 
 #include "sifp.mcc";
 #include "sifp_sys.mcc";

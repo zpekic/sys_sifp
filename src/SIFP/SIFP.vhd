@@ -29,7 +29,7 @@ use IEEE.NUMERIC_STD.ALL;
 -- any Xilinx primitives in this code.
 --library UNISIM;
 --use UNISIM.VComponents.all;
-use work.emz1001_package.all;
+use work.sifp_package.all;
 
 entity EMZ1001A is
     Port ( CLK : in  STD_LOGIC;

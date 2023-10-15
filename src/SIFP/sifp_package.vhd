@@ -24,7 +24,7 @@ impure function c(char: in character) return std_logic_vector;
 impure function i(char: in character) return std_logic_vector;
 
 type mem2k8 is array(0 to 2047) of std_logic_vector(7 downto 0);
-type mem1k8 is array(0 to 1023) of std_logic_vector(7 downto 0);
+type mem1k16 is array(0 to 1023) of std_logic_vector(15 downto 0);
 type mem256x8 is array(0 to 255) of std_logic_vector(7 downto 0);
 type mem512x8 is array(0 to 511) of std_logic_vector(7 downto 0);
 type mem64x12 is array(0 to 63) of std_logic_vector(11 downto 0);
@@ -35,8 +35,7 @@ type mem16x8 is array(0 to 15) of std_logic_vector(7 downto 0);
 type mem4x14 is array(0 to 3) of std_logic_vector(13 downto 0);
 type mem4x10 is array(0 to 3) of std_logic_vector(9 downto 0);
 
-
-impure function init_filememory(file_name : in string; depth: in integer; default_value: std_logic_vector(7 downto 0)) return mem1k8;
+impure function init_filememory(file_name : in string; depth: in integer; default_value: std_logic_vector(15 downto 0)) return mem1k16;
 
 constant hex2ascii: mem16x8 := (
 	c('0'),
@@ -75,9 +74,9 @@ constant hex2ascii: mem16x8 := (
 -- procedure <procedure_name> (<type_declaration> <constant_name>	: in <type_declaration>);
 --
 
-end emz1001_package;
+end sifp_package;
 
-package body emz1001_package is
+package body sifp_package is
 
 ---- Example 1
 --  function <function_name>  (signal <signal_name> : in <type_declaration>  ) return <type_declaration> is
@@ -115,10 +114,10 @@ begin
 	return X"80" xor c(char);
 end i;
 
-impure function init_filememory(file_name : in string; depth: in integer; default_value: std_logic_vector(7 downto 0)) return mem1k8 is
-variable temp_mem : mem1k8;
-variable i, addr_start, addr_end: integer range 0 to (depth - 1);
-variable location: std_logic_vector(7 downto 0);
+impure function init_filememory(file_name : in string; depth: in integer; default_value: std_logic_vector(15 downto 0)) return mem1k16 is
+variable temp_mem : mem1k16;
+variable i, temp_addr: integer range 0 to (depth - 1);
+--variable location: std_logic_vector(7 downto 0);
 file input_file : text open read_mode is file_name;
 variable input_line : line;
 variable line_current: integer := 0;
@@ -130,9 +129,9 @@ variable isOk: boolean;
 
 begin
 	-- fill with default value
---	for i in 0 to depth - 1 loop	
---			temp_mem(i) := default_value;
---	end loop;
+	for i in 0 to depth - 1 loop	
+			temp_mem(i) := default_value;
+	end loop;
 
 	 -- parse the file for the data
 	 -- format described here: https://en.wikipedia.org/wiki/Intel_HEX
@@ -151,16 +150,17 @@ begin
 				when X"00" => -- DATA
 					count := to_integer(unsigned(byte_count));
 					if (count > 0) then
-						addr_start := to_integer(unsigned(address));
-						addr_end := addr_start + to_integer(unsigned(byte_count)) - 1;
-						report file_name & ": parsing line " & integer'image(line_current) & " for " & integer'image(count) & " bytes at address " & integer'image(addr_start) severity note;
-						for i in addr_start to addr_end loop
+						temp_addr := to_integer(unsigned(address)) / 2;
+						report file_name & ": parsing line " & integer'image(line_current) & " for " & integer'image(count) & " bytes at address " & integer'image(temp_addr) severity note;
+
+						for i in 0 to (count / 2) - 1 loop
+							-- assume "big-endian" (MSByte first)
 							hread(input_line, byte_value);
-							if (i < depth) then
-								temp_mem(i) := byte_value;
-							else
-								report file_name & ": line " & integer'image(line_current) & " data beyond memory capacity ignored" severity note;
-							end if;
+							temp_mem(temp_addr)(15 downto 8) := byte_value;
+							hread(input_line, byte_value);
+							temp_mem(temp_addr)(7 downto 0) := byte_value;
+							-- increment address
+							temp_addr := temp_addr + 1;
 						end loop;
 					else
 						report file_name  & ": line " & integer'image(line_current) & " has no data" severity note;

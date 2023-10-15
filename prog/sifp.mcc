@@ -7,9 +7,9 @@
 //---------------------------------------------------------------------------------------------
 // define slices of the instruction word format
 //
-// 16-bit program counter (has no flags)
+// 16-bit program counter (has no flags, changes during both fetch and execute phases)
 r_p			.valfield 4 values
-				NOP,		// continue, increment P
+				NOP,		// continue (increment P during fetch phase)
 				LDP|JMP|JUMP|GOTO,	// load from incoming data (jump)
 				ADP|BRANCH, 		// add incoming data (relative jump / branch)
 				STP2,				// output P+x as data (usually for push)
@@ -27,7 +27,7 @@ r_p			.valfield 4 values
 				BSZ|IF_SZ|IF_S_EQ	// branch is S flag Z set
 				default NOP;
 //				
-// 16-bit accumulator (has own carry (AC) and zero (AZ) flags)
+// 16-bit accumulator (has own carry (AC) and zero (AZ) flags, changes only during execute phases)
 r_a			.valfield 3 values
 				NOA,	// no operation on A register 
 				LDA,	// load with incoming data (AZ)
@@ -39,7 +39,7 @@ r_a			.valfield 3 values
 				STA|A	// output value as data
 				default NOA;
 //
-// 16-bit index register X (has own carry (XC) and zero (XZ) flags)
+// 16-bit index register X (has own carry (XC) and zero (XZ) flags, changes only during execute phases)
 r_x			.valfield 3 values
 				NOX,	// no operation on X register 
 				CPX,	// compare with incoming data (XC, XZ)
@@ -51,7 +51,7 @@ r_x			.valfield 3 values
 				STX|X	// output value as data
 				default NOX;
 //				
-// 16-bit index register Y (has own carry (YC) and zero (YZ) flags)			
+// 16-bit index register Y (has own carry (YC) and zero (YZ) flags, changes only during execute phases)			
 r_y			.valfield 3 values
 				NOY,	// no operation on Y register 
 				CPY,	// compare with incoming data (YC, YZ)
@@ -62,7 +62,7 @@ r_y			.valfield 3 values
 				M[Y],	// output value as address 
 				STY|Y	// output value as data
 				default NOY;
-// 16-bit stack pointer S  (has own carry (SC) and zero (SZ) flags)
+// 16-bit stack pointer S  (has own carry (SC) and zero (SZ) flags, changes only during execute phases)
 r_s			.valfield 3 values
 				NOS,	// no operation on X register 
 				CPS,	// compare with incoming data (SC, SZ)
@@ -74,6 +74,14 @@ r_s			.valfield 3 values
 				STS|S	// output value as data
 				default NOS;
 
+// other registers
+// F ... 16bit flags register (MSByte = not used, LSByte = Flags for A, X, Y, S)
+//			during execute phase, F is updated either from:
+//			A, X, Y, S flags -OR-
+//			memory data bus if stack pointer "pops" and all other registers as inactive (NOP)
+//			it can be saved during execute phase if stack pointer "pushes" and all other registers are inactive (NOP)
+// I ... 16bit instruction register, loaded from memory data bus during fetch phase only
+
 // 16-bit data can be directly in instruction stream (immediate value, relative or absolute address)
 data16		.valfield r_p .. r_s values * default 0;
 						
@@ -82,33 +90,37 @@ data16		.valfield r_p .. r_s values * default 0;
 .to			.alias  data16 = ;
 .branchto	.alias  data16 = ;
 .into		.alias 	data16 = ;
-RTS			.alias 	r_p = JMP, r_s = M[POP];
-MARK2		.alias 	r_p = STP2, r_s = M[PUSH];
 // Base + offset addressing mode
 M[Y+X]		.alias  r_x = M[X], r_y = M[Y];
 M[X+Y]		.alias  r_x = M[X], r_y = M[Y];
 // Convenient stack operations
-PUSHA		.alias  r_p = NOP, r_a = STA, r_x = NOX, r_y = NOY, r_s = M[PUSH];
-POPA		.alias  r_p = NOP, r_a = LDA, r_x = NOX, r_y = NOY, r_s = M[POP];
-PUSHX		.alias  r_p = NOP, r_a = NOA, r_x = STX, r_y = NOY, r_s = M[PUSH];
-POPX		.alias  r_p = NOP, r_a = NOA, r_x = LDX, r_y = NOY, r_s = M[POP];
-PUSHY		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = STY, r_s = M[PUSH];
-POPY		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = LDY, r_s = M[POP];
+RTS			.alias 	r_p = JMP, r_s = M[POP];
+MARK2		.alias 	r_p = STP2, r_s = M[PUSH];
+PUSHA		.alias  r_a = STA, r_s = M[PUSH];
+POPA		.alias  r_a = LDA, r_s = M[POP];
+PUSHX		.alias  r_x = STX, r_s = M[PUSH];
+POPX		.alias  r_x = LDX, r_s = M[POP];
+PUSHY		.alias  r_y = STY, r_s = M[PUSH];
+POPY		.alias  r_y = LDY, r_s = M[POP];
 // Convenient immediate operations
-LDAI		.alias  r_p = M[IMM], r_a = LDA, r_x = NOX, r_y = NOY, r_s = NOS;
-XORI		.alias  r_p = M[IMM], r_a = XOR, r_x = NOX, r_y = NOY, r_s = NOS;
-ADCI		.alias  r_p = M[IMM], r_a = ADC, r_x = NOX, r_y = NOY, r_s = NOS;
-SBCI		.alias  r_p = M[IMM], r_a = SBC, r_x = NOX, r_y = NOY, r_s = NOS;
-LDXI		.alias  r_p = M[IMM], r_a = NOA, r_x = LDX, r_y = NOY, r_s = NOS;
-ADXI		.alias  r_p = M[IMM], r_a = NOA, r_x = ADX, r_y = NOY, r_s = NOS;
-CPXI		.alias  r_p = M[IMM], r_a = NOA, r_x = CPX, r_y = NOY, r_s = NOS;
-LDYI		.alias  r_p = M[IMM], r_a = NOA, r_x = NOX, r_y = LDY, r_s = NOS;
-ADYI		.alias  r_p = M[IMM], r_a = NOA, r_x = NOX, r_y = ADY, r_s = NOS;
-CPYI		.alias  r_p = M[IMM], r_a = NOA, r_x = NOX, r_y = CPY, r_s = NOS;
+LDAI		.alias  r_p = M[IMM], r_a = LDA;
+XORI		.alias  r_p = M[IMM], r_a = XOR;
+ADCI		.alias  r_p = M[IMM], r_a = ADC;
+SBCI		.alias  r_p = M[IMM], r_a = SBC;
+LDXI		.alias  r_p = M[IMM], r_x = LDX;
+ADXI		.alias  r_p = M[IMM], r_x = ADX;
+CPXI		.alias  r_p = M[IMM], r_x = CPX;
+LDYI		.alias  r_p = M[IMM], r_y = LDY;
+ADYI		.alias  r_p = M[IMM], r_y = ADY;
+CPYI		.alias  r_p = M[IMM], r_y = CPY;
+LDSI		.alias  r_p = M[IMM], r_s = LDS;
+ADSI		.alias  r_p = M[IMM], r_s = ADS;
+CPSI		.alias  r_p = M[IMM], r_s = CPS;
 
 //
 // Special case instruction combinations
-PUSHF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[PUSH];
-POPF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[POP];
-HALT		.alias  r_p = NOP, r_a = A, r_x = X, r_y = Y, r_s = S;
+FTOS		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[S];		// mostly for flag output is trace mode 
+PUSHF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[PUSH];	// flags to stack
+POPF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[POP];	// pick up flags from stack
+HALT		.alias  r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S;			// ABUS will indicate where CPU halted
 

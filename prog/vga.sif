@@ -4,26 +4,12 @@ CURSOR_Y	.alias RAM_BASE + 1;
 // Display ASCII in A at row Y, column X	
 			.org $;
 
-DisplayAt:	PUSHX;	// save column
-			PUSHA;	// save ASCII code
-			LDXI;
-			.data VGA_COLS;
-			MARK2;
-			BRANCH;
-			.into @MulU;	// A.Y <= Y * VGA_COLS
-			POPA;
-			POPX;
-			ADYI;
-			.data VGA_BASE;
-			STA, M[Y+X];
-			RTS;
-			
 // Print string pointed by X to VGA			
 Str2VGA:	NOP;
 			STY, M[PUSH];	// save Y
 
 Str2VGALoop:LDA, M[X];
-			IF_AZ,;
+			IF_AZ;
 			.branchto @Str2VGAExit - $;
 			XORI;
 			.data CR;		// is it clear screen?
@@ -49,52 +35,164 @@ Str2VGALoop:LDA, M[X];
 			.branchto @ClrScreen - $;
 			
 //			default output
-			STX, M[PUSH];		// save character pointer
+			PUSHX;		// save character pointer
 			MARK2;
 			JMP;
 			.into @GetCursorXY;	// get cursor row, col from RAM
 			MARK2;
-			JMP;
-			.into @DisplayAt;
+			BRANCH;
+			.into @DisplayAt - $;
 			INX;
-			CPX, M[IMM];
+			CPXI;
 			.data VGA_COLS;
 			IF_X_GE;
 			.branchto @NextRow - $;
 NoScroll:	MARK2;
 			JMP;
 			.into @SetCursorXY;
-			BRANCH;
-			.to @NextChar - $;
-NextRow:	LDX, M[IMM];
+// 			next character in the string
+NextChar:	POPX;		// restore character pointer
+			INX, BRANCH;
+			.to @Str2VGALoop - $;
+			
+NextRow:	LDXI;
 			.data 0;
-			INY;
-			CPY, M[IMM];
+NextRow1:	INY;
+			CPYI;
 			.data VGA_ROWS;
 			IF_Y_GE;
 			.branchto @ScrollUp - $;
 			BRANCH;
 			.to @NoScroll - $;
 
-ScrollUp:	HALT; // TODO			
+ScrollUp:	NOP;
+			LDYI;
+			.data 0;
+NxtRow:		PUSHY; 		// we will need row later
+			LDXI;
+			.data 0;
+NxtCol:		PUSHX;		// we will need column later
+			MARK2;
+			BRANCH;
+			.into @GetRowBase - $;
+			PUSHY;		// destination base on stack
+			ADYI;		// add to get source base
+			.data VGA_ROWS;
+			LDA, M[Y+X];	// get character from VGA RAM
+			POPY;			// destination base
+			STA, M[Y+X];	// store character to one row below, same column
+			INX;			// next column
+			CPXI;
+			.data VGA_COLS;
+			IF_X_GE;
+			.branchto @ChkRow - $;
+			BRANCH;
+			.to @NxtCol;
+ChkRow:		POPY;
+			INY;
+			CPYI;
+			.data VGA_ROWS - 1;
+			IF_Y_GE;
+			.branchto @ClrLastRow - $;
+			BRANCH;
+			.to @NxtRow - $;
+			// clear last row
+ClrLastRow:	MARK2;
+			BRANCH;
+			.into @GetRowBase - $;
+			LDXI;
+			.data 0;
+			LDAI;
+			.data ' ';
+ClrRowLoop:	STA, M[Y+X];
+			INX;
+			CPXI;
+			.data VGA_COLS;
+			IF_X_GE;
+			.branchto @ScrDone - $;
+			BRANCH;
+			.to @ClrRowLoop - $;
 			
-CarReturn:	HALT; // TODO
+// Y = VGA_BASE + row * VGA_COLS
+GetRowBase:	LDXI;
+			.data VGA_COLS;
+			MARK2;
+			BRANCH;
+			.into @MulU - $;
+			ADYI;
+			.data VGA_BASE;
+ScrDone:	RTS;
+			
+CarReturn:	MARK2;
+			JMP;
+			.into @GetCursorXY;
+			LDXI;
+			.data 0;
+			BRANCH;
+			.to @NoScroll - $;
 
-LineFeed:	HALT; // TODO
+LineFeed:	MARK2;
+			JMP;
+			.into @GetCursorXY;
+			BRANCH;
+			.to @NextRow1 - $;
 
-Cur2Home:	HALT; // TODO
-
-ClrScreen:	HALT; // TODO
-
-// 			next character in the string
-NextChar:	POPX;		// restore character pointer
-			INX, BRANCH;
-			.to @Str2VGALoop - $;
+ClrScreen:	LDXI;
+			.data VGA_COLS;
+			LDYI;
+			.data VGA_ROWS;
+			MARK2;
+			JMP;
+			.into @MulU;
+			LDXI;
+			.data VGA_BASE;
+			LDAI;
+			.data ' ';	// use space character to clear screen
+ClrPos:		DEY;
+			STA, M[Y+X];
+			IF_YZ;
+			.branchto @ClrPos - $;
+			STA, M[Y+X];
+Cur2Home:	LDX, LDY, M[IMM];
+			.data 0;			// X, Y <= 0
+			BRANCH;
+			.to @NoScroll - $;
 			
 Str2VGAExit:POPY;	// restore Y
 			RTS;
 			
-SetCursorXY:RTS;	// TODO
+SetCursorXY:PUSHA;
+			PUSHY;
+			LDYI;
+			.data CURSOR_X;
+			STX, M[Y];	// M[CURSOR_X] <= X
+			INY, POPA;
+			STA, M[Y];	// M[CURSOR_Y] <= Y
+			POPA;
+			RTS;
 
-GetCursorXY:RTS;	// TODO
+GetCursorXY:PUSHA;
+			LDYI;
+			.data CURSOR_X;
+			LDX, M[Y];		// X <= M[CURSOR_X]
+			INY;
+			LDA, M[Y];
+			PUSHA;
+			POPY;			// Y <= M[CURSOR_Y]
+			POPA;
+			RTS;	
+
+DisplayAt:	PUSHX;	// save column
+			PUSHA;	// save ASCII code
+			LDXI;
+			.data VGA_COLS;
+			MARK2;
+			BRANCH;
+			.into @MulU - $;	// A.Y <= Y * VGA_COLS
+			POPA;
+			POPX;
+			ADYI;
+			.data VGA_BASE;
+			STA, M[Y+X];
+			RTS;
 
