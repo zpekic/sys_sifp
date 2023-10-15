@@ -49,24 +49,25 @@ StrHWorld:	.data 'H';
 			.data LF;
 			.data 0;
 			
-// Print string pointed by X to UART
+// Print string pointed by X to UART 
 //			
 Str2UART:	NOP;
 			PUSHY;
 			LDYI;			// Y points to UART memory mapped register
-			.data UART_TX_DATA;
+			.data UART_STATUS;
 Str2ULoop:	LDA, M[X];		// check if reached end (nul end char)
-			IF_AZ,;
+			IF_AZ;
 			.branchto @Done - $;
 ChkTxdRdy:	LDA, M[Y];		// read UART status
-			SLC;			// LSB is the READY bit
-			IF_AC,;
+			SRC;
+			SRC;			// TDRE (transmit data register empty) bit is now in AC
+			IF_AC;
 			.branchto @Str2UOut - $;
 			BRANCH;
 			.to @ChkTxdRdy - $;
-Str2UOut:	LDA, M[X];		// get current char from string
+Str2UOut:	INY, LDA, M[X];	// get current char from string, Y points to UART data register
 			STA, M[Y];		// output to UART
-			INX, BRANCH,;
+			DEY, INX, BRANCH;	// Y back to UART status, X to next character 
 			.to @Str2ULoop - $;
 Done:		POPY;
 			RTS;

@@ -37,8 +37,9 @@ entity rom1k is
 	);
 	Port ( 
 		A : in  STD_LOGIC_VECTOR (9 downto 0);
-		nOE : in  STD_LOGIC;
-		D : out  STD_LOGIC_VECTOR (15 downto 0)
+		D : out  STD_LOGIC_VECTOR (15 downto 0);
+		CS : in  STD_LOGIC;
+		OE : in  STD_LOGIC
 	);
 end rom1k;
 
@@ -50,8 +51,7 @@ constant rom: mem1k16 := init_filememory(filename, 1024, default_value);
 
 begin
 
-	D <= rom(to_integer(unsigned(A))) when (nOE = '0') else "ZZZZZZZZZZZZZZZZ";
---	D <= ("000000" & A) when (nOE = '0') else "ZZZZZZZZZZZZZZZZ";
+	D <= rom(to_integer(unsigned(A))) when ((CS and OE) = '1') else "ZZZZZZZZZZZZZZZZ";
 
 end Behavioral;
 

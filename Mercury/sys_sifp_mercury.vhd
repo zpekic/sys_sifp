@@ -175,7 +175,7 @@ begin
 	end if;
 end process;
 
--- 1k of external ROM contains the "Fibonacci" program
+-- 1k words of ROM contains the "helloworld" program
 appware: entity work.rom1k generic map(
 		filename => "..\prog\helloworld_code.hex",
 		default_value => X"7FFF"	-- HALT
@@ -183,7 +183,8 @@ appware: entity work.rom1k generic map(
 	port map(
 		D => DBUS,
 		A => ABUS(9 downto 0),
-		nOE => '0' -- TODO
+		CS => button(3), -- TODO
+		OE => '1' -- TODO
 	);
 
 -- CPU!
@@ -210,7 +211,7 @@ vga: entity work.mwvga Port map (
 		reset => RESET,
 		clk => vga_clk,
 		border_char => c(' '),
-		win_char => DBUS(15 downto 8),
+		win_char => DBUS(7 downto 0),
 		win => win,
 		win_color => switch(0),
 		hactive => hactive,
@@ -230,6 +231,7 @@ vga: entity work.mwvga Port map (
 		vsync => VSYNC
 		);
 
+-- 2k video RAM is only sufficient for 32*64 text window positioned at center screen
 char_x <= std_logic_vector(unsigned(vga_x) - ((80 - 64)/2));
 char_y <= std_logic_vector(unsigned(vga_y) - ((60 - 32)/2));
 win_x <= '1' when (unsigned(char_x) < 64) else '0';
@@ -238,18 +240,33 @@ win <= win_x and win_y;
 
 ABUS <= "00000" & char_y(4 downto 0) & char_x(5 downto 0);
 
---tx_char <= DBUS(7 downto 0); 
----- TODO tx_send <= not (emz_nExt); 
---		
---uart_tx: uart_par2ser Port map (
---		reset => RESET,
---		txd_clk => baudrate,
---		send => tx_send,
---		mode => "000",	-- 8N1
---		data => tx_char,
---		ready => tx_ready,
---		txd => PMOD_RXD
---		);		
+vram: entity work.simpleram 
+generic map(
+	address_size => 11,
+	default_value => X"2B"
+	)	
+port map(
+	  clk => cpu_clk,
+	  D => DBUS(7 downto 0), 
+	  A => ABUS(10 downto 0),
+	  RnW => '1',
+	  CS => not (button(3))
+);
+		
+acia0: entity work.uart Port map (
+			reset => Reset,
+			clk => cpu_clk,
+			clk_txd => baudrate,		-- 38400
+			clk_rxd => baudrate_x4,	-- 115200
+			CS => '0',
+			RnW => '1',
+			RS => ABUS(0),
+			D => DBUS(7 downto 0),
+			debug => open,
+			TXD => PMOD_RXD0,
+			RXD => PMOD_TXD0
+		);
+		
 		
 -- LEDs
 LED(0) <= freq1Hz; 

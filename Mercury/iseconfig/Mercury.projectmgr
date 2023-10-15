@@ -8,6 +8,7 @@
       <ClosedNodes>
          <ClosedNodesVersion>2</ClosedNodesVersion>
          <ClosedNode>/adder16 - Behavioral C:|Users|zoltanp|Documents|HexCalc|sys_emz1001|sys_emz1001|src|adder16.vhd</ClosedNode>
+         <ClosedNode>/clockgen - Behavioral C:|Users|zoltanp|Documents|HexCalc|sys_sifp|src|clockgen.vhd</ClosedNode>
          <ClosedNode>/freqcounter - Behavioral C:|Users|zoltanp|Documents|HexCalc|sys_emz1001|sys_emz1001|src|freqcounter.vhd</ClosedNode>
          <ClosedNode>/sys_cas_mercury - Structural C:|Users|zoltanp|Documents|HexCalc|Sys_cas|Mercury|sys_cas_mercury.vhd/baud_counter - freqcounter - Behavioral/adder0 - adder16 - Behavioral</ClosedNode>
          <ClosedNode>/sys_cas_mercury - Structural C:|Users|zoltanp|Documents|HexCalc|Sys_cas|Mercury|sys_cas_mercury.vhd/baud_counter - freqcounter - Behavioral/adder1 - adder16 - Behavioral</ClosedNode>
@@ -17,14 +18,16 @@
          <ClosedNode>/sys_cas_mercury - Structural C:|Users|zoltanp|Documents|HexCalc|sys_emz1001|sys_emz1001|Mercury|sys_emz1001_mercury.vhd/debounce_btn - debouncer8channel - Behavioral</ClosedNode>
          <ClosedNode>/sys_cas_mercury - Structural C:|Users|zoltanp|Documents|HexCalc|sys_emz1001|sys_emz1001|Mercury|sys_emz1001_mercury.vhd/debounce_sw - debouncer8channel - Behavioral</ClosedNode>
          <ClosedNode>/sys_cas_mercury - Structural C:|Users|zoltanp|Documents|HexCalc|sys_emz1001|sys_emz1001|Mercury|sys_emz1001_mercury.vhd/sample_counter - freqcounter - Behavioral</ClosedNode>
+         <ClosedNode>/ttyvgawin - Behavioral C:|Users|zoltanp|Documents|HexCalc|sys_sifp|src|VGA|ttyvgawin.vhd/tty - tty_screen - Behavioral</ClosedNode>
+         <ClosedNode>/ttyvgawin - Behavioral C:|Users|zoltanp|Documents|HexCalc|sys_sifp|src|VGA|ttyvgawin.vhd/vga - mwvga - Behavioral</ClosedNode>
          <ClosedNode>/uart_receiver - Behavioral C:|Users|zoltanp|Documents|HexCalc|sys_emz1001|sys_emz1001|src|uart_receiver.vhd</ClosedNode>
       </ClosedNodes>
       <SelectedItems>
          <SelectedItem>sys_sifp_mercury - Structural (C:/Users/zoltanp/Documents/HexCalc/sys_sifp/Mercury/sys_sifp_mercury.vhd)</SelectedItem>
       </SelectedItems>
-      <ScrollbarPosition orientation="vertical" >1</ScrollbarPosition>
+      <ScrollbarPosition orientation="vertical" >0</ScrollbarPosition>
       <ScrollbarPosition orientation="horizontal" >0</ScrollbarPosition>
-      <ViewHeaderState orientation="horizontal" >000000ff000000000000000100000001000000000000000000000000000000000202000000010000000100000064000002fd000000020000000000000000000000000200000064ffffffff000000810000000300000002000002fd0000000100000003000000000000000100000003</ViewHeaderState>
+      <ViewHeaderState orientation="horizontal" >000000ff000000000000000100000001000000000000000000000000000000000202000000010000000100000064000002ee000000020000000000000000000000000200000064ffffffff000000810000000300000002000002ee0000000100000003000000000000000100000003</ViewHeaderState>
       <UserChangedColumnWidths orientation="horizontal" >true</UserChangedColumnWidths>
       <CurrentItem>sys_sifp_mercury - Structural (C:/Users/zoltanp/Documents/HexCalc/sys_sifp/Mercury/sys_sifp_mercury.vhd)</CurrentItem>
    </ItemView>
@@ -53,12 +56,14 @@
       <ClosedNodes>
          <ClosedNodesVersion>1</ClosedNodesVersion>
       </ClosedNodes>
-      <SelectedItems/>
+      <SelectedItems>
+         <SelectedItem>C:\Users\zoltanp\Documents\HexCalc\sys_sifp\src\SIFP\sifp_package.vhd</SelectedItem>
+      </SelectedItems>
       <ScrollbarPosition orientation="vertical" >0</ScrollbarPosition>
       <ScrollbarPosition orientation="horizontal" >0</ScrollbarPosition>
       <ViewHeaderState orientation="horizontal" >000000ff000000000000000100000000000000000100000000000000000000000000000000000003e8000000040101000100000000000000000000000064ffffffff000000810000000000000004000002510000000100000000000000d700000001000000000000006600000001000000000000005a0000000100000000</ViewHeaderState>
       <UserChangedColumnWidths orientation="horizontal" >false</UserChangedColumnWidths>
-      <CurrentItem></CurrentItem>
+      <CurrentItem>C:\Users\zoltanp\Documents\HexCalc\sys_sifp\src\SIFP\sifp_package.vhd</CurrentItem>
    </ItemView>
    <ItemView guiview="Library" >
       <ClosedNodes>
