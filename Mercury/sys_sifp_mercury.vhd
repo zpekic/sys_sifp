@@ -148,9 +148,14 @@ signal hactive, vactive: std_logic;
 signal win_x, win_y, win: std_logic;
 signal char_x, char_y: std_logic_vector(7 downto 0);
 signal vga_x, vga_y: std_logic_vector(7 downto 0);
+signal vram_douta, vram_doutb: std_logic_vector(7 downto 0);
+signal vram_wea, vram_web: std_logic_vector(0 downto 0);	-- wacky but it works
 
--- 7seg LED
-signal blank: std_logic;
+-- select devices
+signal cs_rom: std_logic := '0';
+signal cs_vram: std_logic := '0';
+signal cs_acia0: std_logic := '0';
+signal cs_ram: std_logic := '0';
 
 -- CPU bus output
 signal ABUS: std_logic_vector(15 downto 0);
@@ -182,6 +187,7 @@ begin
 	end if;
 end process;
 
+-- 0x0XXX (repeats twice)
 -- 1k words of ROM contains the "helloworld" program
 appware: entity work.rom1k generic map(
 		filename => "..\prog\helloworld_code.hex",
@@ -190,8 +196,8 @@ appware: entity work.rom1k generic map(
 	port map(
 		D => DBUS,
 		A => ABUS(9 downto 0),
-		CS => button(3), -- TODO
-		OE => '1' -- TODO
+		CS => cs_rom, 
+		OE => RnW
 	);
 
 -- CPU!
@@ -218,7 +224,7 @@ vga: entity work.mwvga Port map (
 		reset => RESET,
 		clk => vga_clk,
 		border_char => c(' '),
-		win_char => DBUS(7 downto 0),
+		win_char => vram_doutb,
 		win => win,
 		win_color => switch(0),
 		hactive => hactive,
@@ -245,27 +251,64 @@ win_x <= '1' when (unsigned(char_x) < 64) else '0';
 win_y <= '1' when (unsigned(char_y) < 32) else '0';
 win <= win_x and win_y;
 
-ABUS <= "00000" & char_y(4 downto 0) & char_x(5 downto 0);
+--ABUS <= "00000" & char_y(4 downto 0) & char_x(5 downto 0);
 
-vram: entity work.simpleram 
+-- 0xFXXX (repeats twice)
+vram_lo: entity work.simpleram 
 generic map(
 	address_size => 11,
-	default_value => X"2B"
+	default_value => X"FF"	-- HALT (LSB)
 	)	
 port map(
 	  clk => cpu_clk,
 	  D => DBUS(7 downto 0), 
 	  A => ABUS(10 downto 0),
-	  RnW => '1',
-	  CS => not (button(3))
+	  RnW => RnW,
+	  CS => cs_ram
+);
+
+vram_hi: entity work.simpleram 
+generic map(
+	address_size => 11,
+	default_value => X"7F"	-- HALT (MSB)
+	)	
+port map(
+	  clk => cpu_clk,
+	  D => DBUS(15 downto 8), 
+	  A => ABUS(10 downto 0),
+	  RnW => RnW,
+	  CS => cs_ram
 );
 		
+-- 0x1XXX (repeats twice)		
+vram: entity work.ram2k8dual port map (
+			clka => cpu_clk,
+			ena => cs_vram,
+			wea => vram_wea,
+			addra => ABUS(10 DOWNTO 0),
+			dina => DBUS(7 downto 0),
+			douta => vram_douta,
+			--
+			clkb => vga_clk,
+			enb => '1',
+			web => vram_web,
+			addrb(10 downto 6) => char_y(4 downto 0),	-- 32 rows
+			addrb(5 downto 0) => char_x(5 downto 0),	-- 64 columns
+			dinb => X"00", -- not used
+			doutb => vram_doutb
+		);
+		
+DBUS(7 downto 0) <= vram_douta when ((RnW and cs_vram) = '1') else "ZZZZZZZZ";
+vram_wea <= "" & (not RnW);
+vram_web <= "" & '0';
+		
+-- 0xEXXX (repeats 1024 times)		
 acia0: entity work.uart Port map (
 			reset => Reset,
 			clk => cpu_clk,
 			clk_txd => baudrate,		-- 38400
 			clk_rxd => baudrate_x4,	-- 115200
-			CS => '0',
+			CS => cs_acia0,
 			RnW => '1',
 			RS => ABUS(0),
 			D => DBUS(7 downto 0),
