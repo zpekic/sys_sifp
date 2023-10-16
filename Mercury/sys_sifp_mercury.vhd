@@ -46,19 +46,19 @@ entity sys_sifp_mercury is
 				USR_BTN: in std_logic; 
 
 				-- Switches on baseboard
-				-- SW(0) -- BAUDRATE SEL 0
-				-- SW(1) -- BAUDRATE SEL 1
-				-- SW(2) -- BAUDRATE SEL 2
-				-- SW(3) -- OFF: EXTERNAL ROM, ON: INTERNAL ROM
+				-- SW(0) -- 
+				-- SW(1) -- 
+				-- SW(2) -- 
+				-- SW(3) -- 
 				-- SW(4) -- CPUCLK SEL 0
 				-- SW(5) -- CPUCLK SEL 1
 				-- SW(6) -- CPUCLK SEL 2
-				-- SW(7)	-- OFF: STOP, ON: RUN
+				-- SW(7)	-- ON: RUN
 
 				SW: in std_logic_vector(7 downto 0); 
 
 				-- Push buttons on baseboard
-				-- BTN0 - single step (effective if SW(6 downto 4)) = "000"
+				-- BTN0 - single step (effective if SW(7 downto 4)) = "X000"
 				-- BTN1 - not used
 				-- BTN2 - not used
 				-- BTN3 - not used
@@ -120,16 +120,18 @@ alias PMOD_RTS1: std_logic is PMOD(4);
 alias PMOD_RXD1: std_logic is PMOD(5);
 alias PMOD_TXD1: std_logic is PMOD(6);
 alias PMOD_CTS1: std_logic is PMOD(7);
+signal rts1_pulse, rts1_delay: std_logic;
+
 --
 signal switch: std_logic_vector(7 downto 0);
---alias sw_run: std_logic is switch(7);
+alias sw_tracesel: std_logic_vector(2 downto 0) is switch(2 downto 0);
 alias sw_cpuclk: std_logic_vector(2 downto 0) is switch(6 downto 4);
---alias sw_internalrom: std_logic is switch(3);
-alias sw_baudrate: std_logic_vector(2 downto 0) is switch(2 downto 0);
+alias sw_runtrace: std_logic is switch(7);
 
 --
 signal button: std_logic_vector(3 downto 0);
-alias btn_ss: std_logic is button(0);
+alias btn_clk: std_logic is button(0);
+alias btn_traceload: std_logic is button(3);
 
 --- frequency signals
 signal vga_clk: std_logic;
@@ -139,6 +141,7 @@ signal cpu_clk: std_logic;
 signal freq100Hz, freq50Hz, freq1Hz: std_logic;
 
 signal cnt: std_logic_vector(31 downto 0);
+signal continue, nMemRead, nMemWrite: std_logic;
 
 -- VGA signals
 signal hactive, vactive: std_logic;
@@ -146,17 +149,21 @@ signal win_x, win_y, win: std_logic;
 signal char_x, char_y: std_logic_vector(7 downto 0);
 signal vga_x, vga_y: std_logic_vector(7 downto 0);
 
--- loopback
-signal rx_char, tx_char: std_logic_vector(7 downto 0);
-signal rx_ready, tx_send, tx_ready, tty_sent: std_logic;
-
 -- 7seg LED
 signal blank: std_logic;
 
--- CPU bus
+-- CPU bus output
 signal ABUS: std_logic_vector(15 downto 0);
+signal VMA: std_logic;		-- valid memory address
+signal FETCH: std_logic;	-- fetching instruction (PnD is also 1)
+signal HALT: std_logic;		-- CPU has halted 
+signal RnW: std_logic;		-- Read 1, Write 0
+signal PnD: std_logic;		-- Program 1, Data 0 (can double address space for Harvard architecture)
+-- CPU bus in/out
 signal DBUS: std_logic_vector(15 downto 0);
-signal VMA, VRA, HALT, RnW, PnD: std_logic;
+-- CPU bus input
+signal READY: std_logic;		-- hold machine cycle until high again
+signal RUNnTRACE: std_logic;	--	Run 1, Trace 0
 
 begin   
 
@@ -193,9 +200,9 @@ appware: entity work.rom1k generic map(
 clocks: entity work.clockgen Port map ( 
 		CLK => CLK, 	-- 50MHz on Mercury board
 		RESET => RESET,
-		baudrate_sel => sw_baudrate,
+		baudrate_sel => "111",	-- 38400
 		cpuclk_sel =>	 sw_cpuclk,
-		pulse => btn_ss,
+		pulse => btn_clk,
 		cpu_clk => cpu_clk,
 		debounce_clk => debounce_clk,
 		vga_clk => vga_clk,
@@ -267,11 +274,51 @@ acia0: entity work.uart Port map (
 			RXD => PMOD_TXD0
 		);
 		
+-- Tracer watches system bus activity and if signal match is detected, freezes the CPU in 
+-- the cycle by asserting low READY signal, and outputing the trace record to serial port
+-- After that, cycle will continue if continue signal is high, or stop there.	 
+	tracer: entity work.debugtracer Port map(
+			reset => reset,
+			cpu_clk => cpu_clk,
+			txd_clk => baudrate,
+			continue => continue,  
+			ready => READY,					-- freezes CPU when low
+			txd => PMOD_RXD1,					-- output trace (to any TTY of special tracer running on the host
+			load => btn_traceload,			-- load mask register if high
+			sel(4) => sw_tracesel(2),		-- set mask register: M1 (FETCH);
+			sel(3 downto 2) => "00",		-- set mask register: no separeate IO access;
+			sel(1 downto 0) => sw_tracesel(1 downto 0),		-- set mask register: MEMR & MEMW;
+			M1 => FETCH,
+			nIOR => '1',
+			nIOW => '1',
+			nMEMR => nMemRead,
+			nMEMW => nMemWrite,
+			ABUS => ABUS,
+			DBUS => DBUS
+	);
+
+nMemRead <= not (VMA and RnW);
+nMemWrite <= RnW or (not VMA);
+	 
+-- Tracer works best when the output is intercepted on the host and resolved using symbolic .lst file
+-- In addition, host is able to flip RTS pin to start/stop tracing 
+-- See https://github.com/zpekic/sys9080/blob/master/Tracer/Tracer/Program.cs
+rts1_pulse <= PMOD_RTS1 xor rts1_delay;
+on_rts1_pulse: process(reset, rts1_pulse)
+begin
+	if ((USR_BTN or btn_clk) = '1') then
+		continue <= '1';
+	else
+		if (rising_edge(rts1_pulse)) then
+			continue <= not continue;
+		end if;
+	end if;
+end process;
+
 		
 -- LEDs
 LED(0) <= freq1Hz; 
 LED(1) <= cnt(31);
---LED <= cnt(31 downto 28);
 	
 -- 7segment LED 
 led4x7: entity work.fourdigitsevensegled port map ( 
