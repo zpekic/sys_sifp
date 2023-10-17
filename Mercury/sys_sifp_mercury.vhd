@@ -131,13 +131,14 @@ alias sw_runtrace: std_logic is switch(7);
 --
 signal button: std_logic_vector(3 downto 0);
 alias btn_clk: std_logic is button(0);
+alias btn_ledsel: std_logic is button(2);
 alias btn_traceload: std_logic is button(3);
 
 --- frequency signals
-signal vga_clk: std_logic;
-signal debounce_clk: std_logic;
-signal baudrate_x4, baudrate: std_logic;	
-signal cpu_clk: std_logic;
+signal clkgen_vga: std_logic;	-- should be 25MHz
+signal clkgen_debounce: std_logic;
+signal clkgen_baudrate4, clkgen_baudrate: std_logic;	
+signal clkgen_cpu: std_logic;
 signal freq100Hz, freq50Hz, freq1Hz: std_logic;
 
 signal cnt: std_logic_vector(31 downto 0);
@@ -166,9 +167,11 @@ signal RnW: std_logic;		-- Read 1, Write 0
 signal PnD: std_logic;		-- Program 1, Data 0 (can double address space for Harvard architecture)
 -- CPU bus in/out
 signal DBUS: std_logic_vector(15 downto 0);
--- CPU bus input
-signal READY: std_logic;		-- hold machine cycle until high again
-signal RUNnTRACE: std_logic;	--	Run 1, Trace 0
+
+-- other
+signal tracer_ready, tracer_continue: std_logic;
+signal led_data: std_logic_vector(15 downto 0);
+signal bus_valid: std_logic;
 
 begin   
 
@@ -187,145 +190,31 @@ begin
 	end if;
 end process;
 
--- 0x0XXX (repeats twice)
--- 1k words of ROM contains the "helloworld" program
-appware: entity work.rom1k generic map(
-		filename => "..\prog\helloworld_code.hex",
-		default_value => X"7FFF"	-- HALT
-	)	
-	port map(
-		D => DBUS,
-		A => ABUS(9 downto 0),
-		CS => cs_rom, 
-		OE => RnW
-	);
 
 -- CPU!
-
--- generate various frequencies
-clocks: entity work.clockgen Port map ( 
-		CLK => CLK, 	-- 50MHz on Mercury board
+cpu: entity work.SIFP16 Port map (
+		CLK => clkgen_cpu,
 		RESET => RESET,
-		baudrate_sel => "111",	-- 38400
-		cpuclk_sel =>	 sw_cpuclk,
-		pulse => btn_clk,
-		cpu_clk => cpu_clk,
-		debounce_clk => debounce_clk,
-		vga_clk => vga_clk,
-		baudrate_x4 => baudrate_x4,
-		baudrate => baudrate,
-		freq100Hz => freq100Hz,
-		freq50Hz => freq50Hz,
-		freq1Hz => freq1Hz
-		);
+		READY => tracer_ready,
+		RUNnTRACE => sw_runtrace,
+		ABUS => ABUS,
+		DBUS => DBUS,
+		RnW => RnW,
+		VMA => VMA,
+		PnD => PnD,
+		HALT => HALT,
+		FETCH => FETCH
+	);
 
--- video
-vga: entity work.mwvga Port map ( 
-		reset => RESET,
-		clk => vga_clk,
-		border_char => c(' '),
-		win_char => vram_doutb,
-		win => win,
-		win_color => switch(0),
-		hactive => hactive,
-		vactive => vactive,
-		x => vga_x,
-		y => vga_y,
-		cursor_enable => '0',
-		cursor_type => '0',
-		-- VGA connections
-		color(11) => open,
-		color(10 downto 8) => RED,
-		color(7) => open,
-		color(6 downto 4) => GRN,
-		color(3 downto 2) => open,
-		color(1 downto 0) => BLU,
-		hsync => HSYNC,
-		vsync => VSYNC
-		);
-
--- 2k video RAM is only sufficient for 32*64 text window positioned at center screen
-char_x <= std_logic_vector(unsigned(vga_x) - ((80 - 64)/2));
-char_y <= std_logic_vector(unsigned(vga_y) - ((60 - 32)/2));
-win_x <= '1' when (unsigned(char_x) < 64) else '0';
-win_y <= '1' when (unsigned(char_y) < 32) else '0';
-win <= win_x and win_y;
-
---ABUS <= "00000" & char_y(4 downto 0) & char_x(5 downto 0);
-
--- 0xFXXX (repeats twice)
-vram_lo: entity work.simpleram 
-generic map(
-	address_size => 11,
-	default_value => X"FF"	-- HALT (LSB)
-	)	
-port map(
-	  clk => cpu_clk,
-	  D => DBUS(7 downto 0), 
-	  A => ABUS(10 downto 0),
-	  RnW => RnW,
-	  CS => cs_ram
-);
-
-vram_hi: entity work.simpleram 
-generic map(
-	address_size => 11,
-	default_value => X"7F"	-- HALT (MSB)
-	)	
-port map(
-	  clk => cpu_clk,
-	  D => DBUS(15 downto 8), 
-	  A => ABUS(10 downto 0),
-	  RnW => RnW,
-	  CS => cs_ram
-);
-		
--- 0x1XXX (repeats twice)		
-vram: entity work.ram2k8dual port map (
-			clka => cpu_clk,
-			ena => cs_vram,
-			wea => vram_wea,
-			addra => ABUS(10 DOWNTO 0),
-			dina => DBUS(7 downto 0),
-			douta => vram_douta,
-			--
-			clkb => vga_clk,
-			enb => '1',
-			web => vram_web,
-			addrb(10 downto 6) => char_y(4 downto 0),	-- 32 rows
-			addrb(5 downto 0) => char_x(5 downto 0),	-- 64 columns
-			dinb => X"00", -- not used
-			doutb => vram_doutb
-		);
-		
-DBUS(7 downto 0) <= vram_douta when ((RnW and cs_vram) = '1') else "ZZZZZZZZ";
-vram_wea <= "" & (not RnW);
-vram_web <= "" & '0';
-		
--- 0xEXXX (repeats 1024 times)		
-acia0: entity work.uart Port map (
-			reset => Reset,
-			clk => cpu_clk,
-			clk_txd => baudrate,		-- 38400
-			clk_rxd => baudrate_x4,	-- 115200
-			CS => cs_acia0,
-			RnW => '1',
-			RS => ABUS(0),
-			D => DBUS(7 downto 0),
-			debug => open,
-			TXD => PMOD_RXD0,
-			RXD => PMOD_TXD0
-		);
-		
 -- Tracer watches system bus activity and if signal match is detected, freezes the CPU in 
 -- the cycle by asserting low READY signal, and outputing the trace record to serial port
 -- After that, cycle will continue if continue signal is high, or stop there.	 
 	tracer: entity work.debugtracer Port map(
 			reset => reset,
-			cpu_clk => cpu_clk,
-			txd_clk => baudrate,
-			continue => continue,  
-			ready => READY,					-- freezes CPU when low
+			cpu_clk => clkgen_cpu,
+			txd_clk => clkgen_baudrate,
+			continue => tracer_continue,  
+			ready => tracer_ready,			-- freezes CPU when low
 			txd => PMOD_RXD1,					-- output trace (to any TTY of special tracer running on the host
 			load => btn_traceload,			-- load mask register if high
 			sel(4) => sw_tracesel(2),		-- set mask register: M1 (FETCH);
@@ -358,33 +247,180 @@ begin
 	end if;
 end process;
 
+-- generate various frequencies
+clkgen: entity work.clockgen Port map ( 
+		CLK => CLK, 	-- 50MHz on Mercury board
+		RESET => RESET,
+		baudrate_sel => "111",	-- 38400
+		cpuclk_sel =>	 sw_cpuclk,
+		pulse => btn_clk,
+		cpu_clk => clkgen_cpu,
+		debounce_clk => clkgen_debounce,
+		vga_clk => clkgen_vga,
+		baudrate_x4 => clkgen_baudrate4,
+		baudrate => clkgen_baudrate,
+		freq100Hz => freq100Hz,
+		freq50Hz => freq50Hz,
+		freq1Hz => freq1Hz
+		);
+
+-- VIDEO
+-- 640*480 VGA, only 512*256 centered window is used
+vga: entity work.mwvga Port map ( 
+		reset => RESET,
+		clk => clkgen_vga,
+		border_char => c(' '),
+		win_char => vram_doutb,
+		win => win,
+		win_color => sw_runtrace,	-- change color based on run/trace mode
+		hactive => hactive,
+		vactive => vactive,
+		x => vga_x,
+		y => vga_y,
+		cursor_enable => '0',
+		cursor_type => '0',
+		-- VGA connections
+		color(11) => open,
+		color(10 downto 8) => RED,
+		color(7) => open,
+		color(6 downto 4) => GRN,
+		color(3 downto 2) => open,
+		color(1 downto 0) => BLU,
+		hsync => HSYNC,
+		vsync => VSYNC
+		);
+
+-- 2k byte dual video RAM is sufficient for 32*64 text window positioned at center screen
+-- each byte is ASCII code of char to display
+-- read/write side is connected to CPU bus, LSB only
+-- read only side is connected to VGA controller 
+char_x <= std_logic_vector(unsigned(vga_x) - ((80 - 64)/2));
+char_y <= std_logic_vector(unsigned(vga_y) - ((60 - 32)/2));
+win_x <= '1' when (unsigned(char_x) < 64) else '0';
+win_y <= '1' when (unsigned(char_y) < 32) else '0';
+win <= win_x and win_y;
+
+-- 0x1XXX (repeats twice)		
+cs_vram <= VMA when (ABUS(15 downto 12) = X"1") else '0';
+
+vram: entity work.ram2k8dual port map (
+			-- connected to CPU bus
+			clka => clkgen_cpu,
+			ena => cs_vram,
+			wea => vram_wea,
+			addra => ABUS(10 DOWNTO 0),
+			dina => DBUS(7 downto 0),
+			douta => vram_douta,
+			-- connected to VGA controller
+			clkb => clkgen_vga,
+			enb => '1',
+			web => vram_web,
+			addrb(10 downto 6) => char_y(4 downto 0),	-- 32 rows
+			addrb(5 downto 0) => char_x(5 downto 0),	-- 64 columns
+			dinb => X"00", -- not used
+			doutb => vram_doutb
+		);
 		
+DBUS(7 downto 0) <= vram_douta when ((RnW and cs_vram) = '1') else "ZZZZZZZZ";
+vram_wea <= "" & (not RnW);
+vram_web <= "" & '0';
+
+-- SYSTEM ROM (1k words of ROM contains the "helloworld" program) 
+-- 0x0XXX (repeats twice)
+cs_rom <= VMA when (ABUS(15 downto 12) = X"0") else '0';
+
+bootrom: entity work.rom1k generic map(
+		filename => "..\prog\helloworld_code.hex",
+		default_value => X"7FFF"	-- HALT
+	)	
+	port map(
+		D => DBUS,
+		A => ABUS(9 downto 0),
+		CS => cs_rom, 
+		OE => RnW
+	);
+
+-- SYSTEM RAM (2k words)
+-- 0xFXXX (repeats twice)
+cs_ram <= VMA when (ABUS(15 downto 12) = X"F") else '0';
+
+ram_lo: entity work.simpleram 
+generic map(
+	address_size => 11,
+	default_value => X"FF"	-- HALT (LSB)
+	)	
+port map(
+	  clk => clkgen_cpu,
+	  D => DBUS(7 downto 0), 
+	  A => ABUS(10 downto 0),
+	  RnW => RnW,
+	  CS => cs_ram
+);
+
+ram_hi: entity work.simpleram 
+generic map(
+	address_size => 11,
+	default_value => X"7F"	-- HALT (MSB)
+	)	
+port map(
+	  clk => clkgen_cpu,
+	  D => DBUS(15 downto 8), 
+	  A => ABUS(10 downto 0),
+	  RnW => RnW,
+	  CS => cs_ram
+);
+		
+-- UART/ACIA (simplified MC6850, connected to lower byte)		
+-- 0xEXXX (repeats 1024 times)
+cs_acia0 <= VMA when (ABUS(15 downto 12) = X"E") else '0';
+		
+acia0: entity work.uart Port map (
+			reset => Reset,
+			clk => clkgen_cpu,
+			clk_txd => clkgen_baudrate,	-- 38400
+			clk_rxd => clkgen_baudrate4,	-- 115200
+			CS => cs_acia0,
+			RnW => '1',
+			RS => ABUS(0),
+			D => DBUS(7 downto 0),
+			debug => open,
+			TXD => PMOD_RXD0,
+			RXD => PMOD_TXD0
+		);
+		
+
 -- LEDs
-LED(0) <= freq1Hz; 
-LED(1) <= cnt(31);
+LED(0) <= clkgen_cpu; 
+LED(1) <= HALT;
 	
 -- 7segment LED 
 led4x7: entity work.fourdigitsevensegled port map ( 
 	  -- inputs
-	  data => cnt(31 downto 16),
+	  data => led_data,
 	  digsel(1) => freq50Hz,
 	  digsel(0) => freq100Hz,
 	  showdigit => "1111",
-	  showdot => button,
-	  showsegments => '1',
+	  showdot(3) => VMA,
+	  showdot(2) => PnD,
+	  showdot(1) => FETCH,
+	  showdot(0) => RnW,
+	  showsegments => bus_valid,
 	  -- outputs
 	  anode => AN,
 	  segment(6 downto 0) => A_TO_G(6 downto 0),
 	  segment(7) => DOT
 	 );
 			 
--- generate 4 debouncers for buttons and 8 for switches to clean input signals
+led_data <= ABUS when (btn_ledsel = '1') else DBUS;
+bus_valid <= VMA or (not RnW);	-- bus signals defined if valid memory address, or register debug output
+			 
+-- generate debouncers for 4 buttons and 8 for switches to clean input signals
 debouncer_generate: for i in 0 to 7 generate
 begin
 	dbc: if (i < 4) generate
 		db_btn: entity work.debouncer port map 
 		(
-			clock => debounce_clk,
+			clock => clkgen_debounce,
 			reset => RESET,
 			signal_in => BTN(i),
 			signal_out => button(i)
@@ -393,7 +429,7 @@ begin
 	
 	db_sw: entity work.debouncer port map 
 	(
-		clock => debounce_clk,
+		clock => clkgen_debounce,
 		reset => RESET,
 		signal_in => SW(i),
 		signal_out => switch(i)
