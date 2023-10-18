@@ -1,5 +1,5 @@
 --------------------------------------------------------
--- mcc V1.3.1008 - Custom microcode compiler (c)2020-... 
+-- mcc V1.3.1017 - Custom microcode compiler (c)2020-... 
 --    https://github.com/zpekic/MicroCodeCompiler
 --------------------------------------------------------
 Compiling helloworld.sif, pass 1 out of 2.
@@ -14,14 +14,14 @@ L0020@0001.  r_p = M[IMM], r_x = LDX;
 Line 21: resolved aliases:  .data in 'data16 =  @StrClear', line 21
 L0021@0002.  data16 =  @StrClear;
 
-Line 22: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 22
-L0022@0003.DeadLoop:  r_p = STP2, r_s = M[PUSH];
+Line 22: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 22
+L0022@0003.DeadLoop:  r_p = P2, r_s = M[PUSH];
 
 Line 24: resolved aliases:  .into in 'data16 =  @Str2UART', line 24
 L0024@0005.  data16 =  @Str2UART;
 
-Line 25: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 25
-L0025@0006.  r_p = STP2, r_s = M[PUSH];
+Line 25: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 25
+L0025@0006.  r_p = P2, r_s = M[PUSH];
 
 Line 27: resolved aliases:  .into in 'data16 =  @Str2VGA', line 27
 L0027@0008.  data16 =  @Str2VGA;
@@ -178,8 +178,8 @@ L0034@004B.  data16 =  0;
 Line 36: resolved aliases:  .to in 'data16 =  @Nextbit - $', line 36
 L0036@004D.  data16 =  @Nextbit - $;
 
-Line 37: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 37
-L0037@004E.Y01:  r_p = STP2, r_s = M[PUSH];
+Line 37: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 37
+L0037@004E.Y01:  r_p = P2, r_s = M[PUSH];
 
 Line 39: resolved aliases:  .into in 'data16 =  @CLC - $', line 39
 L0039@0050.  data16 =  @CLC - $;
@@ -241,14 +241,14 @@ L0035@0073.  data16 =  @ClrScreen - $;
 Line 38: resolved aliases:  PUSHX in 'r_x = STX, r_s = M[PUSH]', line 38
 L0038@0074.  r_x = STX, r_s = M[PUSH];
 
-Line 39: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 39
-L0039@0075.  r_p = STP2, r_s = M[PUSH];
+Line 39: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 39
+L0039@0075.  r_p = P2, r_s = M[PUSH];
 
 Line 41: resolved aliases:  .into in 'data16 =  @GetCursorXY', line 41
 L0041@0077.  data16 =  @GetCursorXY;
 
-Line 42: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 42
-L0042@0078.  r_p = STP2, r_s = M[PUSH];
+Line 42: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 42
+L0042@0078.  r_p = P2, r_s = M[PUSH];
 
 Line 44: resolved aliases:  .into in 'data16 =  @DisplayAt - $', line 44
 L0044@007A.  data16 =  @DisplayAt - $;
@@ -262,8 +262,8 @@ L0047@007D.  data16 =  64;
 Line 49: resolved aliases:  .branchto in 'data16 =  @NextRow - $', line 49
 L0049@007F.  data16 =  @NextRow - $;
 
-Line 50: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 50
-L0050@0080.NoScroll:  r_p = STP2, r_s = M[PUSH];
+Line 50: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 50
+L0050@0080.NoScroll:  r_p = P2, r_s = M[PUSH];
 
 Line 52: resolved aliases:  .into in 'data16 =  @SetCursorXY', line 52
 L0052@0082.  data16 =  @SetCursorXY;
@@ -310,8 +310,8 @@ L0073@0094.  data16 =  0;
 Line 74: resolved aliases:  PUSHX in 'r_x = STX, r_s = M[PUSH]', line 74
 L0074@0095.NxtCol:  r_x = STX, r_s = M[PUSH];
 
-Line 75: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 75
-L0075@0096.  r_p = STP2, r_s = M[PUSH];
+Line 75: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 75
+L0075@0096.  r_p = P2, r_s = M[PUSH];
 
 Line 77: resolved aliases:  .into in 'data16 =  @GetRowBase - $', line 77
 L0077@0098.  data16 =  @GetRowBase - $;
@@ -361,8 +361,8 @@ L0096@00AB.  data16 =  @ClrLastRow - $;
 Line 98: resolved aliases:  .to in 'data16 =  @NxtRow - $', line 98
 L0098@00AD.  data16 =  @NxtRow - $;
 
-Line 100: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 100
-L0100@00AE.ClrLastRow:  r_p = STP2, r_s = M[PUSH];
+Line 100: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 100
+L0100@00AE.ClrLastRow:  r_p = P2, r_s = M[PUSH];
 
 Line 102: resolved aliases:  .into in 'data16 =  @GetRowBase - $', line 102
 L0102@00B0.  data16 =  @GetRowBase - $;
@@ -400,8 +400,8 @@ L0117@00BD.GetRowBase:  r_p = M[IMM], r_x = LDX;
 Line 118: resolved aliases:  VGA_COLS, .data in 'data16 =  64', line 118
 L0118@00BE.  data16 =  64;
 
-Line 119: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 119
-L0119@00BF.  r_p = STP2, r_s = M[PUSH];
+Line 119: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 119
+L0119@00BF.  r_p = P2, r_s = M[PUSH];
 
 Line 121: resolved aliases:  .into in 'data16 =  @MulU - $', line 121
 L0121@00C1.  data16 =  @MulU - $;
@@ -415,8 +415,8 @@ L0123@00C3.  data16 =  0x1000;
 Line 124: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 124
 L0124@00C4.ScrDone:  r_p = JMP, r_s = M[POP];
 
-Line 126: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 126
-L0126@00C5.CarReturn:  r_p = STP2, r_s = M[PUSH];
+Line 126: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 126
+L0126@00C5.CarReturn:  r_p = P2, r_s = M[PUSH];
 
 Line 128: resolved aliases:  .into in 'data16 =  @GetCursorXY', line 128
 L0128@00C7.  data16 =  @GetCursorXY;
@@ -430,8 +430,8 @@ L0130@00C9.  data16 =  0;
 Line 132: resolved aliases:  .to in 'data16 =  @NoScroll - $', line 132
 L0132@00CB.  data16 =  @NoScroll - $;
 
-Line 134: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 134
-L0134@00CC.LineFeed:  r_p = STP2, r_s = M[PUSH];
+Line 134: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 134
+L0134@00CC.LineFeed:  r_p = P2, r_s = M[PUSH];
 
 Line 136: resolved aliases:  .into in 'data16 =  @GetCursorXY', line 136
 L0136@00CE.  data16 =  @GetCursorXY;
@@ -451,8 +451,8 @@ L0142@00D3.  r_p = M[IMM], r_y = LDY;
 Line 143: resolved aliases:  VGA_ROWS, .data in 'data16 =  32', line 143
 L0143@00D4.  data16 =  32;
 
-Line 144: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 144
-L0144@00D5.  r_p = STP2, r_s = M[PUSH];
+Line 144: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 144
+L0144@00D5.  r_p = P2, r_s = M[PUSH];
 
 Line 146: resolved aliases:  .into in 'data16 =  @MulU', line 146
 L0146@00D7.  data16 =  @MulU;
@@ -544,8 +544,8 @@ L0187@00FC.  r_p = M[IMM], r_x = LDX;
 Line 188: resolved aliases:  VGA_COLS, .data in 'data16 =  64', line 188
 L0188@00FD.  data16 =  64;
 
-Line 189: resolved aliases:  MARK2 in 'r_p = STP2, r_s = M[PUSH]', line 189
-L0189@00FE.  r_p = STP2, r_s = M[PUSH];
+Line 189: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 189
+L0189@00FE.  r_p = P2, r_s = M[PUSH];
 
 Line 191: resolved aliases:  .into in 'data16 =  @MulU - $', line 191
 L0191@0100.  data16 =  @MulU - $;
@@ -1650,4 +1650,5 @@ Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_sym.cgf' ..
 Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_sym.coe' (LF only) ... Done (initialized locations: 512, empty locations: 0, total locations: 512).
 Generating code 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_sym.vhd' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_sym.hex' ... Done.
-Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\p
+Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_sym_lendian.bin' ... Done.
+Writing '

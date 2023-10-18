@@ -1,5 +1,5 @@
 --------------------------------------------------------
--- mcc V1.3.1008 - Custom microcode compiler (c)2020-... 
+-- mcc V1.3.1017 - Custom microcode compiler (c)2020-... 
 --    https://github.com/zpekic/MicroCodeCompiler
 --------------------------------------------------------
 -- Auto-generated file, do not modify. To customize, create 'symbol_template.vhd' file in mcc.exe folder
@@ -19,23 +19,23 @@ constant SYMBOL_BYTE_LAST: 	positive := 31;
 constant SYMBOL_BYTE_WIDTH: positive := 5;
 
 
-type t_fls_symbol_entry is array(0 to SYMBOL_ADDRESS_LAST) of std_logic_vector(SYMBOL_DATA_WIDTH -1 downto 0);
-type t_fls_symbol_byte is array(0 to(SYMBOL_ADDRESS_LAST + 1) * (SYMBOL_BYTE_LAST + 1) - 1) of std_logic_vector(7 downto 0);
+type t_sym_symbol_entry is array(0 to SYMBOL_ADDRESS_LAST) of std_logic_vector(SYMBOL_DATA_WIDTH -1 downto 0);
+type t_sym_symbol_byte is array(0 to(SYMBOL_ADDRESS_LAST + 1) * (SYMBOL_BYTE_LAST + 1) - 1) of std_logic_vector(7 downto 0);
 
 
-signal fls_symbol_byte: t_fls_symbol_byte;
-signal fls_sym_d: std_logic_vector(7 downto 0);
-signal fls_sym_a: std_logic_vector(SYMBOL_ADDRESS_WIDTH + SYMBOL_BYTE_WIDTH - 1 downto 0);
+signal sym_symbol_byte: t_sym_symbol_byte;
+signal sym_sym_d: std_logic_vector(7 downto 0);
+signal sym_sym_a: std_logic_vector(SYMBOL_ADDRESS_WIDTH + SYMBOL_BYTE_WIDTH - 1 downto 0);
 ----Start boilerplate code(use with utmost caution!)
--- fls_sym_a <= -- TODO concatenate microinstruction address and character address
--- fls_sym_d <= fls_symbol_byte(to_integer(unsigned(fls_sym_a)));
+-- sym_sym_a <= -- TODO concatenate microinstruction address and character address
+-- sym_sym_d <= sym_symbol_byte(to_integer(unsigned(sym_sym_a)));
 ----convert symbol entries to byte-oriented ROM
 --gen_r: for r in 0 to SYMBOL_ADDRESS_LAST generate
 --begin
 --    gen_c: for c in 0 to SYMBOL_BYTE_LAST generate
 --   begin
 --           --assert false report "r = " & integer'image(r) & " c = " & integer'image(c) severity note;
---           fls_symbol_byte(r * (SYMBOL_BYTE_LAST + 1) + c) <= fls_symbol_entry(r)(SYMBOL_DATA_WIDTH - 8 * c - 1 downto SYMBOL_DATA_WIDTH - 8 * (c + 1));
+--           sym_symbol_byte(r * (SYMBOL_BYTE_LAST + 1) + c) <= sym_symbol_entry(r)(SYMBOL_DATA_WIDTH - 8 * c - 1 downto SYMBOL_DATA_WIDTH - 8 * (c + 1));
 --   end generate;
 --end generate;
 ----End boilerplate code
@@ -45,7 +45,7 @@ signal fls_sym_a: std_logic_vector(SYMBOL_ADDRESS_WIDTH + SYMBOL_BYTE_WIDTH - 1 
 
 
 
-constant fls_symbol_entry: t_fls_symbol_entry := (
+constant sym_symbol_entry: t_sym_symbol_entry := (
 
 -- L0019@0000.  NOP;
 -- NOP;
@@ -59,9 +59,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- data16 =  @StrClear;
 2 => X"64_61_74_61_31_36_20_3D_20_20_40_53_74_72_43_6C_65_61_72_3B_20_20_20_20_20_20_20_20_20_20_20_20",
 
--- L0022@0003.DeadLoop:  r_p = STP2, r_s = M[PUSH];
--- DeadLoop: r_p = STP2, r_s = M[PUSH];
-3 => X"44_65_61_64_4C_6F_6F_70_3A_20_72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55",
+-- L0022@0003.DeadLoop:  r_p = P2, r_s = M[PUSH];
+-- DeadLoop: r_p = P2, r_s = M[PUSH];
+3 => X"44_65_61_64_4C_6F_6F_70_3A_20_72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48",
 
 -- L0023@0004.  JMP;
 -- JMP;
@@ -71,9 +71,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- data16 =  @Str2UART;
 5 => X"64_61_74_61_31_36_20_3D_20_20_40_53_74_72_32_55_41_52_54_3B_20_20_20_20_20_20_20_20_20_20_20_20",
 
--- L0025@0006.  r_p = STP2, r_s = M[PUSH];
--- r_p = STP2, r_s = M[PUSH];
-6 => X"72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20",
+-- L0025@0006.  r_p = P2, r_s = M[PUSH];
+-- r_p = P2, r_s = M[PUSH];
+6 => X"72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20_20_20",
 
 -- L0026@0007.  JMP;
 -- JMP;
@@ -359,9 +359,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- data16 =  @Nextbit - $;
 77 => X"64_61_74_61_31_36_20_3D_20_20_40_4E_65_78_74_62_69_74_20_2D_20_24_3B_20_20_20_20_20_20_20_20_20",
 
--- L0037@004E.Y01:  r_p = STP2, r_s = M[PUSH];
--- Y01: r_p = STP2, r_s = M[PUSH];
-78 => X"59_30_31_3A_20_72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20",
+-- L0037@004E.Y01:  r_p = P2, r_s = M[PUSH];
+-- Y01: r_p = P2, r_s = M[PUSH];
+78 => X"59_30_31_3A_20_72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20",
 
 -- L0038@004F.  BRANCH;
 -- BRANCH;
@@ -515,9 +515,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- r_x = STX, r_s = M[PUSH];
 116 => X"72_5F_78_20_3D_20_53_54_58_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20_20",
 
--- L0039@0075.  r_p = STP2, r_s = M[PUSH];
--- r_p = STP2, r_s = M[PUSH];
-117 => X"72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20",
+-- L0039@0075.  r_p = P2, r_s = M[PUSH];
+-- r_p = P2, r_s = M[PUSH];
+117 => X"72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20_20_20",
 
 -- L0040@0076.  JMP;
 -- JMP;
@@ -527,9 +527,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- data16 =  @GetCursorXY;
 119 => X"64_61_74_61_31_36_20_3D_20_20_40_47_65_74_43_75_72_73_6F_72_58_59_3B_20_20_20_20_20_20_20_20_20",
 
--- L0042@0078.  r_p = STP2, r_s = M[PUSH];
--- r_p = STP2, r_s = M[PUSH];
-120 => X"72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20",
+-- L0042@0078.  r_p = P2, r_s = M[PUSH];
+-- r_p = P2, r_s = M[PUSH];
+120 => X"72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20_20_20",
 
 -- L0043@0079.  BRANCH;
 -- BRANCH;
@@ -559,9 +559,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- data16 =  @NextRow - $;
 127 => X"64_61_74_61_31_36_20_3D_20_20_40_4E_65_78_74_52_6F_77_20_2D_20_24_3B_20_20_20_20_20_20_20_20_20",
 
--- L0050@0080.NoScroll:  r_p = STP2, r_s = M[PUSH];
--- NoScroll: r_p = STP2, r_s = M[PUSH];
-128 => X"4E_6F_53_63_72_6F_6C_6C_3A_20_72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55",
+-- L0050@0080.NoScroll:  r_p = P2, r_s = M[PUSH];
+-- NoScroll: r_p = P2, r_s = M[PUSH];
+128 => X"4E_6F_53_63_72_6F_6C_6C_3A_20_72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48",
 
 -- L0051@0081.  JMP;
 -- JMP;
@@ -647,9 +647,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- NxtCol: r_x = STX, r_s = M[PUSH];
 149 => X"4E_78_74_43_6F_6C_3A_20_72_5F_78_20_3D_20_53_54_58_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D",
 
--- L0075@0096.  r_p = STP2, r_s = M[PUSH];
--- r_p = STP2, r_s = M[PUSH];
-150 => X"72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20",
+-- L0075@0096.  r_p = P2, r_s = M[PUSH];
+-- r_p = P2, r_s = M[PUSH];
+150 => X"72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20_20_20",
 
 -- L0076@0097.  BRANCH;
 -- BRANCH;
@@ -743,9 +743,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- data16 =  @NxtRow - $;
 173 => X"64_61_74_61_31_36_20_3D_20_20_40_4E_78_74_52_6F_77_20_2D_20_24_3B_20_20_20_20_20_20_20_20_20_20",
 
--- L0100@00AE.ClrLastRow:  r_p = STP2, r_s = M[PUSH];
--- ClrLastRow: r_p = STP2, r_s = M[PUSH];
-174 => X"43_6C_72_4C_61_73_74_52_6F_77_3A_20_72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B",
+-- L0100@00AE.ClrLastRow:  r_p = P2, r_s = M[PUSH];
+-- ClrLastRow: r_p = P2, r_s = M[PUSH];
+174 => X"43_6C_72_4C_61_73_74_52_6F_77_3A_20_72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55",
 
 -- L0101@00AF.  BRANCH;
 -- BRANCH;
@@ -811,9 +811,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- data16 =  64;
 190 => X"64_61_74_61_31_36_20_3D_20_20_36_34_3B_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20",
 
--- L0119@00BF.  r_p = STP2, r_s = M[PUSH];
--- r_p = STP2, r_s = M[PUSH];
-191 => X"72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20",
+-- L0119@00BF.  r_p = P2, r_s = M[PUSH];
+-- r_p = P2, r_s = M[PUSH];
+191 => X"72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20_20_20",
 
 -- L0120@00C0.  BRANCH;
 -- BRANCH;
@@ -835,9 +835,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- ScrDone: r_p = JMP, r_s = M[POP];
 196 => X"53_63_72_44_6F_6E_65_3A_20_72_5F_70_20_3D_20_4A_4D_50_2C_20_72_5F_73_20_3D_20_4D_5B_50_4F_50_5D",
 
--- L0126@00C5.CarReturn:  r_p = STP2, r_s = M[PUSH];
--- CarReturn: r_p = STP2, r_s = M[PUSH];
-197 => X"43_61_72_52_65_74_75_72_6E_3A_20_72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50",
+-- L0126@00C5.CarReturn:  r_p = P2, r_s = M[PUSH];
+-- CarReturn: r_p = P2, r_s = M[PUSH];
+197 => X"43_61_72_52_65_74_75_72_6E_3A_20_72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53",
 
 -- L0127@00C6.  JMP;
 -- JMP;
@@ -863,9 +863,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- data16 =  @NoScroll - $;
 203 => X"64_61_74_61_31_36_20_3D_20_20_40_4E_6F_53_63_72_6F_6C_6C_20_2D_20_24_3B_20_20_20_20_20_20_20_20",
 
--- L0134@00CC.LineFeed:  r_p = STP2, r_s = M[PUSH];
--- LineFeed: r_p = STP2, r_s = M[PUSH];
-204 => X"4C_69_6E_65_46_65_65_64_3A_20_72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55",
+-- L0134@00CC.LineFeed:  r_p = P2, r_s = M[PUSH];
+-- LineFeed: r_p = P2, r_s = M[PUSH];
+204 => X"4C_69_6E_65_46_65_65_64_3A_20_72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48",
 
 -- L0135@00CD.  JMP;
 -- JMP;
@@ -899,9 +899,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- data16 =  32;
 212 => X"64_61_74_61_31_36_20_3D_20_20_33_32_3B_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20",
 
--- L0144@00D5.  r_p = STP2, r_s = M[PUSH];
--- r_p = STP2, r_s = M[PUSH];
-213 => X"72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20",
+-- L0144@00D5.  r_p = P2, r_s = M[PUSH];
+-- r_p = P2, r_s = M[PUSH];
+213 => X"72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20_20_20",
 
 -- L0145@00D6.  JMP;
 -- JMP;
@@ -1063,9 +1063,9 @@ constant fls_symbol_entry: t_fls_symbol_entry := (
 -- data16 =  64;
 253 => X"64_61_74_61_31_36_20_3D_20_20_36_34_3B_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20",
 
--- L0189@00FE.  r_p = STP2, r_s = M[PUSH];
--- r_p = STP2, r_s = M[PUSH];
-254 => X"72_5F_70_20_3D_20_53_54_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20",
+-- L0189@00FE.  r_p = P2, r_s = M[PUSH];
+-- r_p = P2, r_s = M[PUSH];
+254 => X"72_5F_70_20_3D_20_50_32_2C_20_72_5F_73_20_3D_20_4D_5B_50_55_53_48_5D_3B_20_20_20_20_20_20_20_20",
 
 -- L0190@00FF.  BRANCH;
 -- BRANCH;

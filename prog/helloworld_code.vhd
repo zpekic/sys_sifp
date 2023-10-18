@@ -1,5 +1,5 @@
 --------------------------------------------------------
--- mcc V1.3.1008 - Custom microcode compiler (c)2020-... 
+-- mcc V1.3.1017 - Custom microcode compiler (c)2020-... 
 --    https://github.com/zpekic/MicroCodeCompiler
 --------------------------------------------------------
 -- Auto-generated file, do not modify. To customize, create 'code_template.vhd' file in mcc.exe folder
@@ -17,16 +17,16 @@ constant CODE_ADDRESS_WIDTH: 	positive := 9;
 constant CODE_ADDRESS_LAST: 	positive := 511;
 
 
-type hwd_code_memory is array(0 to 511) of std_logic_vector(15 downto 0);
+type cpu_code_memory is array(0 to 511) of std_logic_vector(15 downto 0);
 
-signal hwd_uinstruction: std_logic_vector(15 downto 0);
+signal cpu_uinstruction: std_logic_vector(15 downto 0);
 
---hwd_uinstruction <= hwd_microcode(to_integer(unsigned(TODO))); -- copy to file containing the control unit. TODO is typically replace with 'ui_address' control unit output
+--cpu_uinstruction <= cpu_microcode(to_integer(unsigned(TODO))); -- copy to file containing the control unit. TODO is typically replace with 'ui_address' control unit output
 
 --
--- L0011.r_p: .valfield 4 values NOP, LDP|JMP|JUMP|GOTO, ADP|BRANCH, STP2, STP3, STP4, STP5, M[IMM], BAC|IF_AC|IF_A_GE, BAZ|IF_AZ|IF_A_EQ, BXC|IF_XC|IF_X_GE, BXZ|IF_XZ|IF_X_EQ, BYC|IF_YC|IF_Y_GE, BYZ|IF_YZ|IF_Y_EQ, BSC|IF_SC|IF_S_GE, BSZ|IF_SZ|IF_S_EQ default NOP;
+-- L0011.r_p: .valfield 4 values NOP, LDP|JMP|JUMP|GOTO, ADP|BRANCH, P2, P3, P4, P0, M[IMM], BAC|IF_AC|IF_A_GE, BAZ|IF_AZ|IF_A_EQ, BXC|IF_XC|IF_X_GE, BXZ|IF_XZ|IF_X_EQ, BYC|IF_YC|IF_Y_GE, BYZ|IF_YZ|IF_Y_EQ, BSC|IF_SC|IF_S_GE, BSZ|IF_SZ|IF_S_EQ default NOP;
 --
-alias hwd_r_p: 	std_logic_vector(3 downto 0) is hwd_uinstruction(15 downto 12);
+alias cpu_r_p: 	std_logic_vector(3 downto 0) is cpu_uinstruction(15 downto 12);
 constant r_p_NOP: 	std_logic_vector(3 downto 0) := X"0";
 constant r_p_LDP: 	std_logic_vector(3 downto 0) := X"1";
 constant r_p_JMP: 	std_logic_vector(3 downto 0) := X"1";
@@ -34,11 +34,11 @@ constant r_p_JUMP: 	std_logic_vector(3 downto 0) := X"1";
 constant r_p_GOTO: 	std_logic_vector(3 downto 0) := X"1";
 constant r_p_ADP: 	std_logic_vector(3 downto 0) := X"2";
 constant r_p_BRANCH: 	std_logic_vector(3 downto 0) := X"2";
-constant r_p_STP2: 	std_logic_vector(3 downto 0) := X"3";
-constant r_p_STP3: 	std_logic_vector(3 downto 0) := X"4";
-constant r_p_STP4: 	std_logic_vector(3 downto 0) := X"5";
-constant r_p_STP5: 	std_logic_vector(3 downto 0) := X"6";
-constant r_p_M[IMM]: 	std_logic_vector(3 downto 0) := X"7";
+constant r_p_P2: 	std_logic_vector(3 downto 0) := X"3";
+constant r_p_P3: 	std_logic_vector(3 downto 0) := X"4";
+constant r_p_P4: 	std_logic_vector(3 downto 0) := X"5";
+constant r_p_P0: 	std_logic_vector(3 downto 0) := X"6";
+constant r_p_M_IMM: 	std_logic_vector(3 downto 0) := X"7";
 constant r_p_BAC: 	std_logic_vector(3 downto 0) := X"8";
 constant r_p_IF_AC: 	std_logic_vector(3 downto 0) := X"8";
 constant r_p_IF_A_GE: 	std_logic_vector(3 downto 0) := X"8";
@@ -64,7 +64,7 @@ constant r_p_BSZ: 	std_logic_vector(3 downto 0) := X"F";
 constant r_p_IF_SZ: 	std_logic_vector(3 downto 0) := X"F";
 constant r_p_IF_S_EQ: 	std_logic_vector(3 downto 0) := X"F";
 ---- Start boilerplate code (use with utmost caution!)
--- with hwd_r_p select r_p <=
+-- with cpu_r_p select r_p <=
 --      NOP when r_p_NOP, -- default value
 --      LDP when r_p_LDP,
 --      LDP when r_p_JMP,
@@ -72,10 +72,10 @@ constant r_p_IF_S_EQ: 	std_logic_vector(3 downto 0) := X"F";
 --      LDP when r_p_GOTO,
 --      ADP when r_p_ADP,
 --      ADP when r_p_BRANCH,
---      STP2 when r_p_STP2,
---      STP3 when r_p_STP3,
---      STP4 when r_p_STP4,
---      STP5 when r_p_STP5,
+--      P2 when r_p_P2,
+--      P3 when r_p_P3,
+--      P4 when r_p_P4,
+--      P0 when r_p_P0,
 --      M[IMM] when r_p_M[IMM],
 --      BAC when r_p_BAC,
 --      BAC when r_p_IF_AC,
@@ -106,7 +106,7 @@ constant r_p_IF_S_EQ: 	std_logic_vector(3 downto 0) := X"F";
 --
 -- L0031.r_a: .valfield 3 values NOA, LDA, XOR, SLC, SRC, ADC, SBC, STA|A default NOA;
 --
-alias hwd_r_a: 	std_logic_vector(2 downto 0) is hwd_uinstruction(11 downto 9);
+alias cpu_r_a: 	std_logic_vector(2 downto 0) is cpu_uinstruction(11 downto 9);
 constant r_a_NOA: 	std_logic_vector(2 downto 0) := O"0";
 constant r_a_LDA: 	std_logic_vector(2 downto 0) := O"1";
 constant r_a_XOR: 	std_logic_vector(2 downto 0) := O"2";
@@ -117,7 +117,7 @@ constant r_a_SBC: 	std_logic_vector(2 downto 0) := O"6";
 constant r_a_STA: 	std_logic_vector(2 downto 0) := O"7";
 constant r_a_A: 	std_logic_vector(2 downto 0) := O"7";
 ---- Start boilerplate code (use with utmost caution!)
--- with hwd_r_a select r_a <=
+-- with cpu_r_a select r_a <=
 --      NOA when r_a_NOA, -- default value
 --      LDA when r_a_LDA,
 --      XOR when r_a_XOR,
@@ -132,18 +132,18 @@ constant r_a_A: 	std_logic_vector(2 downto 0) := O"7";
 --
 -- L0043.r_x: .valfield 3 values NOX, CPX, INX, DEX, LDX, ADX, M[X], STX|X default NOX;
 --
-alias hwd_r_x: 	std_logic_vector(2 downto 0) is hwd_uinstruction(8 downto 6);
+alias cpu_r_x: 	std_logic_vector(2 downto 0) is cpu_uinstruction(8 downto 6);
 constant r_x_NOX: 	std_logic_vector(2 downto 0) := O"0";
 constant r_x_CPX: 	std_logic_vector(2 downto 0) := O"1";
 constant r_x_INX: 	std_logic_vector(2 downto 0) := O"2";
 constant r_x_DEX: 	std_logic_vector(2 downto 0) := O"3";
 constant r_x_LDX: 	std_logic_vector(2 downto 0) := O"4";
 constant r_x_ADX: 	std_logic_vector(2 downto 0) := O"5";
-constant r_x_M[X]: 	std_logic_vector(2 downto 0) := O"6";
+constant r_x_M_X: 	std_logic_vector(2 downto 0) := O"6";
 constant r_x_STX: 	std_logic_vector(2 downto 0) := O"7";
 constant r_x_X: 	std_logic_vector(2 downto 0) := O"7";
 ---- Start boilerplate code (use with utmost caution!)
--- with hwd_r_x select r_x <=
+-- with cpu_r_x select r_x <=
 --      NOX when r_x_NOX, -- default value
 --      CPX when r_x_CPX,
 --      INX when r_x_INX,
@@ -158,18 +158,18 @@ constant r_x_X: 	std_logic_vector(2 downto 0) := O"7";
 --
 -- L0055.r_y: .valfield 3 values NOY, CPY, INY, DEY, LDY, ADY, M[Y], STY|Y default NOY;
 --
-alias hwd_r_y: 	std_logic_vector(2 downto 0) is hwd_uinstruction(5 downto 3);
+alias cpu_r_y: 	std_logic_vector(2 downto 0) is cpu_uinstruction(5 downto 3);
 constant r_y_NOY: 	std_logic_vector(2 downto 0) := O"0";
 constant r_y_CPY: 	std_logic_vector(2 downto 0) := O"1";
 constant r_y_INY: 	std_logic_vector(2 downto 0) := O"2";
 constant r_y_DEY: 	std_logic_vector(2 downto 0) := O"3";
 constant r_y_LDY: 	std_logic_vector(2 downto 0) := O"4";
 constant r_y_ADY: 	std_logic_vector(2 downto 0) := O"5";
-constant r_y_M[Y]: 	std_logic_vector(2 downto 0) := O"6";
+constant r_y_M_Y: 	std_logic_vector(2 downto 0) := O"6";
 constant r_y_STY: 	std_logic_vector(2 downto 0) := O"7";
 constant r_y_Y: 	std_logic_vector(2 downto 0) := O"7";
 ---- Start boilerplate code (use with utmost caution!)
--- with hwd_r_y select r_y <=
+-- with cpu_r_y select r_y <=
 --      NOY when r_y_NOY, -- default value
 --      CPY when r_y_CPY,
 --      INY when r_y_INY,
@@ -184,18 +184,18 @@ constant r_y_Y: 	std_logic_vector(2 downto 0) := O"7";
 --
 -- L0066.r_s: .valfield 3 values NOS, CPS, M[POP], M[PUSH], LDS, ADS, M[S], STS|S default NOS;
 --
-alias hwd_r_s: 	std_logic_vector(2 downto 0) is hwd_uinstruction(2 downto 0);
+alias cpu_r_s: 	std_logic_vector(2 downto 0) is cpu_uinstruction(2 downto 0);
 constant r_s_NOS: 	std_logic_vector(2 downto 0) := O"0";
 constant r_s_CPS: 	std_logic_vector(2 downto 0) := O"1";
-constant r_s_M[POP]: 	std_logic_vector(2 downto 0) := O"2";
-constant r_s_M[PUSH]: 	std_logic_vector(2 downto 0) := O"3";
+constant r_s_M_POP: 	std_logic_vector(2 downto 0) := O"2";
+constant r_s_M_PUSH: 	std_logic_vector(2 downto 0) := O"3";
 constant r_s_LDS: 	std_logic_vector(2 downto 0) := O"4";
 constant r_s_ADS: 	std_logic_vector(2 downto 0) := O"5";
-constant r_s_M[S]: 	std_logic_vector(2 downto 0) := O"6";
+constant r_s_M_S: 	std_logic_vector(2 downto 0) := O"6";
 constant r_s_STS: 	std_logic_vector(2 downto 0) := O"7";
 constant r_s_S: 	std_logic_vector(2 downto 0) := O"7";
 ---- Start boilerplate code (use with utmost caution!)
--- with hwd_r_s select r_s <=
+-- with cpu_r_s select r_s <=
 --      NOS when r_s_NOS, -- default value
 --      CPS when r_s_CPS,
 --      M[POP] when r_s_M[POP],
@@ -210,15 +210,15 @@ constant r_s_S: 	std_logic_vector(2 downto 0) := O"7";
 --
 -- L0086.data16: .valfield r_p .. r_s values * default 0;
 --
-alias hwd_data16: 	std_logic_vector(15 downto 0) is hwd_uinstruction(15 downto 0);
+alias cpu_data16: 	std_logic_vector(15 downto 0) is cpu_uinstruction(15 downto 0);
 -- Values from X"0000" to X"FFFF" allowed
 ---- Start boilerplate code (use with utmost caution!)
---  data16 <= hwd_data16;
+--  data16 <= cpu_data16;
 ---- End boilerplate code
 
 
 
-constant hwd_microcode: hwd_code_memory := (
+constant cpu_microcode: cpu_code_memory := (
 
 -- L0019@0000.  NOP;
 --  r_p = 0000, r_a = 000, r_x = 000, r_y = 000, r_s = 000;
@@ -232,7 +232,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  data16 = 0000000000001101;
 2 => X"000D",
 
--- L0022@0003.DeadLoop:  r_p = STP2, r_s = M[PUSH];
+-- L0022@0003.DeadLoop:  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 3 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -244,7 +244,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  data16 = 0000000000011110;
 5 => X"001E",
 
--- L0025@0006.  r_p = STP2, r_s = M[PUSH];
+-- L0025@0006.  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 6 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -532,7 +532,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  data16 = 0000000000000101;
 77 => X"0005",
 
--- L0037@004E.Y01:  r_p = STP2, r_s = M[PUSH];
+-- L0037@004E.Y01:  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 78 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -688,7 +688,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  r_p = 0000, r_a = 000, r_x = 111, r_y = 000, r_s = 011;
 116 => X"0" & O"0" & O"7" & O"0" & O"3",
 
--- L0039@0075.  r_p = STP2, r_s = M[PUSH];
+-- L0039@0075.  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 117 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -700,7 +700,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  data16 = 0000000011110000;
 119 => X"00F0",
 
--- L0042@0078.  r_p = STP2, r_s = M[PUSH];
+-- L0042@0078.  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 120 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -732,7 +732,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  data16 = 0000000000000111;
 127 => X"0007",
 
--- L0050@0080.NoScroll:  r_p = STP2, r_s = M[PUSH];
+-- L0050@0080.NoScroll:  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 128 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -820,7 +820,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  r_p = 0000, r_a = 000, r_x = 111, r_y = 000, r_s = 011;
 149 => X"0" & O"0" & O"7" & O"0" & O"3",
 
--- L0075@0096.  r_p = STP2, r_s = M[PUSH];
+-- L0075@0096.  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 150 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -916,7 +916,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  data16 = 1111111111100101;
 173 => X"FFE5",
 
--- L0100@00AE.ClrLastRow:  r_p = STP2, r_s = M[PUSH];
+-- L0100@00AE.ClrLastRow:  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 174 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -984,7 +984,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  data16 = 0000000001000000;
 190 => X"0040",
 
--- L0119@00BF.  r_p = STP2, r_s = M[PUSH];
+-- L0119@00BF.  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 191 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -1008,7 +1008,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  r_p = 0001, r_a = 000, r_x = 000, r_y = 000, r_s = 010;
 196 => X"1" & O"0" & O"0" & O"0" & O"2",
 
--- L0126@00C5.CarReturn:  r_p = STP2, r_s = M[PUSH];
+-- L0126@00C5.CarReturn:  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 197 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -1036,7 +1036,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  data16 = 1111111110110101;
 203 => X"FFB5",
 
--- L0134@00CC.LineFeed:  r_p = STP2, r_s = M[PUSH];
+-- L0134@00CC.LineFeed:  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 204 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -1072,7 +1072,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  data16 = 0000000000100000;
 212 => X"0020",
 
--- L0144@00D5.  r_p = STP2, r_s = M[PUSH];
+-- L0144@00D5.  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 213 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -1236,7 +1236,7 @@ constant hwd_microcode: hwd_code_memory := (
 --  data16 = 0000000001000000;
 253 => X"0040",
 
--- L0189@00FE.  r_p = STP2, r_s = M[PUSH];
+-- L0189@00FE.  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 254 => X"3" & O"0" & O"0" & O"0" & O"3",
 
