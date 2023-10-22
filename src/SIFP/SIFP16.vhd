@@ -35,13 +35,14 @@ entity SIFP16 is
     Port ( CLK : in  STD_LOGIC;
            RESET : in  STD_LOGIC;
            READY : in  STD_LOGIC;
-           RUNnTRACE : in  STD_LOGIC;
+           TRACE : in  STD_LOGIC;
            ABUS : out  STD_LOGIC_VECTOR (15 downto 0);
            DBUS : inout  STD_LOGIC_VECTOR (15 downto 0);
            RnW : out  STD_LOGIC;
            VMA : out  STD_LOGIC;
            PnD : out  STD_LOGIC;
 			  HALT: out STD_LOGIC;
+			  WAITING: out STD_LOGIC;
            FETCH : out  STD_LOGIC);
 end SIFP16;
 
@@ -49,8 +50,9 @@ architecture Behavioral of SIFP16 is
 
 --
 -- Special case instruction combinations
-constant c_NOP: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS;		-- only increment P
-constant c_FTOS: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_S;		-- mostly for flag output is trace mode 
+constant c_FETCH: std_logic_vector(15 downto 0) := r_p_M_IMM & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS;
+constant c_NOP, c_EXEC: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS;		-- only increment P
+constant c_FTOS: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_S;		-- mostly for flag output in trace mode
 constant c_PUSHF: std_logic_vector(15 downto 0) := r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_PUSH;	-- flags to stack
 constant c_POPF: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_POP;	-- pick up flags from stack
 constant c_HALT: std_logic_vector(15 downto 0) :=	r_p_M_IMM & r_a_A & r_x_X & r_y_Y & r_s_S;				-- ABUS will indicate where CPU halted
@@ -58,61 +60,129 @@ constant c_HALT: std_logic_vector(15 downto 0) :=	r_p_M_IMM & r_a_A & r_x_X & r_
 -- CPU program
 -- CPU always executes only 8 instructions continously!
 constant cpu_program: mem16x20 := (
+-- 8 instructions to execute in RUN mode (4 times the FETCH-EXECUTE sequence)
+	"0101" & c_FETCH,
+	"0110" & c_EXEC,
+	"0101" & c_FETCH,
+	"0110" & c_EXEC,
+	"0101" & c_FETCH,
+	"0110" & c_EXEC,
+	"0101" & c_FETCH,
+	"0110" & c_EXEC,
 -- 8 instructions to execute in TRACE mode (FETCH-EXECUTE-6*REGISTER OUT)
-	"0101" & r_p_M_IMM & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS, -- FETCH (load instruction register)
-	"0110" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS, 	-- EXECUTE (from instruction register)
+	"0101" & c_FETCH, -- FETCH (load instruction register)
+	"0110" & c_EXEC, 	-- EXECUTE (from instruction register)
 	"0000" & c_FTOS,														 	-- output F(lags) 
 	"0000" & r_p_NOP & r_a_A 	& r_x_NOX & r_y_NOY & r_s_NOS,	-- output A
 	"0000" & r_p_NOP & r_a_NOA & r_x_X	 & r_y_NOY & r_s_NOS,	-- output X
 	"0000" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_Y	  & r_s_NOS,	-- output Y
 	"0000" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_S,		-- output S
-	"0000" & r_p_P0 & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS,		-- output P
--- 8 instructions to execute in RUN mode (4 times the FETCH-EXECUTE sequence)
-	"0101" & r_p_M_IMM & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS,
-	"0110" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS,
-	"0101" & r_p_M_IMM & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS,
-	"0110" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS,
-	"0101" & r_p_M_IMM & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS,
-	"0110" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS,
-	"0101" & r_p_M_IMM & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS,
-	"0110" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS
+	"0000" & r_p_P0 & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS		-- output P
 );
 
 
-signal seq_cnt: std_logic_vector(2 downto 0);
+signal clk_cnt: std_logic_vector(15 downto 0); -- free running counter, 3 LSB bits are the program counter
 signal cpu_upc: std_logic_vector(3 downto 0);
 
-signal cpu_ucurrent: std_logic_vector(19 downto 0);
-alias cpu_rsvrd: std_logic is cpu_ucurrent(19); -- ?: reserved for future use
-alias cpu_bctrl: std_logic is cpu_ucurrent(18); -- 0: alternative bus control (ABUS = register address; VMA, PnD, RnW = '0')
-alias cpu_irexe: std_logic is cpu_ucurrent(17); -- 1: execute from instruction register 
-alias cpu_fetch: std_logic is cpu_ucurrent(16); -- 1: fetch
-alias cpu_instr: std_logic_vector(15 downto 0) is cpu_ucurrent(15 downto 0);
+-- instruction word
+signal cpu_i: std_logic_vector(19 downto 0);
+alias cpu_rsvrd: std_logic is cpu_i(19); -- ?: reserved for future use
+alias cpu_bctrl: std_logic is cpu_i(18); -- 0: alternative bus control (ABUS = register address; VMA, PnD, RnW = '0')
+alias cpu_irexe: std_logic is cpu_i(17); -- 1: execute from instruction register 
+alias cpu_fetch: std_logic is cpu_i(16); -- 1: fetch
+alias cpu_instr: std_logic_vector(15 downto 0) is cpu_i(15 downto 0);
+signal i_is_ftos, i_is_pushf, i_is_popf: std_logic; 
+signal i_is_halt: std_logic;
 
 -- internally sync'd with CLK
-signal int_runtrace, int_halt, int_ready: std_logic;
+signal int_trace, int_halt, int_ready: std_logic;
 signal reg_clk: std_logic;
 
 -- non-programmable registers
-signal reg_instr: std_logic_vector(15 downto 0); -- instruction register
-signal reg_flags: std_logic_vector(15 downto 0); -- flags
+signal reg_i: std_logic_vector(15 downto 0); -- instruction register
+signal reg_f: std_logic_vector(15 downto 0); -- flags
+-- flags are arranged for debug convenience
+alias flag_ac: std_logic is reg_f(15);
+alias flag_az: std_logic is reg_f(12);
+alias flag_xc: std_logic is reg_f(11);
+alias flag_xz: std_logic is reg_f(8);
+alias flag_yc: std_logic is reg_f(7);
+alias flag_yz: std_logic is reg_f(4);
+alias flag_sc: std_logic is reg_f(3);
+alias flag_sz: std_logic is reg_f(0);
+-- currently consumed flag value
+signal flag: std_logic;
 
+-- values of programmable registers and their flag outputs
+signal p, a, x, y, s: std_logic_vector(15 downto 0);
+signal reg_ac, reg_az: std_logic;
+signal reg_xc, reg_xz: std_logic;
+signal reg_yc, reg_yz: std_logic;
+signal reg_sc, reg_sz: std_logic;
+
+-- address (and enable) outputs of registers (note: A[ccumulator] never generates address)
+signal p2a, x2a, y2a, s2a: std_logic_vector(15 downto 0);
+signal reg_p_a, reg_x_a, reg_y_a, reg_s_a: std_logic;
+
+-- data (and enable) outputs of registers (includes A and data bus input)
+signal p2d, a2d, x2d, y2d, s2d, d2d: std_logic_vector(15 downto 0);
+signal reg_p_d, reg_a_d, reg_x_d, reg_y_d, reg_s_d: std_logic;
 
 -- other
 signal int_abus: std_logic_vector(15 downto 0);
-signal int_dbus: std_logic_vector(15 downto 0);
+signal int_dbus, int_fdbus: std_logic_vector(15 downto 0);
 signal int_rnw, int_vma, int_pnd: std_logic;
 
 begin
 
--- drive CPU output signals
-ABUS <= X"000" & cpu_upc when (cpu_bctrl = '0') else int_abus;
-DBUS <= "ZZZZZZZZZZZZZZZZ";-- when (int_rnw = '1') else int_dbus;
+-- CPU control bus outputs
 RnW <= cpu_bctrl and int_rnw;
 VMA <= cpu_bctrl and int_vma;
 PnD <= cpu_bctrl and int_pnd;
 HALT <= int_halt;
+WAITING <= not int_ready;
 FETCH <= cpu_fetch;
+
+----------------------------------------------------------------------------
+-- CPU Address bus output
+----------------------------------------------------------------------------
+-- in trace mode, address bits 2,1,0 (values 2..7) indicating a register
+ABUS <= ("0000000000000" & clk_cnt(2 downto 0)) when (cpu_bctrl = '0') else int_abus;	
+
+-- internal address bus is an addition of all registers that project address
+int_abus <= std_logic_vector(unsigned(p2a) + unsigned(x2a) + unsigned(y2a) + unsigned(s2a));
+p2a <= p when (reg_p_a = '1') else X"0000"; 
+x2a <= x when (reg_x_a = '1') else X"0000"; 
+y2a <= y when (reg_y_a = '1') else X"0000"; 
+s2a <= s when (reg_s_a = '1') else X"0000"; 
+
+-- indicate valid memory address if at least one register is projecting address
+int_vma <= reg_p_a or reg_x_a or reg_y_a or reg_s_a;
+
+-- for Harvard mode, we need to know if program counter is involved in address generation
+int_pnd <= reg_p_a;
+
+---------------------------------------------------------------------------
+-- CPU data bus outputs
+---------------------------------------------------------------------------
+-- internal data bus is logical OR of all registers that project data
+DBUS <= "ZZZZZZZZZZZZZZZZ" when (int_rnw = '1') else int_fdbus;
+
+-- memory write if valid memory address and trying to output at least 1 register
+int_rnw <= not(reg_p_d or reg_a_d or reg_x_d or reg_y_d or reg_s_d or i_is_ftos or i_is_pushf) when (int_vma = '1') else '1';
+
+-- MUX to allow pushing, storing F to stack memory
+int_fdbus <= reg_f when ((i_is_ftos or i_is_pushf) = '1') else int_dbus;
+
+-- internal data bus is logical OR of all registers that project data
+int_dbus <= p2d or a2d or x2d or y2d or s2d or d2d;
+p2d <= p when (reg_p_d = '1') else X"0000";
+a2d <= a when (reg_a_d = '1') else X"0000"; 
+x2d <= x when (reg_x_d = '1') else X"0000"; 
+y2d <= y when (reg_y_d = '1') else X"0000"; 
+s2d <= s when (reg_s_d = '1') else X"0000"; 
+-- read from external memory bus if valid memory address and not write mode
+d2d <= DBUS when ((int_rnw and int_vma) = '1') else X"0000"; 
 
 -- capture READY at falling edge of CLK
 on_clk: process(CLK)
@@ -125,49 +195,143 @@ end process;
 -- internal clock 
 reg_clk <= CLK and int_ready and (not int_halt);
 
-
 -- execution sequence counter and non-program accessible registers
 on_reg_clk: process(reg_clk, RESET)
 begin
 	if (RESET = '1') then
-		seq_cnt <= "000";
+		clk_cnt <= X"0000";
 		int_halt <= '0';
-		reg_instr <= c_NOP;	-- has no effect, won't be executed
-		reg_flags <= X"1111";-- initialize all Z flags with 1 to reflect register values of 0
+		int_trace <= '0';
+		reg_i <= c_NOP;	-- has no effect, won't be executed
+		reg_f <= X"1111";-- initialize all Z flags with 1 to reflect register values of 0
 	else
 		if (rising_edge(reg_clk)) then
-			seq_cnt <= std_logic_vector(unsigned(seq_cnt) + 1);
-			if (cpu_uinstruction = c_HALT) then
+			clk_cnt <= std_logic_vector(unsigned(clk_cnt) + 1);
+			if (i_is_halt = '1') then
 				int_halt <= '1';
 			end if;
-			-- safely change run/trace mode only at the end of full sequence
-			if (seq_cnt = "111") then
-				int_runtrace <= RUNnTRACE; 
+			-- safely change run/trace mode only at the start of full sequence
+			if (clk_cnt(2 downto 0) = "000") then
+				int_trace <= TRACE; 
 			end if;
 			-- load Flags register
-			if (cpu_uinstruction = c_POPF) then
-				reg_flags <= DBUS;
+			if (i_is_popf = '1') then
+				reg_f <= DBUS;
 			else
-				reg_flags <= X"BEEF";	-- TODO, load from register flag outputs
+				-- only change 8 bits of 16 bits in F[lags] register
+				flag_ac <= reg_ac;
+				flag_az <= reg_az;
+				flag_xc <= reg_xc;
+				flag_xz <= reg_xz;
+				flag_yc <= reg_yc;
+				flag_yz <= reg_yz;
+				flag_sc <= reg_sc;
+				flag_sz <= reg_sz;
 			end if;
 			-- load instruction register
 			if (cpu_fetch = '1') then
-				reg_instr <= DBUS;
+				reg_i <= DBUS;
 			end if;
 		end if;
 	end if;
 end process;
 
--- microinstruction program counter is only 4 bits!
-cpu_upc <= int_runtrace & seq_cnt;
+-- internal instruction program counter is only 4 bits!
+cpu_upc <= int_trace & clk_cnt(2 downto 0);
 
--- current microinstruction is 1 out of 16 20-bit words
-cpu_ucurrent <= cpu_program(to_integer(unsigned(cpu_upc)));
+-- current instruction is 1 out of 16 20-bit words
+cpu_i <= cpu_program(to_integer(unsigned(cpu_upc)));
 
--- CPU executes either internal microinstruction, or the one from instruction register
-cpu_uinstruction <= reg_instr when (cpu_irexe = '1') else cpu_instr;
+-- CPU executes either internal instruction, or the one from instruction register
+cpu_uinstruction <= reg_i when (cpu_irexe = '1') else cpu_instr;
 
--- loading Flags register
+-- decode some instructions to drive internal control signals
+i_is_ftos <= '1' when (cpu_uinstruction = c_FTOS) else '0';
+i_is_popf <= '1' when (cpu_uinstruction = c_POPF) else '0';
+i_is_pushf <= '1' when (cpu_uinstruction = c_PUSHF) else '0';
+i_is_halt <= '1' when (cpu_uinstruction = c_HALT) else '0';
+
+-- condition code MUX
+with cpu_r_p select flag <= 
+		flag_ac when r_p_IF_AC,
+		flag_az when r_p_IF_AZ,
+		flag_xc when r_p_IF_XC,
+		flag_xz when r_p_IF_XZ,
+		flag_yc when r_p_IF_YC,
+		flag_yz when r_p_IF_YZ,
+		flag_sc when r_p_IF_SC,
+		flag_sz when r_p_IF_SZ,
+		'1' when others;
+-- TODO optimization!
+-- flag <= (not cpu_r_p(3)) or reg_f(to_integer(unsigned(cpu_r_p(2 downto 0)))); 
+
+-- programmable registers
+p_reg: entity work.reg_progcounter Port map ( 
+			clk => reg_clk,
+			reset => RESET,
+			operation => cpu_r_p,	-- 4 bit slice of the current instruction
+			din => int_dbus,			-- data from memory or other registers (except F)
+			cond => flag,
+			reg => p,
+			reg_d => reg_p_d,
+			reg_a => reg_p_a
+		);
+
+a_reg: entity work.reg_acc Port map ( 
+			clk => reg_clk,
+			reset => RESET,
+			operation => cpu_r_a,	-- 3 bit slice of the current instruction
+			din => int_dbus,			-- data from memory or other registers (except F)
+			zi => flag_az,
+			ci => flag_ac,
+			reg => a,
+			zo => reg_az,
+			co => reg_ac,
+			reg_d => reg_a_d,
+			reg_a => open				-- A[ccumulator] never projects address
+		);
+
+x_reg: entity work.reg_index Port map ( 
+			clk => reg_clk,
+			reset => RESET,
+			operation => cpu_r_x,	-- 3 bit slice of the current instruction
+			din => int_dbus,			-- data from memory or other registers (except F)
+			zi => flag_xz,
+			ci => flag_xc,
+			reg => x,
+			zo => reg_xz,
+			co => reg_xc,
+			reg_d => reg_x_d,
+			reg_a => reg_x_a
+		);
+
+y_reg: entity work.reg_index Port map ( 
+			clk => reg_clk,
+			reset => RESET,
+			operation => cpu_r_y,	-- 3 bit slice of the current instruction
+			din => int_dbus,			-- data from memory or other registers (except F)
+			zi => flag_yz,
+			ci => flag_yc,
+			reg => y,
+			zo => reg_yz,
+			co => reg_yc,
+			reg_d => reg_y_d,
+			reg_a => reg_y_a
+		);
+
+s_reg: entity work.reg_stackpointer Port map ( 
+			clk => reg_clk,
+			reset => RESET,
+			operation => cpu_r_s,	-- 3 bit slice of the current instruction
+			din => int_dbus,			-- data from memory or other registers (except F)
+			zi => flag_sz,
+			ci => flag_sc,
+			reg => s,
+			zo => reg_sz,
+			co => reg_sc,
+			reg_d => reg_s_d,
+			reg_a => reg_s_a
+		);
 
 end Behavioral;
 

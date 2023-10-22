@@ -38,12 +38,11 @@ entity debugtracer is
            ready : out  STD_LOGIC;
            txd : out STD_LOGIC;
 			  load : in STD_LOGIC;							-- load trigger selection
-			  sel : in STD_LOGIC_VECTOR(4 downto 0);	-- 1 for signal that will trigger trace
-           M1 : in  STD_LOGIC;
-           nIOR : in  STD_LOGIC;
-           nIOW : in  STD_LOGIC;
-           nMEMR : in  STD_LOGIC;
-           nMEMW : in  STD_LOGIC;
+			  sel : in STD_LOGIC_VECTOR(3 downto 0);	-- 1 for signal that will trigger trace
+           REGW : in  STD_LOGIC;
+           FETCH : in  STD_LOGIC;
+           MEMW : in  STD_LOGIC;
+           MEMR : in  STD_LOGIC;
            ABUS : in  STD_LOGIC_VECTOR (15 downto 0);
            DBUS : in  STD_LOGIC_VECTOR (15 downto 0)
 			  );
@@ -52,7 +51,7 @@ end debugtracer;
 architecture Behavioral of debugtracer is
 
 signal trace, trace_enable, tr_clk, tr_on, tr_off: std_logic;
-signal reg_sel, cbus: std_logic_vector(4 downto 0);
+signal reg_sel, cbus: std_logic_vector(3 downto 0);
 signal counter: std_logic_vector(7 downto 0);
 alias chrSel: std_logic_vector(3 downto 0) is counter(7 downto 4);
 alias bitSel: std_logic_vector(3 downto 0) is counter(3 downto 0);
@@ -63,9 +62,9 @@ signal hex: std_logic_vector(3 downto 0);
 begin
 
 ready <= not trace;
-cbus <= M1 & nIOR & nIOW & nMEMR & nMEMW;
+cbus <= REGW & FETCH & MEMW & MEMR;
 
-on_cpu_clk: process(reset, cpu_clk, ABUS, sel, nIOW)
+on_cpu_clk: process(reset, cpu_clk, ABUS, sel)
 begin
 	if (reset = '1') then 
 		trace_enable <= '1';
@@ -78,18 +77,17 @@ begin
 				reg_sel <= sel;
 				trace_enable <= '1';
 			end if;
-			if ((ABUS(7 downto 1) = "0000000") and (nIOW = '0')) then
-				trace_enable <= ABUS(0);
-			end if;
+--			if ((ABUS(7 downto 1) = "0000000") and (nIOW = '0')) then
+--				trace_enable <= ABUS(0);
+--			end if;
 		end if;
 		if (falling_edge(cpu_clk)) then
 			if (trace = '0') then
 				if (trace_enable = '1') then
-					trace <= (reg_sel(4) and M1) or 
-								(reg_sel(3) and (not nIOR)) or 
-								(reg_sel(2) and (not nIOW)) or 
-								(reg_sel(1) and (not nMEMR)) or 
-								(reg_sel(0) and (not nMEMW));
+					trace <= (reg_sel(3) and REGW) or 
+								(reg_sel(2) and FETCH) or 
+								(reg_sel(1) and MEMR) or 
+								(reg_sel(0) and MEMW);
 				else
 					trace <= '0';
 				end if;
@@ -120,22 +118,20 @@ end process;
 
 -- character generation
 with cbus select char_1 <=
-	c('M') when "11101",
-	c('M') when "01101",
-	c('M') when "01110",
-	c('I') when "00111",
-	c('I') when "01011",
-	"010" & cbus when others;
-	--c('?') when others;
+	c('M') when "0001",
+	c('M') when "0010",
+	c('M') when "0101",
+	c('R') when "1000",
+--	"010" & cbus when others;
+	c('?') when others;
 
 with cbus select char_2 <=
-	c('1') when "11101",
-	c('R') when "01101",
-	c('W') when "01110",
-	c('R') when "00111",
-	c('W') when "01011",
-	"010" & cbus when others;
-	--c('?') when others;
+	c('R') when "0001",
+	c('W') when "0010",
+	c('F') when "0101",
+	c('W') when "1000",
+--	"010" & cbus when others;
+	c('?') when others;
 
 with chrSel select hex <=
 	ABUS(15 downto 12) when X"3",	-- A

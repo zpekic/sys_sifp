@@ -46,14 +46,14 @@ entity sys_sifp_mercury is
 				USR_BTN: in std_logic; 
 
 				-- Switches on baseboard
-				-- SW(0) -- 
-				-- SW(1) -- 
-				-- SW(2) -- 
-				-- SW(3) -- 
+				-- SW(0) -- TRACE on MEM READ
+				-- SW(1) -- TRACE on MEM WRITE
+				-- SW(2) -- TRACE on INSTR FETCH
+				-- SW(3) -- TRACE on REG WRITE
 				-- SW(4) -- CPUCLK SEL 0
 				-- SW(5) -- CPUCLK SEL 1
 				-- SW(6) -- CPUCLK SEL 2
-				-- SW(7)	-- ON: RUN
+				-- SW(7)	-- TRACE
 
 				SW: in std_logic_vector(7 downto 0); 
 
@@ -124,9 +124,9 @@ signal rts1_pulse, rts1_delay: std_logic;
 
 --
 signal switch: std_logic_vector(7 downto 0);
-alias sw_tracesel: std_logic_vector(2 downto 0) is switch(2 downto 0);
+alias sw_tracesel: std_logic_vector(3 downto 0) is switch(3 downto 0);
 alias sw_cpuclk: std_logic_vector(2 downto 0) is switch(6 downto 4);
-alias sw_runtrace: std_logic is switch(7);
+alias sw_trace: std_logic is switch(7);
 
 --
 signal button: std_logic_vector(3 downto 0);
@@ -142,7 +142,7 @@ signal clkgen_cpu: std_logic;
 signal freq100Hz, freq50Hz, freq1Hz: std_logic;
 
 signal cnt: std_logic_vector(31 downto 0);
-signal continue, nMemRead, nMemWrite: std_logic;
+signal continue, MemRead, MemWrite, RegWrite: std_logic;
 
 -- VGA signals
 signal hactive, vactive: std_logic;
@@ -162,6 +162,7 @@ signal cs_ram: std_logic := '0';
 signal ABUS: std_logic_vector(15 downto 0);
 signal VMA: std_logic;		-- valid memory address
 signal FETCH: std_logic;	-- fetching instruction (PnD is also 1)
+signal WAITING: std_logic;	-- 1 when CPU is waiting for READY to go low
 signal HALT: std_logic;		-- CPU has halted 
 signal RnW: std_logic;		-- Read 1, Write 0
 signal PnD: std_logic;		-- Program 1, Data 0 (can double address space for Harvard architecture)
@@ -196,13 +197,14 @@ cpu: entity work.SIFP16 Port map (
 		CLK => clkgen_cpu,
 		RESET => RESET,
 		READY => tracer_ready,
-		RUNnTRACE => sw_runtrace,
+		TRACE => sw_trace,
 		ABUS => ABUS,
 		DBUS => DBUS,
 		RnW => RnW,
 		VMA => VMA,
 		PnD => PnD,
 		HALT => HALT,
+		WAITING => WAITING,
 		FETCH => FETCH
 	);
 
@@ -217,20 +219,18 @@ cpu: entity work.SIFP16 Port map (
 			ready => tracer_ready,			-- freezes CPU when low
 			txd => PMOD_RXD1,					-- output trace (to any TTY of special tracer running on the host
 			load => btn_traceload,			-- load mask register if high
-			sel(4) => sw_tracesel(2),		-- set mask register: M1 (FETCH);
-			sel(3 downto 2) => "00",		-- set mask register: no separeate IO access;
-			sel(1 downto 0) => sw_tracesel(1 downto 0),		-- set mask register: MEMR & MEMW;
-			M1 => FETCH,
-			nIOR => '1',
-			nIOW => '1',
-			nMEMR => nMemRead,
-			nMEMW => nMemWrite,
+			sel(3 downto 0) => sw_tracesel,		-- set mask register
+			REGW => RegWrite,
+			FETCH => FETCH,
+			MEMW => MemWrite,
+			MEMR => MemRead,
 			ABUS => ABUS,
 			DBUS => DBUS
 	);
 
-nMemRead <= not (VMA and RnW);
-nMemWrite <= RnW or (not VMA);
+MemRead <= VMA and RnW;
+MemWrite <= VMA and (not RnW);
+RegWrite <= (not VMA) and (not RnW);
 	 
 -- Tracer works best when the output is intercepted on the host and resolved using symbolic .lst file
 -- In addition, host is able to flip RTS pin to start/stop tracing 
@@ -272,7 +272,7 @@ vga: entity work.mwvga Port map (
 		border_char => c(' '),
 		win_char => vram_doutb,
 		win => win,
-		win_color => sw_runtrace,	-- change color based on run/trace mode
+		win_color => sw_trace,	-- change color based on run/trace mode
 		hactive => hactive,
 		vactive => vactive,
 		x => vga_x,
@@ -390,7 +390,7 @@ acia0: entity work.uart Port map (
 		
 
 -- LEDs
-LED(0) <= clkgen_cpu; 
+LED(0) <= WAITING; 
 LED(1) <= HALT;
 	
 -- 7segment LED 
