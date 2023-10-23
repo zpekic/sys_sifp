@@ -17,14 +17,35 @@
 //	Execution starts at location 0
 //	---------------------------------------------------------------------------
 			NOP;
+			
+// test stack operations
+			PUSHF;
+			PUSHX;
+			PUSHY;
+			PUSHA;
+			LDA, LDY, LDX, M[IMM];
+			.data 0;
+			POPA;
+			POPY;
+			POPX;
+			LDAI;
+			.data 0;
+			PUSHA;
+			RTS;
+			HALT;
+// end test			
+			MARK2;
+			BRANCH;
+			.to @QTest - $;
+			HALT;
 			LDXI;
 			.data @StrClear;	// points to clear string
 DeadLoop:	MARK2;
-			JMP;
-			.into @Str2UART;
+			BRANCH;
+			.to @Str2UART - $;
 			MARK2;
-			JMP;
-			.into @Str2VGA;
+			BRANCH;
+			.to @Str2VGA - $;
 			LDXI;
 			.data @StrHWorld;	// points to "Hello World!"
 			BRANCH,;

@@ -31,7 +31,7 @@ use IEEE.NUMERIC_STD.ALL;
 use work.sifp_package.all;
 use work.helloworld_code.all;
 
-entity reg_index is
+entity indexreg is
     Port ( clk : in  STD_LOGIC;
            reset : in  STD_LOGIC;
            operation : in  STD_LOGIC_VECTOR(2 downto 0);
@@ -43,9 +43,9 @@ entity reg_index is
            co : out  STD_LOGIC;
            reg_d : out  STD_LOGIC;
            reg_a : out  STD_LOGIC);
-end reg_index;
+end indexreg;
 
-architecture Behavioral of reg_index is
+architecture Behavioral of indexreg is
 
 -- actual register value
 signal r: std_logic_vector(15 downto 0);
@@ -58,7 +58,7 @@ begin
 on_clk: process(clk, reset)
 begin
 	if (reset = '1') then
-		r <= X"BEEF";
+		r <= X"BEEF";	-- TODO: clear to 0
 	else
 		if (rising_edge(clk)) then
 			case operation is

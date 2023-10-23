@@ -131,6 +131,7 @@ alias sw_trace: std_logic is switch(7);
 --
 signal button: std_logic_vector(3 downto 0);
 alias btn_clk: std_logic is button(0);
+alias btn_continue: std_logic is button(1);
 alias btn_ledsel: std_logic is button(2);
 alias btn_traceload: std_logic is button(3);
 
@@ -138,7 +139,7 @@ alias btn_traceload: std_logic is button(3);
 signal clkgen_vga: std_logic;	-- should be 25MHz
 signal clkgen_debounce: std_logic;
 signal clkgen_baudrate4, clkgen_baudrate: std_logic;	
-signal clkgen_cpu: std_logic;
+signal clkgen_cpu, cpu_clk: std_logic;
 signal freq100Hz, freq50Hz, freq1Hz: std_logic;
 
 signal cnt: std_logic_vector(31 downto 0);
@@ -162,7 +163,7 @@ signal cs_ram: std_logic := '0';
 signal ABUS: std_logic_vector(15 downto 0);
 signal VMA: std_logic;		-- valid memory address
 signal FETCH: std_logic;	-- fetching instruction (PnD is also 1)
-signal WAITING: std_logic;	-- 1 when CPU is waiting for READY to go low
+signal CLKOUT: std_logic;	-- sync'd with READY
 signal HALT: std_logic;		-- CPU has halted 
 signal RnW: std_logic;		-- Read 1, Write 0
 signal PnD: std_logic;		-- Program 1, Data 0 (can double address space for Harvard architecture)
@@ -204,7 +205,7 @@ cpu: entity work.SIFP16 Port map (
 		VMA => VMA,
 		PnD => PnD,
 		HALT => HALT,
-		WAITING => WAITING,
+		CLKOUT => CLKOUT,
 		FETCH => FETCH
 	);
 
@@ -215,7 +216,7 @@ cpu: entity work.SIFP16 Port map (
 			reset => reset,
 			cpu_clk => clkgen_cpu,
 			txd_clk => clkgen_baudrate,
-			continue => tracer_continue,  
+			continue => btn_continue,  
 			ready => tracer_ready,			-- freezes CPU when low
 			txd => PMOD_RXD1,					-- output trace (to any TTY of special tracer running on the host
 			load => btn_traceload,			-- load mask register if high
@@ -390,7 +391,7 @@ acia0: entity work.uart Port map (
 		
 
 -- LEDs
-LED(0) <= WAITING; 
+LED(0) <= CLKOUT; 
 LED(1) <= HALT;
 	
 -- 7segment LED 

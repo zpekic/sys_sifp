@@ -56,13 +56,12 @@ signal counter: std_logic_vector(7 downto 0);
 alias chrSel: std_logic_vector(3 downto 0) is counter(7 downto 4);
 alias bitSel: std_logic_vector(3 downto 0) is counter(3 downto 0);
 
-signal char_1, char_2, char_hex, char: std_logic_vector(7 downto 0);
+signal char_1, char_2, char_3, char_4, char_5, char_6, char_hex, char: std_logic_vector(7 downto 0);
 signal hex: std_logic_vector(3 downto 0);
 
 begin
 
 ready <= not trace;
-cbus <= REGW & FETCH & MEMW & MEMR;
 
 on_cpu_clk: process(reset, cpu_clk, ABUS, sel)
 begin
@@ -86,8 +85,9 @@ begin
 				if (trace_enable = '1') then
 					trace <= (reg_sel(3) and REGW) or 
 								(reg_sel(2) and FETCH) or 
-								(reg_sel(1) and MEMR) or 
-								(reg_sel(0) and MEMW);
+								(reg_sel(1) and MEMW) or 
+								(reg_sel(0) and MEMR);
+					cbus <= REGW & FETCH & MEMW & MEMR;
 				else
 					trace <= '0';
 				end if;
@@ -118,10 +118,10 @@ end process;
 
 -- character generation
 with cbus select char_1 <=
-	c('M') when "0001",
-	c('M') when "0010",
-	c('M') when "0101",
-	c('R') when "1000",
+	c('M') when "0001",	-- memory read
+	c('M') when "0010",	-- memory write
+	c('I') when "0101",	-- instruction fetch
+	c('R') when "1000",	-- register value
 --	"010" & cbus when others;
 	c('?') when others;
 
@@ -129,7 +129,7 @@ with cbus select char_2 <=
 	c('R') when "0001",
 	c('W') when "0010",
 	c('F') when "0101",
-	c('W') when "1000",
+	c('V') when "1000",
 --	"010" & cbus when others;
 	c('?') when others;
 
@@ -145,14 +145,20 @@ with chrSel select hex <=
 
 char_hex <= hex2ascii(to_integer(unsigned(hex)));
 
+-- if we are tracing register outputs, display their names and not their slots
+char_3 <= c(' ') when (cbus(3) = '1') else char_hex;
+char_4 <= c(' ') when (cbus(3) = '1') else char_hex;
+char_5 <= reg2ascii(to_integer(unsigned(ABUS(3 downto 0)))) when (cbus(3) = '1') else char_hex;
+char_6 <= c('=') when (cbus(3) = '1') else char_hex;
+
 with chrSel select char <= 
 	char_1 when X"0",
 	char_2 when X"1",
 	c(',') when X"2",
---	char_hex when X"3",	-- A
---	char_hex when X"4",	-- A
---	char_hex when X"5",	-- A
---	char_hex when X"6",	-- A
+	char_3 when X"3",	-- A
+	char_4 when X"4",	-- A
+	char_5 when X"5",	-- A
+	char_6 when X"6",	-- A
 	c(' ') when X"7",
 --	char_hex when X"8",	-- D
 --	char_hex when X"9", 	-- D

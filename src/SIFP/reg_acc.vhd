@@ -58,7 +58,7 @@ begin
 on_clk: process(clk, reset)
 begin
 	if (reset = '1') then
-		r <= X"0000";
+		r <= X"DEAD";	-- TODO: clear to 0
 	else
 		if (rising_edge(clk)) then
 			case operation is
@@ -81,7 +81,7 @@ with operation select y <=
       std_logic_vector(unsigned('0' & r & ci) + unsigned('0' & (din xor X"FFFF") & ci)) when r_a_SBC,
 		'0' & r & '0' when others;
 		
-y_z <= '1' when (y(15 downto 0) = X"0000") else '0';
+y_z <= '1' when (y(16 downto 1) = X"0000") else '0';
 
 -- zero flag output
 with operation select zo <=

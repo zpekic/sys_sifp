@@ -56,6 +56,26 @@ constant hex2ascii: mem16x8 := (
 	c('F')
 );
 
+-- locations 2..7 match the outputs of the internal tracer program CPU executes
+constant reg2ascii: mem16x8 := (
+	c('0'),
+	c('1'),
+	c('F'),	
+	c('A'),	
+	c('X'),	
+	c('Y'),
+	c('S'),
+	c('P'),
+	c('8'),
+	c('9'),
+	c('a'),
+	c('b'),
+	c('c'),
+	c('d'),
+	c('e'),
+	c('f')
+);
+
 --	
 -- type <new_type> is
 --  record

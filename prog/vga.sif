@@ -37,8 +37,8 @@ Str2VGALoop:LDA, M[X];
 //			default output
 			PUSHX;		// save character pointer
 			MARK2;
-			JMP;
-			.into @GetCursorXY;	// get cursor row, col from RAM
+			BRANCH;
+			.to @GetCursorXY - $;	// get cursor row, col from RAM
 			MARK2;
 			BRANCH;
 			.into @DisplayAt - $;
@@ -48,8 +48,8 @@ Str2VGALoop:LDA, M[X];
 			IF_X_GE;
 			.branchto @NextRow - $;
 NoScroll:	MARK2;
-			JMP;
-			.into @SetCursorXY;
+			BRANCH;
+			.into @SetCursorXY - $;
 // 			next character in the string
 NextChar:	POPX;		// restore character pointer
 			INX, BRANCH;
@@ -124,16 +124,16 @@ GetRowBase:	LDXI;
 ScrDone:	RTS;
 			
 CarReturn:	MARK2;
-			JMP;
-			.into @GetCursorXY;
+			BRANCH;
+			.into @GetCursorXY - $;
 			LDXI;
 			.data 0;
 			BRANCH;
 			.to @NoScroll - $;
 
 LineFeed:	MARK2;
-			JMP;
-			.into @GetCursorXY;
+			BRANCH;
+			.into @GetCursorXY - $;
 			BRANCH;
 			.to @NextRow1 - $;
 
@@ -142,8 +142,8 @@ ClrScreen:	LDXI;
 			LDYI;
 			.data VGA_ROWS;
 			MARK2;
-			JMP;
-			.into @MulU;
+			BRANCH;
+			.into @MulU - $;
 			LDXI;
 			.data VGA_BASE;
 			LDAI;
@@ -196,3 +196,18 @@ DisplayAt:	PUSHX;	// save column
 			STA, M[Y+X];
 			RTS;
 
+QTest:		PUSHY;
+			LDYI;
+			.data VGA_BASE;
+			LDXI;
+			.data 2047;
+QTestLoop:	LDA, X;
+			STA, M[Y+X];
+			INX;
+			CPXI;
+			.data VGA_COLS * VGA_ROWS;
+			IF_XZ;
+			.branchto @Str2VGAExit - $;
+			BRANCH;
+			.to @QTestLoop - $;
+			

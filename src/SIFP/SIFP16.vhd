@@ -42,7 +42,7 @@ entity SIFP16 is
            VMA : out  STD_LOGIC;
            PnD : out  STD_LOGIC;
 			  HALT: out STD_LOGIC;
-			  WAITING: out STD_LOGIC;
+			  CLKOUT: out STD_LOGIC;
            FETCH : out  STD_LOGIC);
 end SIFP16;
 
@@ -140,7 +140,7 @@ RnW <= cpu_bctrl and int_rnw;
 VMA <= cpu_bctrl and int_vma;
 PnD <= cpu_bctrl and int_pnd;
 HALT <= int_halt;
-WAITING <= not int_ready;
+CLKOUT <= reg_clk;
 FETCH <= cpu_fetch;
 
 ----------------------------------------------------------------------------
@@ -166,7 +166,7 @@ int_pnd <= reg_p_a;
 -- CPU data bus outputs
 ---------------------------------------------------------------------------
 -- internal data bus is logical OR of all registers that project data
-DBUS <= "ZZZZZZZZZZZZZZZZ" when (int_rnw = '1') else int_fdbus;
+DBUS <= "ZZZZZZZZZZZZZZZZ" when ((int_rnw and cpu_bctrl) = '1') else int_fdbus;
 
 -- memory write if valid memory address and trying to output at least 1 register
 int_rnw <= not(reg_p_d or reg_a_d or reg_x_d or reg_y_d or reg_s_d or i_is_ftos or i_is_pushf) when (int_vma = '1') else '1';
@@ -201,9 +201,9 @@ begin
 	if (RESET = '1') then
 		clk_cnt <= X"0000";
 		int_halt <= '0';
-		int_trace <= '0';
+		int_trace <= '1';
 		reg_i <= c_NOP;	-- has no effect, won't be executed
-		reg_f <= X"1111";-- initialize all Z flags with 1 to reflect register values of 0
+		reg_f <= X"0001";-- initialize C,Z flags to reflect register values
 	else
 		if (rising_edge(reg_clk)) then
 			clk_cnt <= std_logic_vector(unsigned(clk_cnt) + 1);

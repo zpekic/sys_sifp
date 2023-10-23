@@ -69,8 +69,10 @@ begin
 						r <= din;
 					when r_p_BRANCH =>
 						r <= std_logic_vector(unsigned(r) + unsigned(din)); 
-					when others =>
+					when r_p_M_IMM =>
 						r <= std_logic_vector(unsigned(r) + 1); 
+					when others =>
+						null;
 				end case;
 			end if;
 		end if;
@@ -95,6 +97,7 @@ with operation select reg_d <=
 -- projecting as address
 with operation select reg_a <= 
 		'0' when r_p_NOP,
+		'0' when r_p_JMP,
 		'0' when r_p_P2,
 		'0' when r_p_P3,
 		'0' when r_p_P4,
