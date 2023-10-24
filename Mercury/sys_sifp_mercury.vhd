@@ -130,10 +130,10 @@ alias sw_trace: std_logic is switch(7);
 
 --
 signal button: std_logic_vector(3 downto 0);
-alias btn_clk: std_logic is button(0);
+alias btn_traceload: std_logic is button(0);
 alias btn_continue: std_logic is button(1);
 alias btn_ledsel: std_logic is button(2);
-alias btn_traceload: std_logic is button(3);
+alias btn_clk: std_logic is button(3);
 
 --- frequency signals
 signal clkgen_vga: std_logic;	-- should be 25MHz
@@ -163,7 +163,7 @@ signal cs_ram: std_logic := '0';
 signal ABUS: std_logic_vector(15 downto 0);
 signal VMA: std_logic;		-- valid memory address
 signal FETCH: std_logic;	-- fetching instruction (PnD is also 1)
-signal CLKOUT: std_logic;	-- sync'd with READY
+signal DONE: std_logic;		-- sync'd with READY
 signal HALT: std_logic;		-- CPU has halted 
 signal RnW: std_logic;		-- Read 1, Write 0
 signal PnD: std_logic;		-- Program 1, Data 0 (can double address space for Harvard architecture)
@@ -205,7 +205,7 @@ cpu: entity work.SIFP16 Port map (
 		VMA => VMA,
 		PnD => PnD,
 		HALT => HALT,
-		CLKOUT => CLKOUT,
+		DONE => DONE,
 		FETCH => FETCH
 	);
 
@@ -216,7 +216,7 @@ cpu: entity work.SIFP16 Port map (
 			reset => reset,
 			cpu_clk => clkgen_cpu,
 			txd_clk => clkgen_baudrate,
-			continue => btn_continue,  
+			continue => '0', --continue,  
 			ready => tracer_ready,			-- freezes CPU when low
 			txd => PMOD_RXD1,					-- output trace (to any TTY of special tracer running on the host
 			load => btn_traceload,			-- load mask register if high
@@ -254,7 +254,8 @@ clkgen: entity work.clockgen Port map (
 		RESET => RESET,
 		baudrate_sel => "111",	-- 38400
 		cpuclk_sel =>	 sw_cpuclk,
-		pulse => btn_clk,
+		ss_start => (not btn_clk),
+		ss_end => DONE,
 		cpu_clk => clkgen_cpu,
 		debounce_clk => clkgen_debounce,
 		vga_clk => clkgen_vga,
@@ -381,17 +382,16 @@ acia0: entity work.uart Port map (
 			clk_txd => clkgen_baudrate,	-- 38400
 			clk_rxd => clkgen_baudrate4,	-- 115200
 			CS => cs_acia0,
-			RnW => '1',
+			RnW => RnW,
 			RS => ABUS(0),
 			D => DBUS(7 downto 0),
 			debug => open,
 			TXD => PMOD_RXD0,
 			RXD => PMOD_TXD0
 		);
-		
 
 -- LEDs
-LED(0) <= CLKOUT; 
+LED(0) <= DONE; 
 LED(1) <= HALT;
 	
 -- 7segment LED 

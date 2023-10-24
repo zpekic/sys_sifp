@@ -42,7 +42,7 @@ entity SIFP16 is
            VMA : out  STD_LOGIC;
            PnD : out  STD_LOGIC;
 			  HALT: out STD_LOGIC;
-			  CLKOUT: out STD_LOGIC;
+			  DONE: out STD_LOGIC;
            FETCH : out  STD_LOGIC);
 end SIFP16;
 
@@ -62,13 +62,13 @@ constant c_HALT: std_logic_vector(15 downto 0) :=	r_p_M_IMM & r_a_A & r_x_X & r_
 constant cpu_program: mem16x20 := (
 -- 8 instructions to execute in RUN mode (4 times the FETCH-EXECUTE sequence)
 	"0101" & c_FETCH,
-	"0110" & c_EXEC,
+	"1110" & c_EXEC,
 	"0101" & c_FETCH,
-	"0110" & c_EXEC,
+	"1110" & c_EXEC,
 	"0101" & c_FETCH,
-	"0110" & c_EXEC,
+	"1110" & c_EXEC,
 	"0101" & c_FETCH,
-	"0110" & c_EXEC,
+	"1110" & c_EXEC,
 -- 8 instructions to execute in TRACE mode (FETCH-EXECUTE-6*REGISTER OUT)
 	"0101" & c_FETCH, -- FETCH (load instruction register)
 	"0110" & c_EXEC, 	-- EXECUTE (from instruction register)
@@ -77,7 +77,7 @@ constant cpu_program: mem16x20 := (
 	"0000" & r_p_NOP & r_a_NOA & r_x_X	 & r_y_NOY & r_s_NOS,	-- output X
 	"0000" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_Y	  & r_s_NOS,	-- output Y
 	"0000" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_S,		-- output S
-	"0000" & r_p_P0 & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS		-- output P
+	"1000" & r_p_P0 & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS		-- output P
 );
 
 
@@ -86,7 +86,7 @@ signal cpu_upc: std_logic_vector(3 downto 0);
 
 -- instruction word
 signal cpu_i: std_logic_vector(19 downto 0);
-alias cpu_rsvrd: std_logic is cpu_i(19); -- ?: reserved for future use
+alias cpu_done:  std_logic is cpu_i(19); -- 1: last in machine cycle
 alias cpu_bctrl: std_logic is cpu_i(18); -- 0: alternative bus control (ABUS = register address; VMA, PnD, RnW = '0')
 alias cpu_irexe: std_logic is cpu_i(17); -- 1: execute from instruction register 
 alias cpu_fetch: std_logic is cpu_i(16); -- 1: fetch
@@ -140,7 +140,7 @@ RnW <= cpu_bctrl and int_rnw;
 VMA <= cpu_bctrl and int_vma;
 PnD <= cpu_bctrl and int_pnd;
 HALT <= int_halt;
-CLKOUT <= reg_clk;
+DONE <= (not reg_clk) and cpu_done;
 FETCH <= cpu_fetch;
 
 ----------------------------------------------------------------------------
@@ -251,27 +251,20 @@ i_is_popf <= '1' when (cpu_uinstruction = c_POPF) else '0';
 i_is_pushf <= '1' when (cpu_uinstruction = c_PUSHF) else '0';
 i_is_halt <= '1' when (cpu_uinstruction = c_HALT) else '0';
 
--- condition code MUX
-with cpu_r_p select flag <= 
-		flag_ac when r_p_IF_AC,
-		flag_az when r_p_IF_AZ,
-		flag_xc when r_p_IF_XC,
-		flag_xz when r_p_IF_XZ,
-		flag_yc when r_p_IF_YC,
-		flag_yz when r_p_IF_YZ,
-		flag_sc when r_p_IF_SC,
-		flag_sz when r_p_IF_SZ,
-		'1' when others;
--- TODO optimization!
--- flag <= (not cpu_r_p(3)) or reg_f(to_integer(unsigned(cpu_r_p(2 downto 0)))); 
-
 -- programmable registers
 p_reg: entity work.reg_progcounter Port map ( 
 			clk => reg_clk,
 			reset => RESET,
 			operation => cpu_r_p,	-- 4 bit slice of the current instruction
 			din => int_dbus,			-- data from memory or other registers (except F)
-			cond => flag,
+			cond(7) => flag_sz,
+			cond(6) => flag_sc,
+			cond(5) => flag_yz,
+			cond(4) => flag_yc,
+			cond(3) => flag_xz,
+			cond(2) => flag_xc,
+			cond(1) => flag_az,
+			cond(0) => flag_ac,
 			reg => p,
 			reg_d => reg_p_d,
 			reg_a => reg_p_a

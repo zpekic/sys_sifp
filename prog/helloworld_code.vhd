@@ -264,9 +264,9 @@ constant cpu_microcode: cpu_code_memory := (
 --  r_p = 0111, r_a = 001, r_x = 000, r_y = 000, r_s = 000;
 10 => X"7" & O"1" & O"0" & O"0" & O"0",
 
--- L0032@000B.  data16 =  0;
---  data16 = 0000000000000000;
-11 => X"0000",
+-- L0032@000B.  data16 =  @Boot;
+--  data16 = 0000000000001111;
+11 => X"000F",
 
 -- L0033@000C.  r_a = STA, r_s = M[PUSH];
 --  r_p = 0000, r_a = 111, r_x = 000, r_y = 000, r_s = 011;
@@ -280,7 +280,7 @@ constant cpu_microcode: cpu_code_memory := (
 --  r_p = 0111, r_a = 111, r_x = 111, r_y = 111, r_s = 111;
 14 => X"7" & O"7" & O"7" & O"7" & O"7",
 
--- L0037@000F.  r_p = P2, r_s = M[PUSH];
+-- L0037@000F.Boot:  r_p = P2, r_s = M[PUSH];
 --  r_p = 0011, r_a = 000, r_x = 000, r_y = 000, r_s = 011;
 15 => X"3" & O"0" & O"0" & O"0" & O"3",
 
@@ -1360,9 +1360,9 @@ constant cpu_microcode: cpu_code_memory := (
 --  r_p = 0111, r_a = 000, r_x = 100, r_y = 000, r_s = 000;
 284 => X"7" & O"0" & O"4" & O"0" & O"0",
 
--- L0203@011D.  data16 =  2047;
---  data16 = 0000011111111111;
-285 => X"07FF",
+-- L0203@011D.  data16 =  0;
+--  data16 = 0000000000000000;
+285 => X"0000",
 
 -- L0204@011E.QTestLoop:  LDA, X;
 --  r_p = 0000, r_a = 001, r_x = 111, r_y = 000, r_s = 000;

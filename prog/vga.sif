@@ -200,7 +200,7 @@ QTest:		PUSHY;
 			LDYI;
 			.data VGA_BASE;
 			LDXI;
-			.data 2047;
+			.data 0;
 QTestLoop:	LDA, X;
 			STA, M[Y+X];
 			INX;

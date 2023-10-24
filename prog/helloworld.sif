@@ -29,12 +29,12 @@
 			POPY;
 			POPX;
 			LDAI;
-			.data 0;
+			.data @Boot;
 			PUSHA;
 			RTS;
 			HALT;
 // end test			
-			MARK2;
+Boot:		MARK2;
 			BRANCH;
 			.to @QTest - $;
 			HALT;

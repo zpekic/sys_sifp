@@ -35,8 +35,8 @@ L0030@0009.  r_x = LDX, r_s = M[POP];
 Line 31: resolved aliases:  LDAI in 'r_p = M[IMM], r_a = LDA', line 31
 L0031@000A.  r_p = M[IMM], r_a = LDA;
 
-Line 32: resolved aliases:  .data in 'data16 =  0', line 32
-L0032@000B.  data16 =  0;
+Line 32: resolved aliases:  .data in 'data16 =  @Boot', line 32
+L0032@000B.  data16 =  @Boot;
 
 Line 33: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 33
 L0033@000C.  r_a = STA, r_s = M[PUSH];
@@ -48,7 +48,7 @@ Line 35: resolved aliases:  HALT in 'r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_
 L0035@000E.  r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S;
 
 Line 37: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 37
-L0037@000F.  r_p = P2, r_s = M[PUSH];
+L0037@000F.Boot:  r_p = P2, r_s = M[PUSH];
 
 Line 39: resolved aliases:  .to in 'data16 =  @QTest - $', line 39
 L0039@0011.  data16 =  @QTest - $;
@@ -628,8 +628,8 @@ L0201@011B.  data16 =  0x1000;
 Line 202: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 202
 L0202@011C.  r_p = M[IMM], r_x = LDX;
 
-Line 203: resolved aliases:  .data in 'data16 =  2047', line 203
-L0203@011D.  data16 =  2047;
+Line 203: resolved aliases:  .data in 'data16 =  0', line 203
+L0203@011D.  data16 =  0;
 
 Line 205: resolved aliases:  M[Y+X] in 'STA, r_x = M[X], r_y = M[Y]', line 205
 L0205@011F.  STA, r_x = M[X], r_y = M[Y];
@@ -1189,7 +1189,7 @@ Info: line 9 - code[0009] <= '0000_000_100_000_010'
 Info: line -1 - symbol[0009] <= 'System.Byte[]'
 Info: line 9 - code[000A] <= '0111_001_000_000_000'
 Info: line -1 - symbol[000A] <= 'System.Byte[]'
-Info: line 9 - code[000B] <= '0000000000000000'
+Info: line 9 - code[000B] <= '0000000000001111'
 Info: line -1 - symbol[000B] <= 'System.Byte[]'
 Info: line 9 - code[000C] <= '0000_111_000_000_011'
 Info: line -1 - symbol[000C] <= 'System.Byte[]'
@@ -1756,7 +1756,7 @@ Info: line 9 - code[011B] <= '0001000000000000'
 Info: line -1 - symbol[011B] <= 'System.Byte[]'
 Info: line 9 - code[011C] <= '0111_000_100_000_000'
 Info: line -1 - symbol[011C] <= 'System.Byte[]'
-Info: line 9 - code[011D] <= '0000011111111111'
+Info: line 9 - code[011D] <= '0000000000000000'
 Info: line -1 - symbol[011D] <= 'System.Byte[]'
 Info: line 9 - code[011E] <= '0000_001_111_000_000'
 Info: line -1 - symbol[011E] <= 'System.Byte[]'
@@ -1791,4 +1791,4 @@ Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_code_lendia
 Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_code_bendian.bin' ... Done.
 Generating symbol: 
 Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_sym.mif' ... Done.
-Writing 'C:
+Writ

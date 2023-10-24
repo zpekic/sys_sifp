@@ -34,7 +34,8 @@ entity clockgen is
            RESET : in  STD_LOGIC;
            baudrate_sel : in  STD_LOGIC_VECTOR (2 downto 0);
            cpuclk_sel : in  STD_LOGIC_VECTOR (2 downto 0);
-			  pulse: in STD_LOGIC;
+			  ss_start: in STD_LOGIC;	-- falling edge triggered
+			  ss_end: in STD_LOGIC;		-- falling edge triggered
            cpu_clk : out  STD_LOGIC;
            debounce_clk : out  STD_LOGIC;
            vga_clk : out  STD_LOGIC;
@@ -73,34 +74,31 @@ signal baudrate_x8: std_logic;
 signal freq4096, freq3200: std_logic;
 signal prescale_baud, prescale_4096, prescale_3200: integer range 0 to 65535;
 	
-signal ss, ss_clk: std_logic;
-signal ss_ring: std_logic_vector(8 downto 0);
+signal ss_clk, ss_q: std_logic := '0';
 
 begin
 
 -- connect to outputs
 with cpuclk_sel select cpu_clk <=
---	ss when "000",	-- single step
-	pulse when "000",	-- single step
+	(ss_q and freq_2048(8)) when "000",	-- single step
 	freq_2048(9)	when "001",	-- 4Hz
 	freq_2048(7)	when "010",	-- 16Hz
 	freq_2048(5)	when "011",	-- 64Hz
 	freq_25M(10)	when "100",	-- 24.4140625kHz
 	freq_25M(9)		when "101",	-- 48.828125kHz
 	freq_25M(2)		when "110",	-- 6.25MHz
-	freq_25M(1)		when others;	-- 12.5MHz  
+	freq_25M(0)		when others;	-- 25MHz  
 	
--- single step lets through 4 clock cycles and then stops until next "pulse" signal is received
--- this way each press on the single-step button allows 1 full machine cycle
-ss_clk <= pulse when (ss_ring(0) = '1') else freq_2048(10);
-ss <= (not ss_ring(0)) and freq_2048(11);
-on_ss_clk: process(RESET, ss_clk, ss_ring)
+-- single step lets through clock cycles between falling edges of ss_start and ss_stop signals
+-- it is assumed that ss_end is triggered by some "end of machine cycle" signal
+ss_clk <= ss_end when (ss_q = '1') else ss_start;
+on_ss_clk: process(RESET, ss_clk, ss_q)
 begin
 	if (RESET = '1') then
-		ss_ring <= "000000001";
+		ss_q <= '0';
 	else
-		if (rising_edge(ss_clk)) then
-			ss_ring <= ss_ring(7 downto 0) & ss_ring(8);
+		if (falling_edge(ss_clk)) then
+			ss_q <= not ss_q;
 		end if;
 	end if;
 end process;

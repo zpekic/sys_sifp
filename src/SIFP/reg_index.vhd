@@ -73,6 +73,7 @@ end process;
 
 -- ALU is adder generating carry_out and zero flags
 with operation select y <=
+		-- TODO: BUGBUG - fix carry flag generation!
       std_logic_vector(unsigned('0' & r) - unsigned(din)) when r_x_CPX,
       std_logic_vector(unsigned('0' & r) + 1) when r_x_INX,
       std_logic_vector(unsigned('0' & r) - 1) when r_x_DEX,

@@ -36,7 +36,7 @@ entity reg_progcounter is
            reset : in  STD_LOGIC;
            operation : in  STD_LOGIC_VECTOR(3 downto 0);
            din : in  STD_LOGIC_VECTOR(15 downto 0);
-           cond : in  STD_LOGIC;
+           cond : in  STD_LOGIC_VECTOR(7 downto 0);
            reg : out STD_LOGIC_VECTOR(15 downto 0);
            reg_d : out  STD_LOGIC;
            reg_a : out  STD_LOGIC);
@@ -46,18 +46,20 @@ architecture Behavioral of reg_progcounter is
 
 -- actual register value
 signal r: std_logic_vector(15 downto 0);
+signal cond_current: std_logic;
+alias operation_is_conditional: std_logic is operation(3);
 
 begin
 
 on_clk: process(clk, reset)
 begin
 	if (reset = '1') then
-		r <= X"0000";
+		r <= X"0000";	-- start execution at location 0, i808x/CDP1802 style
 	else
 		if (rising_edge(clk)) then
-			if (operation(3) = '1') then
+			if (operation_is_conditional = '1') then
 			-- conditional 
-				if (cond = '1') then
+				if (cond_current = '1') then
 					r <= std_logic_vector(unsigned(r) + unsigned(din)); 
 				else
 					r <= std_logic_vector(unsigned(r) + 1); 
@@ -78,6 +80,9 @@ begin
 		end if;
 	end if;
 end process;
+
+-- select condition from 8 incoming flags, based on operation
+cond_current <= (not operation_is_conditional) or cond(to_integer(unsigned(operation(2 downto 0))));
 
 -- value
 with operation select reg <= 
