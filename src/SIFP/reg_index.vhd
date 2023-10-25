@@ -50,7 +50,7 @@ architecture Behavioral of reg_index is
 -- actual register value
 signal r: std_logic_vector(15 downto 0);
 -- helpers
-signal y: std_logic_vector(16 downto 0);
+signal y: std_logic_vector(17 downto 0);
 signal y_z: std_logic;
 
 begin
@@ -63,7 +63,7 @@ begin
 		if (rising_edge(clk)) then
 			case operation is
 				when r_x_INX | r_x_DEX | r_x_LDX | r_x_ADX =>
-					r <= y(15 downto 0);
+					r <= y(16 downto 1);
 				when others =>
 					null;
 			end case;
@@ -73,15 +73,14 @@ end process;
 
 -- ALU is adder generating carry_out and zero flags
 with operation select y <=
-		-- TODO: BUGBUG - fix carry flag generation!
-      std_logic_vector(unsigned('0' & r) - unsigned(din)) when r_x_CPX,
-      std_logic_vector(unsigned('0' & r) + 1) when r_x_INX,
-      std_logic_vector(unsigned('0' & r) - 1) when r_x_DEX,
-      '0' & din when r_x_LDX,
-      std_logic_vector(unsigned('0' & r) + unsigned(din)) when r_x_ADX,
-		'0' & r when others;
+      std_logic_vector(unsigned('0' & r & '1') + unsigned('0' & (din xor X"FFFF") & '1')) when r_x_CPX,
+      std_logic_vector(unsigned('0' & r & '1') + unsigned('0' & (din and X"0000") & '1')) when r_x_INX,
+      std_logic_vector(unsigned('0' & r & '0') + unsigned('0' & (din or  X"FFFF") & '0')) when r_x_DEX,
+      '0' & din & '0' when r_x_LDX,
+      std_logic_vector(unsigned('0' & r & '0') + unsigned('0' & din & '0')) when r_x_ADX,
+		'0' & r & '0' when others;
 		
-y_z <= '1' when (y(15 downto 0) = X"0000") else '0';
+y_z <= '1' when (y(16 downto 1) = X"0000") else '0';
 
 -- zero flag output
 with operation select zo <=
@@ -94,10 +93,10 @@ with operation select zo <=
 
 -- carry flag output
 with operation select co <=
-      y(16) when r_x_CPX,
-      y(16) when r_x_INX,
-      y(16) when r_x_DEX,
-      y(16) when r_x_ADX,
+      y(17) when r_x_CPX,
+      y(17) when r_x_INX,
+      y(17) when r_x_DEX,
+      y(17) when r_x_ADX,
 		ci when others;
 
 -- value

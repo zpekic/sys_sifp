@@ -17,27 +17,10 @@
 //	Execution starts at location 0
 //	---------------------------------------------------------------------------
 			NOP;
-			
-// test stack operations
-			PUSHF;
-			PUSHX;
-			PUSHY;
-			PUSHA;
-			LDA, LDY, LDX, M[IMM];
-			.data 0;
-			POPA;
-			POPY;
-			POPX;
-			LDAI;
-			.data @Boot;
-			PUSHA;
-			RTS;
-			HALT;
-// end test			
 Boot:		MARK2;
 			BRANCH;
-			.to @QTest - $;
-			HALT;
+			.to @VGATest - $;
+
 			LDXI;
 			.data @StrClear;	// points to clear string
 DeadLoop:	MARK2;

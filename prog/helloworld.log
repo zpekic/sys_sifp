@@ -8,646 +8,646 @@ Success: pass 0 on sifp.mcc - 126 line(s) read, 39 statement(s) parsed, code add
 Compiling sifp_sys.mcc, pass 1 out of 2.
 Success: pass 0 on sifp_sys.mcc - 16 line(s) read, 50 statement(s) parsed, code address range 0xFFFFFFFF - 0xFFFFFFFF.
 Warning: .org value changed from -1 (0xFFFFFFFF) to 0 (0x0000)
-Line 22: resolved aliases:  PUSHF in 'r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[PUSH]', line 22
-L0022@0001.  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[PUSH];
+Line 20: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 20
+L0020@0001.Boot:  r_p = P2, r_s = M[PUSH];
 
-Line 23: resolved aliases:  PUSHX in 'r_x = STX, r_s = M[PUSH]', line 23
-L0023@0002.  r_x = STX, r_s = M[PUSH];
+Line 22: resolved aliases:  .to in 'data16 =  @VGATest - $', line 22
+L0022@0003.  data16 =  @VGATest - $;
 
-Line 24: resolved aliases:  PUSHY in 'r_y = STY, r_s = M[PUSH]', line 24
-L0024@0003.  r_y = STY, r_s = M[PUSH];
+Line 24: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 24
+L0024@0004.  r_p = M[IMM], r_x = LDX;
 
-Line 25: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 25
-L0025@0004.  r_a = STA, r_s = M[PUSH];
+Line 25: resolved aliases:  .data in 'data16 =  @StrClear', line 25
+L0025@0005.  data16 =  @StrClear;
 
-Line 27: resolved aliases:  .data in 'data16 =  0', line 27
-L0027@0006.  data16 =  0;
+Line 26: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 26
+L0026@0006.DeadLoop:  r_p = P2, r_s = M[PUSH];
 
-Line 28: resolved aliases:  POPA in 'r_a = LDA, r_s = M[POP]', line 28
-L0028@0007.  r_a = LDA, r_s = M[POP];
+Line 28: resolved aliases:  .to in 'data16 =  @Str2UART - $', line 28
+L0028@0008.  data16 =  @Str2UART - $;
 
-Line 29: resolved aliases:  POPY in 'r_y = LDY, r_s = M[POP]', line 29
-L0029@0008.  r_y = LDY, r_s = M[POP];
+Line 29: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 29
+L0029@0009.  r_p = P2, r_s = M[PUSH];
 
-Line 30: resolved aliases:  POPX in 'r_x = LDX, r_s = M[POP]', line 30
-L0030@0009.  r_x = LDX, r_s = M[POP];
+Line 31: resolved aliases:  .to in 'data16 =  @Str2VGA - $', line 31
+L0031@000B.  data16 =  @Str2VGA - $;
 
-Line 31: resolved aliases:  LDAI in 'r_p = M[IMM], r_a = LDA', line 31
-L0031@000A.  r_p = M[IMM], r_a = LDA;
+Line 32: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 32
+L0032@000C.  r_p = M[IMM], r_x = LDX;
 
-Line 32: resolved aliases:  .data in 'data16 =  @Boot', line 32
-L0032@000B.  data16 =  @Boot;
+Line 33: resolved aliases:  .data in 'data16 =  @StrHWorld', line 33
+L0033@000D.  data16 =  @StrHWorld;
 
-Line 33: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 33
-L0033@000C.  r_a = STA, r_s = M[PUSH];
+Line 35: resolved aliases:  .to in 'data16 =  @DeadLoop - $', line 35
+L0035@000F.  data16 =  @DeadLoop - $;
 
-Line 34: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 34
-L0034@000D.  r_p = JMP, r_s = M[POP];
+Line 37: resolved aliases:  CLS, .data in 'data16 =  0x1', line 37
+L0037@0010.StrClear:  data16 =  0x1;
 
-Line 35: resolved aliases:  HALT in 'r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S', line 35
-L0035@000E.  r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S;
+Line 38: resolved aliases:  .data in 'data16 =  0', line 38
+L0038@0011.  data16 =  0;
 
-Line 37: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 37
-L0037@000F.Boot:  r_p = P2, r_s = M[PUSH];
+Line 40: resolved aliases:  .data in 'data16 =  'H'', line 40
+L0040@0012.StrHWorld:  data16 =  'H';
 
-Line 39: resolved aliases:  .to in 'data16 =  @QTest - $', line 39
-L0039@0011.  data16 =  @QTest - $;
+Line 41: resolved aliases:  .data in 'data16 =  'e'', line 41
+L0041@0013.  data16 =  'e';
 
-Line 40: resolved aliases:  HALT in 'r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S', line 40
-L0040@0012.  r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S;
+Line 42: resolved aliases:  .data in 'data16 =  'l'', line 42
+L0042@0014.  data16 =  'l';
 
-Line 41: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 41
-L0041@0013.  r_p = M[IMM], r_x = LDX;
+Line 43: resolved aliases:  .data in 'data16 =  'l'', line 43
+L0043@0015.  data16 =  'l';
 
-Line 42: resolved aliases:  .data in 'data16 =  @StrClear', line 42
-L0042@0014.  data16 =  @StrClear;
+Line 44: resolved aliases:  .data in 'data16 =  'o'', line 44
+L0044@0016.  data16 =  'o';
 
-Line 43: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 43
-L0043@0015.DeadLoop:  r_p = P2, r_s = M[PUSH];
+Line 45: resolved aliases:  .data in 'data16 =  ' '', line 45
+L0045@0017.  data16 =  ' ';
 
-Line 45: resolved aliases:  .to in 'data16 =  @Str2UART - $', line 45
-L0045@0017.  data16 =  @Str2UART - $;
+Line 46: resolved aliases:  .data in 'data16 =  'W'', line 46
+L0046@0018.  data16 =  'W';
 
-Line 46: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 46
-L0046@0018.  r_p = P2, r_s = M[PUSH];
+Line 47: resolved aliases:  .data in 'data16 =  'o'', line 47
+L0047@0019.  data16 =  'o';
 
-Line 48: resolved aliases:  .to in 'data16 =  @Str2VGA - $', line 48
-L0048@001A.  data16 =  @Str2VGA - $;
+Line 48: resolved aliases:  .data in 'data16 =  'r'', line 48
+L0048@001A.  data16 =  'r';
 
-Line 49: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 49
-L0049@001B.  r_p = M[IMM], r_x = LDX;
+Line 49: resolved aliases:  .data in 'data16 =  'l'', line 49
+L0049@001B.  data16 =  'l';
 
-Line 50: resolved aliases:  .data in 'data16 =  @StrHWorld', line 50
-L0050@001C.  data16 =  @StrHWorld;
+Line 50: resolved aliases:  .data in 'data16 =  'd'', line 50
+L0050@001C.  data16 =  'd';
 
-Line 52: resolved aliases:  .to in 'data16 =  @DeadLoop - $', line 52
-L0052@001E.  data16 =  @DeadLoop - $;
+Line 51: resolved aliases:  .data in 'data16 =  '!'', line 51
+L0051@001D.  data16 =  '!';
 
-Line 54: resolved aliases:  CLS, .data in 'data16 =  0x1', line 54
-L0054@001F.StrClear:  data16 =  0x1;
+Line 52: resolved aliases:  CR, .data in 'data16 =  0xD', line 52
+L0052@001E.  data16 =  0xD;
 
-Line 55: resolved aliases:  .data in 'data16 =  0', line 55
-L0055@0020.  data16 =  0;
+Line 53: resolved aliases:  LF, .data in 'data16 =  0xA', line 53
+L0053@001F.  data16 =  0xA;
 
-Line 57: resolved aliases:  .data in 'data16 =  'H'', line 57
-L0057@0021.StrHWorld:  data16 =  'H';
+Line 54: resolved aliases:  .data in 'data16 =  0', line 54
+L0054@0020.  data16 =  0;
 
-Line 58: resolved aliases:  .data in 'data16 =  'e'', line 58
-L0058@0022.  data16 =  'e';
+Line 59: resolved aliases:  PUSHY in 'r_y = STY, r_s = M[PUSH]', line 59
+L0059@0022.  r_y = STY, r_s = M[PUSH];
 
-Line 59: resolved aliases:  .data in 'data16 =  'l'', line 59
-L0059@0023.  data16 =  'l';
+Line 60: resolved aliases:  LDYI in 'r_p = M[IMM], r_y = LDY', line 60
+L0060@0023.  r_p = M[IMM], r_y = LDY;
 
-Line 60: resolved aliases:  .data in 'data16 =  'l'', line 60
-L0060@0024.  data16 =  'l';
+Line 61: resolved aliases:  UART_STATUS, .data in 'data16 =  0xE000', line 61
+L0061@0024.  data16 =  0xE000;
 
-Line 61: resolved aliases:  .data in 'data16 =  'o'', line 61
-L0061@0025.  data16 =  'o';
+Line 64: resolved aliases:  .branchto in 'data16 =  @Done - $', line 64
+L0064@0027.  data16 =  @Done - $;
 
-Line 62: resolved aliases:  .data in 'data16 =  ' '', line 62
-L0062@0026.  data16 =  ' ';
+Line 69: resolved aliases:  .branchto in 'data16 =  @Str2UOut - $', line 69
+L0069@002C.  data16 =  @Str2UOut - $;
 
-Line 63: resolved aliases:  .data in 'data16 =  'W'', line 63
-L0063@0027.  data16 =  'W';
+Line 71: resolved aliases:  .to in 'data16 =  @ChkTxdRdy - $', line 71
+L0071@002E.  data16 =  @ChkTxdRdy - $;
 
-Line 64: resolved aliases:  .data in 'data16 =  'o'', line 64
-L0064@0028.  data16 =  'o';
+Line 75: resolved aliases:  .to in 'data16 =  @Str2ULoop - $', line 75
+L0075@0032.  data16 =  @Str2ULoop - $;
 
-Line 65: resolved aliases:  .data in 'data16 =  'r'', line 65
-L0065@0029.  data16 =  'r';
+Line 76: resolved aliases:  POPY in 'r_y = LDY, r_s = M[POP]', line 76
+L0076@0033.Done:  r_y = LDY, r_s = M[POP];
 
-Line 66: resolved aliases:  .data in 'data16 =  'l'', line 66
-L0066@002A.  data16 =  'l';
-
-Line 67: resolved aliases:  .data in 'data16 =  'd'', line 67
-L0067@002B.  data16 =  'd';
-
-Line 68: resolved aliases:  .data in 'data16 =  '!'', line 68
-L0068@002C.  data16 =  '!';
-
-Line 69: resolved aliases:  CR, .data in 'data16 =  0xD', line 69
-L0069@002D.  data16 =  0xD;
-
-Line 70: resolved aliases:  LF, .data in 'data16 =  0xA', line 70
-L0070@002E.  data16 =  0xA;
-
-Line 71: resolved aliases:  .data in 'data16 =  0', line 71
-L0071@002F.  data16 =  0;
-
-Line 76: resolved aliases:  PUSHY in 'r_y = STY, r_s = M[PUSH]', line 76
-L0076@0031.  r_y = STY, r_s = M[PUSH];
-
-Line 77: resolved aliases:  LDYI in 'r_p = M[IMM], r_y = LDY', line 77
-L0077@0032.  r_p = M[IMM], r_y = LDY;
-
-Line 78: resolved aliases:  UART_STATUS, .data in 'data16 =  0xE000', line 78
-L0078@0033.  data16 =  0xE000;
-
-Line 81: resolved aliases:  .branchto in 'data16 =  @Done - $', line 81
-L0081@0036.  data16 =  @Done - $;
-
-Line 86: resolved aliases:  .branchto in 'data16 =  @Str2UOut - $', line 86
-L0086@003B.  data16 =  @Str2UOut - $;
-
-Line 88: resolved aliases:  .to in 'data16 =  @ChkTxdRdy - $', line 88
-L0088@003D.  data16 =  @ChkTxdRdy - $;
-
-Line 92: resolved aliases:  .to in 'data16 =  @Str2ULoop - $', line 92
-L0092@0041.  data16 =  @Str2ULoop - $;
-
-Line 93: resolved aliases:  POPY in 'r_y = LDY, r_s = M[POP]', line 93
-L0093@0042.Done:  r_y = LDY, r_s = M[POP];
-
-Line 94: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 94
-L0094@0043.  r_p = JMP, r_s = M[POP];
+Line 77: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 77
+L0077@0034.  r_p = JMP, r_s = M[POP];
 
 Compiling utils.sif, pass 1 out of 2.
-Warning: .org value changed from 68 (0x0044) to 68 (0x0044)
+Warning: .org value changed from 53 (0x0035) to 53 (0x0035)
 Line 3: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 3
-L0003@0044.CLC:  r_a = STA, r_s = M[PUSH];
+L0003@0035.CLC:  r_a = STA, r_s = M[PUSH];
 
 Line 4: resolved aliases:  LDAI in 'r_p = M[IMM], r_a = LDA', line 4
-L0004@0045.  r_p = M[IMM], r_a = LDA;
+L0004@0036.  r_p = M[IMM], r_a = LDA;
 
 Line 5: resolved aliases:  .data in 'data16 =  0', line 5
-L0005@0046.  data16 =  0;
+L0005@0037.  data16 =  0;
 
 Line 7: resolved aliases:  POPA in 'r_a = LDA, r_s = M[POP]', line 7
-L0007@0048.  r_a = LDA, r_s = M[POP];
+L0007@0039.  r_a = LDA, r_s = M[POP];
 
 Line 8: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 8
-L0008@0049.ACDone:  r_p = JMP, r_s = M[POP];
+L0008@003A.ACDone:  r_p = JMP, r_s = M[POP];
 
 Line 12: resolved aliases:  .branchto in 'data16 =  @ACDone - $', line 12
-L0012@004B.  data16 =  @ACDone - $;
+L0012@003C.  data16 =  @ACDone - $;
 
 Line 13: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 13
-L0013@004C.CSet:  r_a = STA, r_s = M[PUSH];
+L0013@003D.CSet:  r_a = STA, r_s = M[PUSH];
 
 Line 14: resolved aliases:  LDAI in 'r_p = M[IMM], r_a = LDA', line 14
-L0014@004D.  r_p = M[IMM], r_a = LDA;
+L0014@003E.  r_p = M[IMM], r_a = LDA;
 
 Line 15: resolved aliases:  .data in 'data16 =  -1', line 15
-L0015@004E.  data16 =  -1;
+L0015@003F.  data16 =  -1;
 
 Line 17: resolved aliases:  .to in 'data16 =  @ACSet - $', line 17
-L0017@0050.  data16 =  @ACSet - $;
+L0017@0041.  data16 =  @ACSet - $;
 
 Line 21: resolved aliases:  PUSHX in 'r_x = STX, r_s = M[PUSH]', line 21
-L0021@0051.MulU:  r_x = STX, r_s = M[PUSH];
+L0021@0042.MulU:  r_x = STX, r_s = M[PUSH];
 
 Line 22: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 22
-L0022@0052.  r_p = M[IMM], r_x = LDX;
+L0022@0043.  r_p = M[IMM], r_x = LDX;
 
 Line 23: resolved aliases:  .data in 'data16 =  16', line 23
-L0023@0053.  data16 =  16;
+L0023@0044.  data16 =  16;
 
 Line 24: resolved aliases:  LDAI in 'r_p = M[IMM], r_a = LDA', line 24
-L0024@0054.  r_p = M[IMM], r_a = LDA;
+L0024@0045.  r_p = M[IMM], r_a = LDA;
 
 Line 25: resolved aliases:  .data in 'data16 =  0', line 25
-L0025@0055.  data16 =  0;
+L0025@0046.  data16 =  0;
 
 Line 27: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 27
-L0027@0056.CheckY0:  r_a = STA, r_s = M[PUSH];
+L0027@0047.CheckY0:  r_a = STA, r_s = M[PUSH];
 
 Line 30: resolved aliases:  POPA in 'r_a = LDA, r_s = M[POP]', line 30
-L0030@0059.  r_a = LDA, r_s = M[POP];
+L0030@004A.  r_a = LDA, r_s = M[POP];
 
 Line 32: resolved aliases:  .branchto in 'data16 =  @Y01 - $', line 32
-L0032@005B.  data16 =  @Y01 - $;
+L0032@004C.  data16 =  @Y01 - $;
 
 Line 33: resolved aliases:  ADCI in 'r_p = M[IMM], r_a = ADC', line 33
-L0033@005C.Y00:  r_p = M[IMM], r_a = ADC;
+L0033@004D.Y00:  r_p = M[IMM], r_a = ADC;
 
 Line 34: resolved aliases:  .data in 'data16 =  0', line 34
-L0034@005D.  data16 =  0;
+L0034@004E.  data16 =  0;
 
 Line 36: resolved aliases:  .to in 'data16 =  @Nextbit - $', line 36
-L0036@005F.  data16 =  @Nextbit - $;
+L0036@0050.  data16 =  @Nextbit - $;
 
 Line 37: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 37
-L0037@0060.Y01:  r_p = P2, r_s = M[PUSH];
+L0037@0051.Y01:  r_p = P2, r_s = M[PUSH];
 
 Line 39: resolved aliases:  .into in 'data16 =  @CLC - $', line 39
-L0039@0062.  data16 =  @CLC - $;
+L0039@0053.  data16 =  @CLC - $;
 
 Line 42: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 42
-L0042@0065.  r_a = STA, r_s = M[PUSH];
+L0042@0056.  r_a = STA, r_s = M[PUSH];
 
 Line 48: resolved aliases:  .branchto in 'data16 =  @CheckY0 - $', line 48
-L0048@006B.  data16 =  @CheckY0 - $;
+L0048@005C.  data16 =  @CheckY0 - $;
 
 Line 49: resolved aliases:  POPX in 'r_x = LDX, r_s = M[POP]', line 49
-L0049@006C.  r_x = LDX, r_s = M[POP];
+L0049@005D.  r_x = LDX, r_s = M[POP];
 
 Line 50: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 50
-L0050@006D.  r_p = JMP, r_s = M[POP];
+L0050@005E.  r_p = JMP, r_s = M[POP];
 
-Success: pass 0 on utils.sif - 52 line(s) read, 162 statement(s) parsed, code address range 0x0044 - 0x006E.
+Success: pass 0 on utils.sif - 52 line(s) read, 147 statement(s) parsed, code address range 0x0035 - 0x005F.
 Compiling vga.sif, pass 1 out of 2.
-Warning: .org value changed from 110 (0x006E) to 110 (0x006E)
+Warning: .org value changed from 95 (0x005F) to 95 (0x005F)
 Line 13: resolved aliases:  .branchto in 'data16 =  @Str2VGAExit - $', line 13
-L0013@0072.  data16 =  @Str2VGAExit - $;
+L0013@0063.  data16 =  @Str2VGAExit - $;
 
 Line 14: resolved aliases:  XORI in 'r_p = M[IMM], r_a = XOR', line 14
-L0014@0073.  r_p = M[IMM], r_a = XOR;
+L0014@0064.  r_p = M[IMM], r_a = XOR;
 
 Line 15: resolved aliases:  CR, .data in 'data16 =  0xD', line 15
-L0015@0074.  data16 =  0xD;
+L0015@0065.  data16 =  0xD;
 
 Line 17: resolved aliases:  .branchto in 'data16 =  @CarReturn - $', line 17
-L0017@0076.  data16 =  @CarReturn - $;
+L0017@0067.  data16 =  @CarReturn - $;
 
 Line 20: resolved aliases:  XORI in 'r_p = M[IMM], r_a = XOR', line 20
-L0020@0078.  r_p = M[IMM], r_a = XOR;
+L0020@0069.  r_p = M[IMM], r_a = XOR;
 
 Line 21: resolved aliases:  LF, .data in 'data16 =  0xA', line 21
-L0021@0079.  data16 =  0xA;
+L0021@006A.  data16 =  0xA;
 
 Line 23: resolved aliases:  .branchto in 'data16 =  @LineFeed - $', line 23
-L0023@007B.  data16 =  @LineFeed - $;
+L0023@006C.  data16 =  @LineFeed - $;
 
 Line 26: resolved aliases:  XORI in 'r_p = M[IMM], r_a = XOR', line 26
-L0026@007D.  r_p = M[IMM], r_a = XOR;
+L0026@006E.  r_p = M[IMM], r_a = XOR;
 
 Line 27: resolved aliases:  HOME, .data in 'data16 =  0x2', line 27
-L0027@007E.  data16 =  0x2;
+L0027@006F.  data16 =  0x2;
 
 Line 29: resolved aliases:  .branchto in 'data16 =  @Cur2Home - $', line 29
-L0029@0080.  data16 =  @Cur2Home - $;
+L0029@0071.  data16 =  @Cur2Home - $;
 
 Line 32: resolved aliases:  XORI in 'r_p = M[IMM], r_a = XOR', line 32
-L0032@0082.  r_p = M[IMM], r_a = XOR;
+L0032@0073.  r_p = M[IMM], r_a = XOR;
 
 Line 33: resolved aliases:  CLS, .data in 'data16 =  0x1', line 33
-L0033@0083.  data16 =  0x1;
+L0033@0074.  data16 =  0x1;
 
 Line 35: resolved aliases:  .branchto in 'data16 =  @ClrScreen - $', line 35
-L0035@0085.  data16 =  @ClrScreen - $;
+L0035@0076.  data16 =  @ClrScreen - $;
 
 Line 38: resolved aliases:  PUSHX in 'r_x = STX, r_s = M[PUSH]', line 38
-L0038@0086.  r_x = STX, r_s = M[PUSH];
+L0038@0077.  r_x = STX, r_s = M[PUSH];
 
 Line 39: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 39
-L0039@0087.  r_p = P2, r_s = M[PUSH];
+L0039@0078.  r_p = P2, r_s = M[PUSH];
 
 Line 41: resolved aliases:  .to in 'data16 =  @GetCursorXY - $', line 41
-L0041@0089.  data16 =  @GetCursorXY - $;
+L0041@007A.  data16 =  @GetCursorXY - $;
 
 Line 42: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 42
-L0042@008A.  r_p = P2, r_s = M[PUSH];
+L0042@007B.  r_p = P2, r_s = M[PUSH];
 
 Line 44: resolved aliases:  .into in 'data16 =  @DisplayAt - $', line 44
-L0044@008C.  data16 =  @DisplayAt - $;
+L0044@007D.  data16 =  @DisplayAt - $;
 
 Line 46: resolved aliases:  CPXI in 'r_p = M[IMM], r_x = CPX', line 46
-L0046@008E.  r_p = M[IMM], r_x = CPX;
+L0046@007F.  r_p = M[IMM], r_x = CPX;
 
 Line 47: resolved aliases:  VGA_COLS, .data in 'data16 =  64', line 47
-L0047@008F.  data16 =  64;
+L0047@0080.  data16 =  64;
 
 Line 49: resolved aliases:  .branchto in 'data16 =  @NextRow - $', line 49
-L0049@0091.  data16 =  @NextRow - $;
+L0049@0082.  data16 =  @NextRow - $;
 
 Line 50: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 50
-L0050@0092.NoScroll:  r_p = P2, r_s = M[PUSH];
+L0050@0083.NoScroll:  r_p = P2, r_s = M[PUSH];
 
 Line 52: resolved aliases:  .into in 'data16 =  @SetCursorXY - $', line 52
-L0052@0094.  data16 =  @SetCursorXY - $;
+L0052@0085.  data16 =  @SetCursorXY - $;
 
 Line 54: resolved aliases:  POPX in 'r_x = LDX, r_s = M[POP]', line 54
-L0054@0095.NextChar:  r_x = LDX, r_s = M[POP];
+L0054@0086.NextChar:  r_x = LDX, r_s = M[POP];
 
 Line 56: resolved aliases:  .to in 'data16 =  @Str2VGALoop - $', line 56
-L0056@0097.  data16 =  @Str2VGALoop - $;
+L0056@0088.  data16 =  @Str2VGALoop - $;
 
 Line 58: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 58
-L0058@0098.NextRow:  r_p = M[IMM], r_x = LDX;
+L0058@0089.NextRow:  r_p = M[IMM], r_x = LDX;
 
 Line 59: resolved aliases:  .data in 'data16 =  0', line 59
-L0059@0099.  data16 =  0;
+L0059@008A.  data16 =  0;
 
 Line 61: resolved aliases:  CPYI in 'r_p = M[IMM], r_y = CPY', line 61
-L0061@009B.  r_p = M[IMM], r_y = CPY;
+L0061@008C.  r_p = M[IMM], r_y = CPY;
 
 Line 62: resolved aliases:  VGA_ROWS, .data in 'data16 =  32', line 62
-L0062@009C.  data16 =  32;
+L0062@008D.  data16 =  32;
 
 Line 64: resolved aliases:  .branchto in 'data16 =  @ScrollUp - $', line 64
-L0064@009E.  data16 =  @ScrollUp - $;
+L0064@008F.  data16 =  @ScrollUp - $;
 
 Line 66: resolved aliases:  .to in 'data16 =  @NoScroll - $', line 66
-L0066@00A0.  data16 =  @NoScroll - $;
+L0066@0091.  data16 =  @NoScroll - $;
 
 Line 69: resolved aliases:  LDYI in 'r_p = M[IMM], r_y = LDY', line 69
-L0069@00A2.  r_p = M[IMM], r_y = LDY;
+L0069@0093.  r_p = M[IMM], r_y = LDY;
 
 Line 70: resolved aliases:  .data in 'data16 =  0', line 70
-L0070@00A3.  data16 =  0;
+L0070@0094.  data16 =  0;
 
 Line 71: resolved aliases:  PUSHY in 'r_y = STY, r_s = M[PUSH]', line 71
-L0071@00A4.NxtRow:  r_y = STY, r_s = M[PUSH];
+L0071@0095.NxtRow:  r_y = STY, r_s = M[PUSH];
 
 Line 72: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 72
-L0072@00A5.  r_p = M[IMM], r_x = LDX;
+L0072@0096.  r_p = M[IMM], r_x = LDX;
 
 Line 73: resolved aliases:  .data in 'data16 =  0', line 73
-L0073@00A6.  data16 =  0;
+L0073@0097.  data16 =  0;
 
 Line 74: resolved aliases:  PUSHX in 'r_x = STX, r_s = M[PUSH]', line 74
-L0074@00A7.NxtCol:  r_x = STX, r_s = M[PUSH];
+L0074@0098.NxtCol:  r_x = STX, r_s = M[PUSH];
 
 Line 75: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 75
-L0075@00A8.  r_p = P2, r_s = M[PUSH];
+L0075@0099.  r_p = P2, r_s = M[PUSH];
 
 Line 77: resolved aliases:  .into in 'data16 =  @GetRowBase - $', line 77
-L0077@00AA.  data16 =  @GetRowBase - $;
+L0077@009B.  data16 =  @GetRowBase - $;
 
 Line 78: resolved aliases:  PUSHY in 'r_y = STY, r_s = M[PUSH]', line 78
-L0078@00AB.  r_y = STY, r_s = M[PUSH];
+L0078@009C.  r_y = STY, r_s = M[PUSH];
 
 Line 79: resolved aliases:  ADYI in 'r_p = M[IMM], r_y = ADY', line 79
-L0079@00AC.  r_p = M[IMM], r_y = ADY;
+L0079@009D.  r_p = M[IMM], r_y = ADY;
 
 Line 80: resolved aliases:  VGA_ROWS, .data in 'data16 =  32', line 80
-L0080@00AD.  data16 =  32;
+L0080@009E.  data16 =  32;
 
 Line 81: resolved aliases:  M[Y+X] in 'LDA, r_x = M[X], r_y = M[Y]', line 81
-L0081@00AE.  LDA, r_x = M[X], r_y = M[Y];
+L0081@009F.  LDA, r_x = M[X], r_y = M[Y];
 
 Line 82: resolved aliases:  POPY in 'r_y = LDY, r_s = M[POP]', line 82
-L0082@00AF.  r_y = LDY, r_s = M[POP];
+L0082@00A0.  r_y = LDY, r_s = M[POP];
 
 Line 83: resolved aliases:  M[Y+X] in 'STA, r_x = M[X], r_y = M[Y]', line 83
-L0083@00B0.  STA, r_x = M[X], r_y = M[Y];
+L0083@00A1.  STA, r_x = M[X], r_y = M[Y];
 
 Line 85: resolved aliases:  CPXI in 'r_p = M[IMM], r_x = CPX', line 85
-L0085@00B2.  r_p = M[IMM], r_x = CPX;
+L0085@00A3.  r_p = M[IMM], r_x = CPX;
 
 Line 86: resolved aliases:  VGA_COLS, .data in 'data16 =  64', line 86
-L0086@00B3.  data16 =  64;
+L0086@00A4.  data16 =  64;
 
 Line 88: resolved aliases:  .branchto in 'data16 =  @ChkRow - $', line 88
-L0088@00B5.  data16 =  @ChkRow - $;
+L0088@00A6.  data16 =  @ChkRow - $;
 
 Line 90: resolved aliases:  .to in 'data16 =  @NxtCol', line 90
-L0090@00B7.  data16 =  @NxtCol;
+L0090@00A8.  data16 =  @NxtCol;
 
 Line 91: resolved aliases:  POPY in 'r_y = LDY, r_s = M[POP]', line 91
-L0091@00B8.ChkRow:  r_y = LDY, r_s = M[POP];
+L0091@00A9.ChkRow:  r_y = LDY, r_s = M[POP];
 
 Line 93: resolved aliases:  CPYI in 'r_p = M[IMM], r_y = CPY', line 93
-L0093@00BA.  r_p = M[IMM], r_y = CPY;
+L0093@00AB.  r_p = M[IMM], r_y = CPY;
 
 Line 94: resolved aliases:  VGA_ROWS, .data in 'data16 =  32 - 1', line 94
-L0094@00BB.  data16 =  32 - 1;
+L0094@00AC.  data16 =  32 - 1;
 
 Line 96: resolved aliases:  .branchto in 'data16 =  @ClrLastRow - $', line 96
-L0096@00BD.  data16 =  @ClrLastRow - $;
+L0096@00AE.  data16 =  @ClrLastRow - $;
 
 Line 98: resolved aliases:  .to in 'data16 =  @NxtRow - $', line 98
-L0098@00BF.  data16 =  @NxtRow - $;
+L0098@00B0.  data16 =  @NxtRow - $;
 
 Line 100: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 100
-L0100@00C0.ClrLastRow:  r_p = P2, r_s = M[PUSH];
+L0100@00B1.ClrLastRow:  r_p = P2, r_s = M[PUSH];
 
 Line 102: resolved aliases:  .into in 'data16 =  @GetRowBase - $', line 102
-L0102@00C2.  data16 =  @GetRowBase - $;
+L0102@00B3.  data16 =  @GetRowBase - $;
 
 Line 103: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 103
-L0103@00C3.  r_p = M[IMM], r_x = LDX;
+L0103@00B4.  r_p = M[IMM], r_x = LDX;
 
 Line 104: resolved aliases:  .data in 'data16 =  0', line 104
-L0104@00C4.  data16 =  0;
+L0104@00B5.  data16 =  0;
 
 Line 105: resolved aliases:  LDAI in 'r_p = M[IMM], r_a = LDA', line 105
-L0105@00C5.  r_p = M[IMM], r_a = LDA;
+L0105@00B6.  r_p = M[IMM], r_a = LDA;
 
 Line 106: resolved aliases:  .data in 'data16 =  ' '', line 106
-L0106@00C6.  data16 =  ' ';
+L0106@00B7.  data16 =  ' ';
 
 Line 107: resolved aliases:  M[Y+X] in 'STA, r_x = M[X], r_y = M[Y]', line 107
-L0107@00C7.ClrRowLoop:  STA, r_x = M[X], r_y = M[Y];
+L0107@00B8.ClrRowLoop:  STA, r_x = M[X], r_y = M[Y];
 
 Line 109: resolved aliases:  CPXI in 'r_p = M[IMM], r_x = CPX', line 109
-L0109@00C9.  r_p = M[IMM], r_x = CPX;
+L0109@00BA.  r_p = M[IMM], r_x = CPX;
 
 Line 110: resolved aliases:  VGA_COLS, .data in 'data16 =  64', line 110
-L0110@00CA.  data16 =  64;
+L0110@00BB.  data16 =  64;
 
 Line 112: resolved aliases:  .branchto in 'data16 =  @ScrDone - $', line 112
-L0112@00CC.  data16 =  @ScrDone - $;
+L0112@00BD.  data16 =  @ScrDone - $;
 
 Line 114: resolved aliases:  .to in 'data16 =  @ClrRowLoop - $', line 114
-L0114@00CE.  data16 =  @ClrRowLoop - $;
+L0114@00BF.  data16 =  @ClrRowLoop - $;
 
 Line 117: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 117
-L0117@00CF.GetRowBase:  r_p = M[IMM], r_x = LDX;
+L0117@00C0.GetRowBase:  r_p = M[IMM], r_x = LDX;
 
 Line 118: resolved aliases:  VGA_COLS, .data in 'data16 =  64', line 118
-L0118@00D0.  data16 =  64;
+L0118@00C1.  data16 =  64;
 
 Line 119: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 119
-L0119@00D1.  r_p = P2, r_s = M[PUSH];
+L0119@00C2.  r_p = P2, r_s = M[PUSH];
 
 Line 121: resolved aliases:  .into in 'data16 =  @MulU - $', line 121
-L0121@00D3.  data16 =  @MulU - $;
+L0121@00C4.  data16 =  @MulU - $;
 
 Line 122: resolved aliases:  ADYI in 'r_p = M[IMM], r_y = ADY', line 122
-L0122@00D4.  r_p = M[IMM], r_y = ADY;
+L0122@00C5.  r_p = M[IMM], r_y = ADY;
 
 Line 123: resolved aliases:  VGA_BASE, .data in 'data16 =  0x1000', line 123
-L0123@00D5.  data16 =  0x1000;
+L0123@00C6.  data16 =  0x1000;
 
 Line 124: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 124
-L0124@00D6.ScrDone:  r_p = JMP, r_s = M[POP];
+L0124@00C7.ScrDone:  r_p = JMP, r_s = M[POP];
 
 Line 126: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 126
-L0126@00D7.CarReturn:  r_p = P2, r_s = M[PUSH];
+L0126@00C8.CarReturn:  r_p = P2, r_s = M[PUSH];
 
 Line 128: resolved aliases:  .into in 'data16 =  @GetCursorXY - $', line 128
-L0128@00D9.  data16 =  @GetCursorXY - $;
+L0128@00CA.  data16 =  @GetCursorXY - $;
 
 Line 129: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 129
-L0129@00DA.  r_p = M[IMM], r_x = LDX;
+L0129@00CB.  r_p = M[IMM], r_x = LDX;
 
 Line 130: resolved aliases:  .data in 'data16 =  0', line 130
-L0130@00DB.  data16 =  0;
+L0130@00CC.  data16 =  0;
 
 Line 132: resolved aliases:  .to in 'data16 =  @NoScroll - $', line 132
-L0132@00DD.  data16 =  @NoScroll - $;
+L0132@00CE.  data16 =  @NoScroll - $;
 
 Line 134: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 134
-L0134@00DE.LineFeed:  r_p = P2, r_s = M[PUSH];
+L0134@00CF.LineFeed:  r_p = P2, r_s = M[PUSH];
 
 Line 136: resolved aliases:  .into in 'data16 =  @GetCursorXY - $', line 136
-L0136@00E0.  data16 =  @GetCursorXY - $;
+L0136@00D1.  data16 =  @GetCursorXY - $;
 
 Line 138: resolved aliases:  .to in 'data16 =  @NextRow1 - $', line 138
-L0138@00E2.  data16 =  @NextRow1 - $;
+L0138@00D3.  data16 =  @NextRow1 - $;
 
 Line 140: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 140
-L0140@00E3.ClrScreen:  r_p = M[IMM], r_x = LDX;
+L0140@00D4.ClrScreen:  r_p = M[IMM], r_x = LDX;
 
 Line 141: resolved aliases:  VGA_COLS, .data in 'data16 =  64', line 141
-L0141@00E4.  data16 =  64;
+L0141@00D5.  data16 =  64;
 
 Line 142: resolved aliases:  LDYI in 'r_p = M[IMM], r_y = LDY', line 142
-L0142@00E5.  r_p = M[IMM], r_y = LDY;
+L0142@00D6.  r_p = M[IMM], r_y = LDY;
 
 Line 143: resolved aliases:  VGA_ROWS, .data in 'data16 =  32', line 143
-L0143@00E6.  data16 =  32;
+L0143@00D7.  data16 =  32;
 
 Line 144: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 144
-L0144@00E7.  r_p = P2, r_s = M[PUSH];
+L0144@00D8.  r_p = P2, r_s = M[PUSH];
 
 Line 146: resolved aliases:  .into in 'data16 =  @MulU - $', line 146
-L0146@00E9.  data16 =  @MulU - $;
+L0146@00DA.  data16 =  @MulU - $;
 
 Line 147: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 147
-L0147@00EA.  r_p = M[IMM], r_x = LDX;
+L0147@00DB.  r_p = M[IMM], r_x = LDX;
 
 Line 148: resolved aliases:  VGA_BASE, .data in 'data16 =  0x1000', line 148
-L0148@00EB.  data16 =  0x1000;
+L0148@00DC.  data16 =  0x1000;
 
 Line 149: resolved aliases:  LDAI in 'r_p = M[IMM], r_a = LDA', line 149
-L0149@00EC.  r_p = M[IMM], r_a = LDA;
+L0149@00DD.  r_p = M[IMM], r_a = LDA;
 
 Line 150: resolved aliases:  .data in 'data16 =  ' '', line 150
-L0150@00ED.  data16 =  ' ';
+L0150@00DE.  data16 =  ' ';
 
 Line 152: resolved aliases:  M[Y+X] in 'STA, r_x = M[X], r_y = M[Y]', line 152
-L0152@00EF.  STA, r_x = M[X], r_y = M[Y];
+L0152@00E0.  STA, r_x = M[X], r_y = M[Y];
 
 Line 154: resolved aliases:  .branchto in 'data16 =  @ClrPos - $', line 154
-L0154@00F1.  data16 =  @ClrPos - $;
+L0154@00E2.  data16 =  @ClrPos - $;
 
 Line 155: resolved aliases:  M[Y+X] in 'STA, r_x = M[X], r_y = M[Y]', line 155
-L0155@00F2.  STA, r_x = M[X], r_y = M[Y];
+L0155@00E3.  STA, r_x = M[X], r_y = M[Y];
 
 Line 157: resolved aliases:  .data in 'data16 =  0', line 157
-L0157@00F4.  data16 =  0;
+L0157@00E5.  data16 =  0;
 
 Line 159: resolved aliases:  .to in 'data16 =  @NoScroll - $', line 159
-L0159@00F6.  data16 =  @NoScroll - $;
+L0159@00E7.  data16 =  @NoScroll - $;
 
 Line 161: resolved aliases:  POPY in 'r_y = LDY, r_s = M[POP]', line 161
-L0161@00F7.Str2VGAExit:  r_y = LDY, r_s = M[POP];
+L0161@00E8.Str2VGAExit:  r_y = LDY, r_s = M[POP];
 
 Line 162: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 162
-L0162@00F8.  r_p = JMP, r_s = M[POP];
+L0162@00E9.  r_p = JMP, r_s = M[POP];
 
 Line 164: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 164
-L0164@00F9.SetCursorXY:  r_a = STA, r_s = M[PUSH];
+L0164@00EA.SetCursorXY:  r_a = STA, r_s = M[PUSH];
 
 Line 165: resolved aliases:  PUSHY in 'r_y = STY, r_s = M[PUSH]', line 165
-L0165@00FA.  r_y = STY, r_s = M[PUSH];
+L0165@00EB.  r_y = STY, r_s = M[PUSH];
 
 Line 166: resolved aliases:  LDYI in 'r_p = M[IMM], r_y = LDY', line 166
-L0166@00FB.  r_p = M[IMM], r_y = LDY;
+L0166@00EC.  r_p = M[IMM], r_y = LDY;
 
 Line 167: resolved aliases:  CURSOR_X, RAM_BASE, .data in 'data16 =  0xFF00 + 0', line 167
-L0167@00FC.  data16 =  0xFF00 + 0;
+L0167@00ED.  data16 =  0xFF00 + 0;
 
 Line 169: resolved aliases:  POPA in 'INY, r_a = LDA, r_s = M[POP]', line 169
-L0169@00FE.  INY, r_a = LDA, r_s = M[POP];
+L0169@00EF.  INY, r_a = LDA, r_s = M[POP];
 
 Line 171: resolved aliases:  POPA in 'r_a = LDA, r_s = M[POP]', line 171
-L0171@0100.  r_a = LDA, r_s = M[POP];
+L0171@00F1.  r_a = LDA, r_s = M[POP];
 
 Line 172: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 172
-L0172@0101.  r_p = JMP, r_s = M[POP];
+L0172@00F2.  r_p = JMP, r_s = M[POP];
 
 Line 174: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 174
-L0174@0102.GetCursorXY:  r_a = STA, r_s = M[PUSH];
+L0174@00F3.GetCursorXY:  r_a = STA, r_s = M[PUSH];
 
 Line 175: resolved aliases:  LDYI in 'r_p = M[IMM], r_y = LDY', line 175
-L0175@0103.  r_p = M[IMM], r_y = LDY;
+L0175@00F4.  r_p = M[IMM], r_y = LDY;
 
 Line 176: resolved aliases:  CURSOR_X, RAM_BASE, .data in 'data16 =  0xFF00 + 0', line 176
-L0176@0104.  data16 =  0xFF00 + 0;
+L0176@00F5.  data16 =  0xFF00 + 0;
 
 Line 180: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 180
-L0180@0108.  r_a = STA, r_s = M[PUSH];
+L0180@00F9.  r_a = STA, r_s = M[PUSH];
 
 Line 181: resolved aliases:  POPY in 'r_y = LDY, r_s = M[POP]', line 181
-L0181@0109.  r_y = LDY, r_s = M[POP];
+L0181@00FA.  r_y = LDY, r_s = M[POP];
 
 Line 182: resolved aliases:  POPA in 'r_a = LDA, r_s = M[POP]', line 182
-L0182@010A.  r_a = LDA, r_s = M[POP];
+L0182@00FB.  r_a = LDA, r_s = M[POP];
 
 Line 183: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 183
-L0183@010B.  r_p = JMP, r_s = M[POP];
+L0183@00FC.  r_p = JMP, r_s = M[POP];
 
 Line 185: resolved aliases:  PUSHX in 'r_x = STX, r_s = M[PUSH]', line 185
-L0185@010C.DisplayAt:  r_x = STX, r_s = M[PUSH];
+L0185@00FD.DisplayAt:  r_x = STX, r_s = M[PUSH];
 
 Line 186: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 186
-L0186@010D.  r_a = STA, r_s = M[PUSH];
+L0186@00FE.  r_a = STA, r_s = M[PUSH];
 
 Line 187: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 187
-L0187@010E.  r_p = M[IMM], r_x = LDX;
+L0187@00FF.  r_p = M[IMM], r_x = LDX;
 
 Line 188: resolved aliases:  VGA_COLS, .data in 'data16 =  64', line 188
-L0188@010F.  data16 =  64;
+L0188@0100.  data16 =  64;
 
 Line 189: resolved aliases:  MARK2 in 'r_p = P2, r_s = M[PUSH]', line 189
-L0189@0110.  r_p = P2, r_s = M[PUSH];
+L0189@0101.  r_p = P2, r_s = M[PUSH];
 
 Line 191: resolved aliases:  .into in 'data16 =  @MulU - $', line 191
-L0191@0112.  data16 =  @MulU - $;
+L0191@0103.  data16 =  @MulU - $;
 
 Line 192: resolved aliases:  POPA in 'r_a = LDA, r_s = M[POP]', line 192
-L0192@0113.  r_a = LDA, r_s = M[POP];
+L0192@0104.  r_a = LDA, r_s = M[POP];
 
 Line 193: resolved aliases:  POPX in 'r_x = LDX, r_s = M[POP]', line 193
-L0193@0114.  r_x = LDX, r_s = M[POP];
+L0193@0105.  r_x = LDX, r_s = M[POP];
 
 Line 194: resolved aliases:  ADYI in 'r_p = M[IMM], r_y = ADY', line 194
-L0194@0115.  r_p = M[IMM], r_y = ADY;
+L0194@0106.  r_p = M[IMM], r_y = ADY;
 
 Line 195: resolved aliases:  VGA_BASE, .data in 'data16 =  0x1000', line 195
-L0195@0116.  data16 =  0x1000;
+L0195@0107.  data16 =  0x1000;
 
 Line 196: resolved aliases:  M[Y+X] in 'STA, r_x = M[X], r_y = M[Y]', line 196
-L0196@0117.  STA, r_x = M[X], r_y = M[Y];
+L0196@0108.  STA, r_x = M[X], r_y = M[Y];
 
 Line 197: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 197
-L0197@0118.  r_p = JMP, r_s = M[POP];
+L0197@0109.  r_p = JMP, r_s = M[POP];
 
 Line 199: resolved aliases:  PUSHY in 'r_y = STY, r_s = M[PUSH]', line 199
-L0199@0119.QTest:  r_y = STY, r_s = M[PUSH];
+L0199@010A.VGATest:  r_y = STY, r_s = M[PUSH];
 
 Line 200: resolved aliases:  LDYI in 'r_p = M[IMM], r_y = LDY', line 200
-L0200@011A.  r_p = M[IMM], r_y = LDY;
+L0200@010B.  r_p = M[IMM], r_y = LDY;
 
 Line 201: resolved aliases:  VGA_BASE, .data in 'data16 =  0x1000', line 201
-L0201@011B.  data16 =  0x1000;
+L0201@010C.  data16 =  0x1000;
 
 Line 202: resolved aliases:  LDXI in 'r_p = M[IMM], r_x = LDX', line 202
-L0202@011C.  r_p = M[IMM], r_x = LDX;
+L0202@010D.  r_p = M[IMM], r_x = LDX;
 
 Line 203: resolved aliases:  .data in 'data16 =  0', line 203
-L0203@011D.  data16 =  0;
+L0203@010E.  data16 =  0;
 
 Line 205: resolved aliases:  M[Y+X] in 'STA, r_x = M[X], r_y = M[Y]', line 205
-L0205@011F.  STA, r_x = M[X], r_y = M[Y];
+L0205@0110.  STA, r_x = M[X], r_y = M[Y];
 
 Line 207: resolved aliases:  CPXI in 'r_p = M[IMM], r_x = CPX', line 207
-L0207@0121.  r_p = M[IMM], r_x = CPX;
+L0207@0112.  r_p = M[IMM], r_x = CPX;
 
 Line 208: resolved aliases:  VGA_COLS, VGA_ROWS, .data in 'data16 =  64 * 32', line 208
-L0208@0122.  data16 =  64 * 32;
+L0208@0113.  data16 =  64 * 32;
 
 Line 210: resolved aliases:  .branchto in 'data16 =  @Str2VGAExit - $', line 210
-L0210@0124.  data16 =  @Str2VGAExit - $;
+L0210@0115.  data16 =  @Str2VGAExit - $;
 
-Line 212: resolved aliases:  .to in 'data16 =  @QTestLoop - $', line 212
-L0212@0126.  data16 =  @QTestLoop - $;
+Line 212: resolved aliases:  .to in 'data16 =  @VGATLoop - $', line 212
+L0212@0117.  data16 =  @VGATLoop - $;
 
-Success: pass 0 on vga.sif - 213 line(s) read, 350 statement(s) parsed, code address range 0x006E - 0x0127.
-Success: pass 0 on helloworld.sif - 98 line(s) read, 350 statement(s) parsed, code address range 0xFFFFFFFF - 0x0127.
+Line 215: resolved aliases:  PUSHF in 'r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[PUSH]', line 215
+L0215@0118.StackTest:  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[PUSH];
+
+Line 216: resolved aliases:  PUSHX in 'r_x = STX, r_s = M[PUSH]', line 216
+L0216@0119.  r_x = STX, r_s = M[PUSH];
+
+Line 219: resolved aliases:  .branchto in 'data16 =  @ContY - $', line 219
+L0219@011C.  data16 =  @ContY - $;
+
+Line 220: resolved aliases:  HALT in 'r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S', line 220
+L0220@011D.  r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S;
+
+Line 221: resolved aliases:  PUSHY in 'r_y = STY, r_s = M[PUSH]', line 221
+L0221@011E.ContY:  r_y = STY, r_s = M[PUSH];
+
+Line 224: resolved aliases:  .branchto in 'data16 =  @ContA - $', line 224
+L0224@0121.  data16 =  @ContA - $;
+
+Line 225: resolved aliases:  HALT in 'r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S', line 225
+L0225@0122.  r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S;
+
+Line 226: resolved aliases:  PUSHA in 'r_a = STA, r_s = M[PUSH]', line 226
+L0226@0123.ContA:  r_a = STA, r_s = M[PUSH];
+
+Line 228: resolved aliases:  .data in 'data16 =  0', line 228
+L0228@0125.  data16 =  0;
+
+Line 229: resolved aliases:  POPA in 'r_a = LDA, r_s = M[POP]', line 229
+L0229@0126.  r_a = LDA, r_s = M[POP];
+
+Line 230: resolved aliases:  POPY in 'r_y = LDY, r_s = M[POP]', line 230
+L0230@0127.  r_y = LDY, r_s = M[POP];
+
+Line 231: resolved aliases:  POPX in 'r_x = LDX, r_s = M[POP]', line 231
+L0231@0128.  r_x = LDX, r_s = M[POP];
+
+Line 232: resolved aliases:  POPF in 'r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[POP]', line 232
+L0232@0129.  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[POP];
+
+Line 233: resolved aliases:  RTS in 'r_p = JMP, r_s = M[POP]', line 233
+L0233@012A.  r_p = JMP, r_s = M[POP];
+
+Success: pass 0 on vga.sif - 236 line(s) read, 354 statement(s) parsed, code address range 0x005F - 0x012B.
+Success: pass 0 on helloworld.sif - 81 line(s) read, 354 statement(s) parsed, code address range 0xFFFFFFFF - 0x012B.
 Compiling helloworld.sif, pass 2 out of 2.
 Info: line -1 - symbol[0000] <= 'System.Byte[]'
 Info: line -1 - symbol[0001] <= 'System.Byte[]'
@@ -1169,181 +1169,182 @@ Field 'r_s' 2 .. 0
 Field 'data16' 15 .. 0 overlaps with: r_p, r_a, r_x, r_y, r_s
 Info: line 9 - code[0000] <= '0000_000_000_000_000'
 Info: line -1 - symbol[0000] <= 'System.Byte[]'
-Info: line 9 - code[0001] <= '0000_000_000_000_011'
+Info: line 9 - code[0001] <= '0011_000_000_000_011'
 Info: line -1 - symbol[0001] <= 'System.Byte[]'
-Info: line 9 - code[0002] <= '0000_000_111_000_011'
+Info: line 9 - code[0002] <= '0010_000_000_000_000'
 Info: line -1 - symbol[0002] <= 'System.Byte[]'
-Info: line 9 - code[0003] <= '0000_000_000_111_011'
+Info: line 9 - code[0003] <= '0000000100000111'
 Info: line -1 - symbol[0003] <= 'System.Byte[]'
-Info: line 9 - code[0004] <= '0000_111_000_000_011'
+Info: line 9 - code[0004] <= '0111_000_100_000_000'
 Info: line -1 - symbol[0004] <= 'System.Byte[]'
-Info: line 9 - code[0005] <= '0111_001_100_100_000'
+Info: line 9 - code[0005] <= '0000000000010000'
 Info: line -1 - symbol[0005] <= 'System.Byte[]'
-Info: line 9 - code[0006] <= '0000000000000000'
+Info: line 9 - code[0006] <= '0011_000_000_000_011'
 Info: line -1 - symbol[0006] <= 'System.Byte[]'
-Info: line 9 - code[0007] <= '0000_001_000_000_010'
+Info: line 9 - code[0007] <= '0010_000_000_000_000'
 Info: line -1 - symbol[0007] <= 'System.Byte[]'
-Info: line 9 - code[0008] <= '0000_000_000_100_010'
+Info: line 9 - code[0008] <= '0000000000011001'
 Info: line -1 - symbol[0008] <= 'System.Byte[]'
-Info: line 9 - code[0009] <= '0000_000_100_000_010'
+Info: line 9 - code[0009] <= '0011_000_000_000_011'
 Info: line -1 - symbol[0009] <= 'System.Byte[]'
-Info: line 9 - code[000A] <= '0111_001_000_000_000'
+Info: line 9 - code[000A] <= '0010_000_000_000_000'
 Info: line -1 - symbol[000A] <= 'System.Byte[]'
-Info: line 9 - code[000B] <= '0000000000001111'
+Info: line 9 - code[000B] <= '0000000001010100'
 Info: line -1 - symbol[000B] <= 'System.Byte[]'
-Info: line 9 - code[000C] <= '0000_111_000_000_011'
+Info: line 9 - code[000C] <= '0111_000_100_000_000'
 Info: line -1 - symbol[000C] <= 'System.Byte[]'
-Info: line 9 - code[000D] <= '0001_000_000_000_010'
+Info: line 9 - code[000D] <= '0000000000010010'
 Info: line -1 - symbol[000D] <= 'System.Byte[]'
-Info: line 9 - code[000E] <= '0111_111_111_111_111'
+Info: line 9 - code[000E] <= '0010_000_000_000_000'
 Info: line -1 - symbol[000E] <= 'System.Byte[]'
-Info: line 9 - code[000F] <= '0011_000_000_000_011'
+Warning: value 11111111111111111111111111110111 truncated to value 1111111111110111 in line 35.
+Info: line 9 - code[000F] <= '1111111111110111'
 Info: line -1 - symbol[000F] <= 'System.Byte[]'
-Info: line 9 - code[0010] <= '0010_000_000_000_000'
+Info: line 9 - code[0010] <= '0000000000000001'
 Info: line -1 - symbol[0010] <= 'System.Byte[]'
-Info: line 9 - code[0011] <= '0000000100001000'
+Info: line 9 - code[0011] <= '0000000000000000'
 Info: line -1 - symbol[0011] <= 'System.Byte[]'
-Info: line 9 - code[0012] <= '0111_111_111_111_111'
+Info: line 9 - code[0012] <= '0000000001001000'
 Info: line -1 - symbol[0012] <= 'System.Byte[]'
-Info: line 9 - code[0013] <= '0111_000_100_000_000'
+Info: line 9 - code[0013] <= '0000000001100101'
 Info: line -1 - symbol[0013] <= 'System.Byte[]'
-Info: line 9 - code[0014] <= '0000000000011111'
+Info: line 9 - code[0014] <= '0000000001101100'
 Info: line -1 - symbol[0014] <= 'System.Byte[]'
-Info: line 9 - code[0015] <= '0011_000_000_000_011'
+Info: line 9 - code[0015] <= '0000000001101100'
 Info: line -1 - symbol[0015] <= 'System.Byte[]'
-Info: line 9 - code[0016] <= '0010_000_000_000_000'
+Info: line 9 - code[0016] <= '0000000001101111'
 Info: line -1 - symbol[0016] <= 'System.Byte[]'
-Info: line 9 - code[0017] <= '0000000000011001'
+Info: line 9 - code[0017] <= '0000000000100000'
 Info: line -1 - symbol[0017] <= 'System.Byte[]'
-Info: line 9 - code[0018] <= '0011_000_000_000_011'
+Info: line 9 - code[0018] <= '0000000001010111'
 Info: line -1 - symbol[0018] <= 'System.Byte[]'
-Info: line 9 - code[0019] <= '0010_000_000_000_000'
+Info: line 9 - code[0019] <= '0000000001101111'
 Info: line -1 - symbol[0019] <= 'System.Byte[]'
-Info: line 9 - code[001A] <= '0000000001010100'
+Info: line 9 - code[001A] <= '0000000001110010'
 Info: line -1 - symbol[001A] <= 'System.Byte[]'
-Info: line 9 - code[001B] <= '0111_000_100_000_000'
+Info: line 9 - code[001B] <= '0000000001101100'
 Info: line -1 - symbol[001B] <= 'System.Byte[]'
-Info: line 9 - code[001C] <= '0000000000100001'
+Info: line 9 - code[001C] <= '0000000001100100'
 Info: line -1 - symbol[001C] <= 'System.Byte[]'
-Info: line 9 - code[001D] <= '0010_000_000_000_000'
+Info: line 9 - code[001D] <= '0000000000100001'
 Info: line -1 - symbol[001D] <= 'System.Byte[]'
-Warning: value 11111111111111111111111111110111 truncated to value 1111111111110111 in line 52.
-Info: line 9 - code[001E] <= '1111111111110111'
+Info: line 9 - code[001E] <= '0000000000001101'
 Info: line -1 - symbol[001E] <= 'System.Byte[]'
-Info: line 9 - code[001F] <= '0000000000000001'
+Info: line 9 - code[001F] <= '0000000000001010'
 Info: line -1 - symbol[001F] <= 'System.Byte[]'
 Info: line 9 - code[0020] <= '0000000000000000'
 Info: line -1 - symbol[0020] <= 'System.Byte[]'
-Info: line 9 - code[0021] <= '0000000001001000'
+Info: line 9 - code[0021] <= '0000_000_000_000_000'
 Info: line -1 - symbol[0021] <= 'System.Byte[]'
-Info: line 9 - code[0022] <= '0000000001100101'
+Info: line 9 - code[0022] <= '0000_000_000_111_011'
 Info: line -1 - symbol[0022] <= 'System.Byte[]'
-Info: line 9 - code[0023] <= '0000000001101100'
+Info: line 9 - code[0023] <= '0111_000_000_100_000'
 Info: line -1 - symbol[0023] <= 'System.Byte[]'
-Info: line 9 - code[0024] <= '0000000001101100'
+Info: line 9 - code[0024] <= '1110000000000000'
 Info: line -1 - symbol[0024] <= 'System.Byte[]'
-Info: line 9 - code[0025] <= '0000000001101111'
+Info: line 9 - code[0025] <= '0000_001_110_000_000'
 Info: line -1 - symbol[0025] <= 'System.Byte[]'
-Info: line 9 - code[0026] <= '0000000000100000'
+Info: line 9 - code[0026] <= '1001_000_000_000_000'
 Info: line -1 - symbol[0026] <= 'System.Byte[]'
-Info: line 9 - code[0027] <= '0000000001010111'
+Info: line 9 - code[0027] <= '0000000000001100'
 Info: line -1 - symbol[0027] <= 'System.Byte[]'
-Info: line 9 - code[0028] <= '0000000001101111'
+Info: line 9 - code[0028] <= '0000_001_000_110_000'
 Info: line -1 - symbol[0028] <= 'System.Byte[]'
-Info: line 9 - code[0029] <= '0000000001110010'
+Info: line 9 - code[0029] <= '0000_100_000_000_000'
 Info: line -1 - symbol[0029] <= 'System.Byte[]'
-Info: line 9 - code[002A] <= '0000000001101100'
+Info: line 9 - code[002A] <= '0000_100_000_000_000'
 Info: line -1 - symbol[002A] <= 'System.Byte[]'
-Info: line 9 - code[002B] <= '0000000001100100'
+Info: line 9 - code[002B] <= '1000_000_000_000_000'
 Info: line -1 - symbol[002B] <= 'System.Byte[]'
-Info: line 9 - code[002C] <= '0000000000100001'
+Info: line 9 - code[002C] <= '0000000000000011'
 Info: line -1 - symbol[002C] <= 'System.Byte[]'
-Info: line 9 - code[002D] <= '0000000000001101'
+Info: line 9 - code[002D] <= '0010_000_000_000_000'
 Info: line -1 - symbol[002D] <= 'System.Byte[]'
-Info: line 9 - code[002E] <= '0000000000001010'
+Warning: value 11111111111111111111111111111010 truncated to value 1111111111111010 in line 71.
+Info: line 9 - code[002E] <= '1111111111111010'
 Info: line -1 - symbol[002E] <= 'System.Byte[]'
-Info: line 9 - code[002F] <= '0000000000000000'
+Info: line 9 - code[002F] <= '0000_001_110_010_000'
 Info: line -1 - symbol[002F] <= 'System.Byte[]'
-Info: line 9 - code[0030] <= '0000_000_000_000_000'
+Info: line 9 - code[0030] <= '0000_111_000_110_000'
 Info: line -1 - symbol[0030] <= 'System.Byte[]'
-Info: line 9 - code[0031] <= '0000_000_000_111_011'
+Info: line 9 - code[0031] <= '0010_000_010_011_000'
 Info: line -1 - symbol[0031] <= 'System.Byte[]'
-Info: line 9 - code[0032] <= '0111_000_000_100_000'
+Warning: value 11111111111111111111111111110011 truncated to value 1111111111110011 in line 75.
+Info: line 9 - code[0032] <= '1111111111110011'
 Info: line -1 - symbol[0032] <= 'System.Byte[]'
-Info: line 9 - code[0033] <= '1110000000000000'
+Info: line 9 - code[0033] <= '0000_000_000_100_010'
 Info: line -1 - symbol[0033] <= 'System.Byte[]'
-Info: line 9 - code[0034] <= '0000_001_110_000_000'
+Info: line 9 - code[0034] <= '0001_000_000_000_010'
 Info: line -1 - symbol[0034] <= 'System.Byte[]'
-Info: line 9 - code[0035] <= '1001_000_000_000_000'
+Info: line 9 - code[0035] <= '0000_111_000_000_011'
 Info: line -1 - symbol[0035] <= 'System.Byte[]'
-Info: line 9 - code[0036] <= '0000000000001100'
+Info: line 9 - code[0036] <= '0111_001_000_000_000'
 Info: line -1 - symbol[0036] <= 'System.Byte[]'
-Info: line 9 - code[0037] <= '0000_001_000_110_000'
+Info: line 9 - code[0037] <= '0000000000000000'
 Info: line -1 - symbol[0037] <= 'System.Byte[]'
-Info: line 9 - code[0038] <= '0000_100_000_000_000'
+Info: line 9 - code[0038] <= '0000_011_000_000_000'
 Info: line -1 - symbol[0038] <= 'System.Byte[]'
-Info: line 9 - code[0039] <= '0000_100_000_000_000'
+Info: line 9 - code[0039] <= '0000_001_000_000_010'
 Info: line -1 - symbol[0039] <= 'System.Byte[]'
-Info: line 9 - code[003A] <= '1000_000_000_000_000'
+Info: line 9 - code[003A] <= '0001_000_000_000_010'
 Info: line -1 - symbol[003A] <= 'System.Byte[]'
-Info: line 9 - code[003B] <= '0000000000000011'
+Info: line 9 - code[003B] <= '1000_000_000_000_000'
 Info: line -1 - symbol[003B] <= 'System.Byte[]'
-Info: line 9 - code[003C] <= '0010_000_000_000_000'
+Warning: value 11111111111111111111111111111110 truncated to value 1111111111111110 in line 12.
+Info: line 9 - code[003C] <= '1111111111111110'
 Info: line -1 - symbol[003C] <= 'System.Byte[]'
-Warning: value 11111111111111111111111111111010 truncated to value 1111111111111010 in line 88.
-Info: line 9 - code[003D] <= '1111111111111010'
+Info: line 9 - code[003D] <= '0000_111_000_000_011'
 Info: line -1 - symbol[003D] <= 'System.Byte[]'
-Info: line 9 - code[003E] <= '0000_001_110_010_000'
+Info: line 9 - code[003E] <= '0111_001_000_000_000'
 Info: line -1 - symbol[003E] <= 'System.Byte[]'
-Info: line 9 - code[003F] <= '0000_111_000_110_000'
+Warning: value 11111111111111111111111111111111 truncated to value 1111111111111111 in line 15.
+Info: line 9 - code[003F] <= '1111111111111111'
 Info: line -1 - symbol[003F] <= 'System.Byte[]'
-Info: line 9 - code[0040] <= '0010_000_010_011_000'
+Info: line 9 - code[0040] <= '0010_000_000_000_000'
 Info: line -1 - symbol[0040] <= 'System.Byte[]'
-Warning: value 11111111111111111111111111110011 truncated to value 1111111111110011 in line 92.
-Info: line 9 - code[0041] <= '1111111111110011'
+Warning: value 11111111111111111111111111110111 truncated to value 1111111111110111 in line 17.
+Info: line 9 - code[0041] <= '1111111111110111'
 Info: line -1 - symbol[0041] <= 'System.Byte[]'
-Info: line 9 - code[0042] <= '0000_000_000_100_010'
+Info: line 9 - code[0042] <= '0000_000_111_000_011'
 Info: line -1 - symbol[0042] <= 'System.Byte[]'
-Info: line 9 - code[0043] <= '0001_000_000_000_010'
+Info: line 9 - code[0043] <= '0111_000_100_000_000'
 Info: line -1 - symbol[0043] <= 'System.Byte[]'
-Info: line 9 - code[0044] <= '0000_111_000_000_011'
+Info: line 9 - code[0044] <= '0000000000010000'
 Info: line -1 - symbol[0044] <= 'System.Byte[]'
 Info: line 9 - code[0045] <= '0111_001_000_000_000'
 Info: line -1 - symbol[0045] <= 'System.Byte[]'
 Info: line 9 - code[0046] <= '0000000000000000'
 Info: line -1 - symbol[0046] <= 'System.Byte[]'
-Info: line 9 - code[0047] <= '0000_011_000_000_000'
+Info: line 9 - code[0047] <= '0000_111_000_000_011'
 Info: line -1 - symbol[0047] <= 'System.Byte[]'
-Info: line 9 - code[0048] <= '0000_001_000_000_010'
+Info: line 9 - code[0048] <= '0000_001_000_111_000'
 Info: line -1 - symbol[0048] <= 'System.Byte[]'
-Info: line 9 - code[0049] <= '0001_000_000_000_010'
+Info: line 9 - code[0049] <= '0000_100_000_000_000'
 Info: line -1 - symbol[0049] <= 'System.Byte[]'
-Info: line 9 - code[004A] <= '1000_000_000_000_000'
+Info: line 9 - code[004A] <= '0000_001_000_000_010'
 Info: line -1 - symbol[004A] <= 'System.Byte[]'
-Warning: value 11111111111111111111111111111110 truncated to value 1111111111111110 in line 12.
-Info: line 9 - code[004B] <= '1111111111111110'
+Info: line 9 - code[004B] <= '1000_000_000_000_000'
 Info: line -1 - symbol[004B] <= 'System.Byte[]'
-Info: line 9 - code[004C] <= '0000_111_000_000_011'
+Info: line 9 - code[004C] <= '0000000000000101'
 Info: line -1 - symbol[004C] <= 'System.Byte[]'
-Info: line 9 - code[004D] <= '0111_001_000_000_000'
+Info: line 9 - code[004D] <= '0111_101_000_000_000'
 Info: line -1 - symbol[004D] <= 'System.Byte[]'
-Warning: value 11111111111111111111111111111111 truncated to value 1111111111111111 in line 15.
-Info: line 9 - code[004E] <= '1111111111111111'
+Info: line 9 - code[004E] <= '0000000000000000'
 Info: line -1 - symbol[004E] <= 'System.Byte[]'
 Info: line 9 - code[004F] <= '0010_000_000_000_000'
 Info: line -1 - symbol[004F] <= 'System.Byte[]'
-Warning: value 11111111111111111111111111110111 truncated to value 1111111111110111 in line 17.
-Info: line 9 - code[0050] <= '1111111111110111'
+Info: line 9 - code[0050] <= '0000000000000101'
 Info: line -1 - symbol[0050] <= 'System.Byte[]'
-Info: line 9 - code[0051] <= '0000_000_111_000_011'
+Info: line 9 - code[0051] <= '0011_000_000_000_011'
 Info: line -1 - symbol[0051] <= 'System.Byte[]'
-Info: line 9 - code[0052] <= '0111_000_100_000_000'
+Info: line 9 - code[0052] <= '0010_000_000_000_000'
 Info: line -1 - symbol[0052] <= 'System.Byte[]'
-Info: line 9 - code[0053] <= '0000000000010000'
+Warning: value 11111111111111111111111111100010 truncated to value 1111111111100010 in line 39.
+Info: line 9 - code[0053] <= '1111111111100010'
 Info: line -1 - symbol[0053] <= 'System.Byte[]'
-Info: line 9 - code[0054] <= '0111_001_000_000_000'
+Info: line 9 - code[0054] <= '0000_101_000_000_110'
 Info: line -1 - symbol[0054] <= 'System.Byte[]'
-Info: line 9 - code[0055] <= '0000000000000000'
+Info: line 9 - code[0055] <= '0000_100_000_000_000'
 Info: line -1 - symbol[0055] <= 'System.Byte[]'
 Info: line 9 - code[0056] <= '0000_111_000_000_011'
 Info: line -1 - symbol[0056] <= 'System.Byte[]'
@@ -1351,444 +1352,455 @@ Info: line 9 - code[0057] <= '0000_001_000_111_000'
 Info: line -1 - symbol[0057] <= 'System.Byte[]'
 Info: line 9 - code[0058] <= '0000_100_000_000_000'
 Info: line -1 - symbol[0058] <= 'System.Byte[]'
-Info: line 9 - code[0059] <= '0000_001_000_000_010'
+Info: line 9 - code[0059] <= '0000_111_000_100_000'
 Info: line -1 - symbol[0059] <= 'System.Byte[]'
-Info: line 9 - code[005A] <= '1000_000_000_000_000'
+Info: line 9 - code[005A] <= '0000_001_011_000_010'
 Info: line -1 - symbol[005A] <= 'System.Byte[]'
-Info: line 9 - code[005B] <= '0000000000000101'
+Info: line 9 - code[005B] <= '1011_000_000_000_000'
 Info: line -1 - symbol[005B] <= 'System.Byte[]'
-Info: line 9 - code[005C] <= '0111_101_000_000_000'
-Info: line -1 - symbol[005C] <= 'System.Byte[]'
-Info: line 9 - code[005D] <= '0000000000000000'
-Info: line -1 - symbol[005D] <= 'System.Byte[]'
-Info: line 9 - code[005E] <= '0010_000_000_000_000'
-Info: line -1 - symbol[005E] <= 'System.Byte[]'
-Info: line 9 - code[005F] <= '0000000000000101'
-Info: line -1 - symbol[005F] <= 'System.Byte[]'
-Info: line 9 - code[0060] <= '0011_000_000_000_011'
-Info: line -1 - symbol[0060] <= 'System.Byte[]'
-Info: line 9 - code[0061] <= '0010_000_000_000_000'
-Info: line -1 - symbol[0061] <= 'System.Byte[]'
-Warning: value 11111111111111111111111111100010 truncated to value 1111111111100010 in line 39.
-Info: line 9 - code[0062] <= '1111111111100010'
-Info: line -1 - symbol[0062] <= 'System.Byte[]'
-Info: line 9 - code[0063] <= '0000_101_000_000_110'
-Info: line -1 - symbol[0063] <= 'System.Byte[]'
-Info: line 9 - code[0064] <= '0000_100_000_000_000'
-Info: line -1 - symbol[0064] <= 'System.Byte[]'
-Info: line 9 - code[0065] <= '0000_111_000_000_011'
-Info: line -1 - symbol[0065] <= 'System.Byte[]'
-Info: line 9 - code[0066] <= '0000_001_000_111_000'
-Info: line -1 - symbol[0066] <= 'System.Byte[]'
-Info: line 9 - code[0067] <= '0000_100_000_000_000'
-Info: line -1 - symbol[0067] <= 'System.Byte[]'
-Info: line 9 - code[0068] <= '0000_111_000_100_000'
-Info: line -1 - symbol[0068] <= 'System.Byte[]'
-Info: line 9 - code[0069] <= '0000_001_011_000_010'
-Info: line -1 - symbol[0069] <= 'System.Byte[]'
-Info: line 9 - code[006A] <= '1011_000_000_000_000'
-Info: line -1 - symbol[006A] <= 'System.Byte[]'
 Warning: value 11111111111111111111111111101011 truncated to value 1111111111101011 in line 48.
-Info: line 9 - code[006B] <= '1111111111101011'
+Info: line 9 - code[005C] <= '1111111111101011'
+Info: line -1 - symbol[005C] <= 'System.Byte[]'
+Info: line 9 - code[005D] <= '0000_000_100_000_010'
+Info: line -1 - symbol[005D] <= 'System.Byte[]'
+Info: line 9 - code[005E] <= '0001_000_000_000_010'
+Info: line -1 - symbol[005E] <= 'System.Byte[]'
+Info: line 9 - code[005F] <= '0000_000_000_000_000'
+Info: line -1 - symbol[005F] <= 'System.Byte[]'
+Info: line 9 - code[0060] <= '0000_000_000_111_011'
+Info: line -1 - symbol[0060] <= 'System.Byte[]'
+Info: line 9 - code[0061] <= '0000_001_110_000_000'
+Info: line -1 - symbol[0061] <= 'System.Byte[]'
+Info: line 9 - code[0062] <= '1001_000_000_000_000'
+Info: line -1 - symbol[0062] <= 'System.Byte[]'
+Info: line 9 - code[0063] <= '0000000010000101'
+Info: line -1 - symbol[0063] <= 'System.Byte[]'
+Info: line 9 - code[0064] <= '0111_010_000_000_000'
+Info: line -1 - symbol[0064] <= 'System.Byte[]'
+Info: line 9 - code[0065] <= '0000000000001101'
+Info: line -1 - symbol[0065] <= 'System.Byte[]'
+Info: line 9 - code[0066] <= '1001_000_000_000_000'
+Info: line -1 - symbol[0066] <= 'System.Byte[]'
+Info: line 9 - code[0067] <= '0000000001100001'
+Info: line -1 - symbol[0067] <= 'System.Byte[]'
+Info: line 9 - code[0068] <= '0000_001_110_000_000'
+Info: line -1 - symbol[0068] <= 'System.Byte[]'
+Info: line 9 - code[0069] <= '0111_010_000_000_000'
+Info: line -1 - symbol[0069] <= 'System.Byte[]'
+Info: line 9 - code[006A] <= '0000000000001010'
+Info: line -1 - symbol[006A] <= 'System.Byte[]'
+Info: line 9 - code[006B] <= '1001_000_000_000_000'
 Info: line -1 - symbol[006B] <= 'System.Byte[]'
-Info: line 9 - code[006C] <= '0000_000_100_000_010'
+Info: line 9 - code[006C] <= '0000000001100011'
 Info: line -1 - symbol[006C] <= 'System.Byte[]'
-Info: line 9 - code[006D] <= '0001_000_000_000_010'
+Info: line 9 - code[006D] <= '0000_001_110_000_000'
 Info: line -1 - symbol[006D] <= 'System.Byte[]'
-Info: line 9 - code[006E] <= '0000_000_000_000_000'
+Info: line 9 - code[006E] <= '0111_010_000_000_000'
 Info: line -1 - symbol[006E] <= 'System.Byte[]'
-Info: line 9 - code[006F] <= '0000_000_000_111_011'
+Info: line 9 - code[006F] <= '0000000000000010'
 Info: line -1 - symbol[006F] <= 'System.Byte[]'
-Info: line 9 - code[0070] <= '0000_001_110_000_000'
+Info: line 9 - code[0070] <= '1001_000_000_000_000'
 Info: line -1 - symbol[0070] <= 'System.Byte[]'
-Info: line 9 - code[0071] <= '1001_000_000_000_000'
+Info: line 9 - code[0071] <= '0000000001110011'
 Info: line -1 - symbol[0071] <= 'System.Byte[]'
-Info: line 9 - code[0072] <= '0000000010000101'
+Info: line 9 - code[0072] <= '0000_001_110_000_000'
 Info: line -1 - symbol[0072] <= 'System.Byte[]'
 Info: line 9 - code[0073] <= '0111_010_000_000_000'
 Info: line -1 - symbol[0073] <= 'System.Byte[]'
-Info: line 9 - code[0074] <= '0000000000001101'
+Info: line 9 - code[0074] <= '0000000000000001'
 Info: line -1 - symbol[0074] <= 'System.Byte[]'
 Info: line 9 - code[0075] <= '1001_000_000_000_000'
 Info: line -1 - symbol[0075] <= 'System.Byte[]'
-Info: line 9 - code[0076] <= '0000000001100001'
+Info: line 9 - code[0076] <= '0000000001011110'
 Info: line -1 - symbol[0076] <= 'System.Byte[]'
-Info: line 9 - code[0077] <= '0000_001_110_000_000'
+Info: line 9 - code[0077] <= '0000_000_111_000_011'
 Info: line -1 - symbol[0077] <= 'System.Byte[]'
-Info: line 9 - code[0078] <= '0111_010_000_000_000'
+Info: line 9 - code[0078] <= '0011_000_000_000_011'
 Info: line -1 - symbol[0078] <= 'System.Byte[]'
-Info: line 9 - code[0079] <= '0000000000001010'
+Info: line 9 - code[0079] <= '0010_000_000_000_000'
 Info: line -1 - symbol[0079] <= 'System.Byte[]'
-Info: line 9 - code[007A] <= '1001_000_000_000_000'
+Info: line 9 - code[007A] <= '0000000001111001'
 Info: line -1 - symbol[007A] <= 'System.Byte[]'
-Info: line 9 - code[007B] <= '0000000001100011'
+Info: line 9 - code[007B] <= '0011_000_000_000_011'
 Info: line -1 - symbol[007B] <= 'System.Byte[]'
-Info: line 9 - code[007C] <= '0000_001_110_000_000'
+Info: line 9 - code[007C] <= '0010_000_000_000_000'
 Info: line -1 - symbol[007C] <= 'System.Byte[]'
-Info: line 9 - code[007D] <= '0111_010_000_000_000'
+Info: line 9 - code[007D] <= '0000000010000000'
 Info: line -1 - symbol[007D] <= 'System.Byte[]'
-Info: line 9 - code[007E] <= '0000000000000010'
+Info: line 9 - code[007E] <= '0000_000_010_000_000'
 Info: line -1 - symbol[007E] <= 'System.Byte[]'
-Info: line 9 - code[007F] <= '1001_000_000_000_000'
+Info: line 9 - code[007F] <= '0111_000_001_000_000'
 Info: line -1 - symbol[007F] <= 'System.Byte[]'
-Info: line 9 - code[0080] <= '0000000001110011'
+Info: line 9 - code[0080] <= '0000000001000000'
 Info: line -1 - symbol[0080] <= 'System.Byte[]'
-Info: line 9 - code[0081] <= '0000_001_110_000_000'
+Info: line 9 - code[0081] <= '1010_000_000_000_000'
 Info: line -1 - symbol[0081] <= 'System.Byte[]'
-Info: line 9 - code[0082] <= '0111_010_000_000_000'
+Info: line 9 - code[0082] <= '0000000000000111'
 Info: line -1 - symbol[0082] <= 'System.Byte[]'
-Info: line 9 - code[0083] <= '0000000000000001'
+Info: line 9 - code[0083] <= '0011_000_000_000_011'
 Info: line -1 - symbol[0083] <= 'System.Byte[]'
-Info: line 9 - code[0084] <= '1001_000_000_000_000'
+Info: line 9 - code[0084] <= '0010_000_000_000_000'
 Info: line -1 - symbol[0084] <= 'System.Byte[]'
-Info: line 9 - code[0085] <= '0000000001011110'
+Info: line 9 - code[0085] <= '0000000001100101'
 Info: line -1 - symbol[0085] <= 'System.Byte[]'
-Info: line 9 - code[0086] <= '0000_000_111_000_011'
+Info: line 9 - code[0086] <= '0000_000_100_000_010'
 Info: line -1 - symbol[0086] <= 'System.Byte[]'
-Info: line 9 - code[0087] <= '0011_000_000_000_011'
+Info: line 9 - code[0087] <= '0010_000_010_000_000'
 Info: line -1 - symbol[0087] <= 'System.Byte[]'
-Info: line 9 - code[0088] <= '0010_000_000_000_000'
-Info: line -1 - symbol[0088] <= 'System.Byte[]'
-Info: line 9 - code[0089] <= '0000000001111001'
-Info: line -1 - symbol[0089] <= 'System.Byte[]'
-Info: line 9 - code[008A] <= '0011_000_000_000_011'
-Info: line -1 - symbol[008A] <= 'System.Byte[]'
-Info: line 9 - code[008B] <= '0010_000_000_000_000'
-Info: line -1 - symbol[008B] <= 'System.Byte[]'
-Info: line 9 - code[008C] <= '0000000010000000'
-Info: line -1 - symbol[008C] <= 'System.Byte[]'
-Info: line 9 - code[008D] <= '0000_000_010_000_000'
-Info: line -1 - symbol[008D] <= 'System.Byte[]'
-Info: line 9 - code[008E] <= '0111_000_001_000_000'
-Info: line -1 - symbol[008E] <= 'System.Byte[]'
-Info: line 9 - code[008F] <= '0000000001000000'
-Info: line -1 - symbol[008F] <= 'System.Byte[]'
-Info: line 9 - code[0090] <= '1010_000_000_000_000'
-Info: line -1 - symbol[0090] <= 'System.Byte[]'
-Info: line 9 - code[0091] <= '0000000000000111'
-Info: line -1 - symbol[0091] <= 'System.Byte[]'
-Info: line 9 - code[0092] <= '0011_000_000_000_011'
-Info: line -1 - symbol[0092] <= 'System.Byte[]'
-Info: line 9 - code[0093] <= '0010_000_000_000_000'
-Info: line -1 - symbol[0093] <= 'System.Byte[]'
-Info: line 9 - code[0094] <= '0000000001100101'
-Info: line -1 - symbol[0094] <= 'System.Byte[]'
-Info: line 9 - code[0095] <= '0000_000_100_000_010'
-Info: line -1 - symbol[0095] <= 'System.Byte[]'
-Info: line 9 - code[0096] <= '0010_000_010_000_000'
-Info: line -1 - symbol[0096] <= 'System.Byte[]'
 Warning: value 11111111111111111111111111011001 truncated to value 1111111111011001 in line 56.
-Info: line 9 - code[0097] <= '1111111111011001'
-Info: line -1 - symbol[0097] <= 'System.Byte[]'
-Info: line 9 - code[0098] <= '0111_000_100_000_000'
-Info: line -1 - symbol[0098] <= 'System.Byte[]'
-Info: line 9 - code[0099] <= '0000000000000000'
-Info: line -1 - symbol[0099] <= 'System.Byte[]'
-Info: line 9 - code[009A] <= '0000_000_000_010_000'
-Info: line -1 - symbol[009A] <= 'System.Byte[]'
-Info: line 9 - code[009B] <= '0111_000_000_001_000'
-Info: line -1 - symbol[009B] <= 'System.Byte[]'
-Info: line 9 - code[009C] <= '0000000000100000'
-Info: line -1 - symbol[009C] <= 'System.Byte[]'
-Info: line 9 - code[009D] <= '1100_000_000_000_000'
-Info: line -1 - symbol[009D] <= 'System.Byte[]'
-Info: line 9 - code[009E] <= '0000000000000011'
-Info: line -1 - symbol[009E] <= 'System.Byte[]'
-Info: line 9 - code[009F] <= '0010_000_000_000_000'
-Info: line -1 - symbol[009F] <= 'System.Byte[]'
+Info: line 9 - code[0088] <= '1111111111011001'
+Info: line -1 - symbol[0088] <= 'System.Byte[]'
+Info: line 9 - code[0089] <= '0111_000_100_000_000'
+Info: line -1 - symbol[0089] <= 'System.Byte[]'
+Info: line 9 - code[008A] <= '0000000000000000'
+Info: line -1 - symbol[008A] <= 'System.Byte[]'
+Info: line 9 - code[008B] <= '0000_000_000_010_000'
+Info: line -1 - symbol[008B] <= 'System.Byte[]'
+Info: line 9 - code[008C] <= '0111_000_000_001_000'
+Info: line -1 - symbol[008C] <= 'System.Byte[]'
+Info: line 9 - code[008D] <= '0000000000100000'
+Info: line -1 - symbol[008D] <= 'System.Byte[]'
+Info: line 9 - code[008E] <= '1100_000_000_000_000'
+Info: line -1 - symbol[008E] <= 'System.Byte[]'
+Info: line 9 - code[008F] <= '0000000000000011'
+Info: line -1 - symbol[008F] <= 'System.Byte[]'
+Info: line 9 - code[0090] <= '0010_000_000_000_000'
+Info: line -1 - symbol[0090] <= 'System.Byte[]'
 Warning: value 11111111111111111111111111110010 truncated to value 1111111111110010 in line 66.
-Info: line 9 - code[00A0] <= '1111111111110010'
+Info: line 9 - code[0091] <= '1111111111110010'
+Info: line -1 - symbol[0091] <= 'System.Byte[]'
+Info: line 9 - code[0092] <= '0000_000_000_000_000'
+Info: line -1 - symbol[0092] <= 'System.Byte[]'
+Info: line 9 - code[0093] <= '0111_000_000_100_000'
+Info: line -1 - symbol[0093] <= 'System.Byte[]'
+Info: line 9 - code[0094] <= '0000000000000000'
+Info: line -1 - symbol[0094] <= 'System.Byte[]'
+Info: line 9 - code[0095] <= '0000_000_000_111_011'
+Info: line -1 - symbol[0095] <= 'System.Byte[]'
+Info: line 9 - code[0096] <= '0111_000_100_000_000'
+Info: line -1 - symbol[0096] <= 'System.Byte[]'
+Info: line 9 - code[0097] <= '0000000000000000'
+Info: line -1 - symbol[0097] <= 'System.Byte[]'
+Info: line 9 - code[0098] <= '0000_000_111_000_011'
+Info: line -1 - symbol[0098] <= 'System.Byte[]'
+Info: line 9 - code[0099] <= '0011_000_000_000_011'
+Info: line -1 - symbol[0099] <= 'System.Byte[]'
+Info: line 9 - code[009A] <= '0010_000_000_000_000'
+Info: line -1 - symbol[009A] <= 'System.Byte[]'
+Info: line 9 - code[009B] <= '0000000000100101'
+Info: line -1 - symbol[009B] <= 'System.Byte[]'
+Info: line 9 - code[009C] <= '0000_000_000_111_011'
+Info: line -1 - symbol[009C] <= 'System.Byte[]'
+Info: line 9 - code[009D] <= '0111_000_000_101_000'
+Info: line -1 - symbol[009D] <= 'System.Byte[]'
+Info: line 9 - code[009E] <= '0000000000100000'
+Info: line -1 - symbol[009E] <= 'System.Byte[]'
+Info: line 9 - code[009F] <= '0000_001_110_110_000'
+Info: line -1 - symbol[009F] <= 'System.Byte[]'
+Info: line 9 - code[00A0] <= '0000_000_000_100_010'
 Info: line -1 - symbol[00A0] <= 'System.Byte[]'
-Info: line 9 - code[00A1] <= '0000_000_000_000_000'
+Info: line 9 - code[00A1] <= '0000_111_110_110_000'
 Info: line -1 - symbol[00A1] <= 'System.Byte[]'
-Info: line 9 - code[00A2] <= '0111_000_000_100_000'
+Info: line 9 - code[00A2] <= '0000_000_010_000_000'
 Info: line -1 - symbol[00A2] <= 'System.Byte[]'
-Info: line 9 - code[00A3] <= '0000000000000000'
+Info: line 9 - code[00A3] <= '0111_000_001_000_000'
 Info: line -1 - symbol[00A3] <= 'System.Byte[]'
-Info: line 9 - code[00A4] <= '0000_000_000_111_011'
+Info: line 9 - code[00A4] <= '0000000001000000'
 Info: line -1 - symbol[00A4] <= 'System.Byte[]'
-Info: line 9 - code[00A5] <= '0111_000_100_000_000'
+Info: line 9 - code[00A5] <= '1010_000_000_000_000'
 Info: line -1 - symbol[00A5] <= 'System.Byte[]'
-Info: line 9 - code[00A6] <= '0000000000000000'
+Info: line 9 - code[00A6] <= '0000000000000011'
 Info: line -1 - symbol[00A6] <= 'System.Byte[]'
-Info: line 9 - code[00A7] <= '0000_000_111_000_011'
+Info: line 9 - code[00A7] <= '0010_000_000_000_000'
 Info: line -1 - symbol[00A7] <= 'System.Byte[]'
-Info: line 9 - code[00A8] <= '0011_000_000_000_011'
+Info: line 9 - code[00A8] <= '0000000010011000'
 Info: line -1 - symbol[00A8] <= 'System.Byte[]'
-Info: line 9 - code[00A9] <= '0010_000_000_000_000'
+Info: line 9 - code[00A9] <= '0000_000_000_100_010'
 Info: line -1 - symbol[00A9] <= 'System.Byte[]'
-Info: line 9 - code[00AA] <= '0000000000100101'
+Info: line 9 - code[00AA] <= '0000_000_000_010_000'
 Info: line -1 - symbol[00AA] <= 'System.Byte[]'
-Info: line 9 - code[00AB] <= '0000_000_000_111_011'
+Info: line 9 - code[00AB] <= '0111_000_000_001_000'
 Info: line -1 - symbol[00AB] <= 'System.Byte[]'
-Info: line 9 - code[00AC] <= '0111_000_000_101_000'
+Info: line 9 - code[00AC] <= '0000000000011111'
 Info: line -1 - symbol[00AC] <= 'System.Byte[]'
-Info: line 9 - code[00AD] <= '0000000000100000'
+Info: line 9 - code[00AD] <= '1100_000_000_000_000'
 Info: line -1 - symbol[00AD] <= 'System.Byte[]'
-Info: line 9 - code[00AE] <= '0000_001_110_110_000'
+Info: line 9 - code[00AE] <= '0000000000000011'
 Info: line -1 - symbol[00AE] <= 'System.Byte[]'
-Info: line 9 - code[00AF] <= '0000_000_000_100_010'
+Info: line 9 - code[00AF] <= '0010_000_000_000_000'
 Info: line -1 - symbol[00AF] <= 'System.Byte[]'
-Info: line 9 - code[00B0] <= '0000_111_110_110_000'
+Warning: value 11111111111111111111111111100101 truncated to value 1111111111100101 in line 98.
+Info: line 9 - code[00B0] <= '1111111111100101'
 Info: line -1 - symbol[00B0] <= 'System.Byte[]'
-Info: line 9 - code[00B1] <= '0000_000_010_000_000'
+Info: line 9 - code[00B1] <= '0011_000_000_000_011'
 Info: line -1 - symbol[00B1] <= 'System.Byte[]'
-Info: line 9 - code[00B2] <= '0111_000_001_000_000'
+Info: line 9 - code[00B2] <= '0010_000_000_000_000'
 Info: line -1 - symbol[00B2] <= 'System.Byte[]'
-Info: line 9 - code[00B3] <= '0000000001000000'
+Info: line 9 - code[00B3] <= '0000000000001101'
 Info: line -1 - symbol[00B3] <= 'System.Byte[]'
-Info: line 9 - code[00B4] <= '1010_000_000_000_000'
+Info: line 9 - code[00B4] <= '0111_000_100_000_000'
 Info: line -1 - symbol[00B4] <= 'System.Byte[]'
-Info: line 9 - code[00B5] <= '0000000000000011'
+Info: line 9 - code[00B5] <= '0000000000000000'
 Info: line -1 - symbol[00B5] <= 'System.Byte[]'
-Info: line 9 - code[00B6] <= '0010_000_000_000_000'
+Info: line 9 - code[00B6] <= '0111_001_000_000_000'
 Info: line -1 - symbol[00B6] <= 'System.Byte[]'
-Info: line 9 - code[00B7] <= '0000000010100111'
+Info: line 9 - code[00B7] <= '0000000000100000'
 Info: line -1 - symbol[00B7] <= 'System.Byte[]'
-Info: line 9 - code[00B8] <= '0000_000_000_100_010'
+Info: line 9 - code[00B8] <= '0000_111_110_110_000'
 Info: line -1 - symbol[00B8] <= 'System.Byte[]'
-Info: line 9 - code[00B9] <= '0000_000_000_010_000'
+Info: line 9 - code[00B9] <= '0000_000_010_000_000'
 Info: line -1 - symbol[00B9] <= 'System.Byte[]'
-Info: line 9 - code[00BA] <= '0111_000_000_001_000'
+Info: line 9 - code[00BA] <= '0111_000_001_000_000'
 Info: line -1 - symbol[00BA] <= 'System.Byte[]'
-Info: line 9 - code[00BB] <= '0000000000011111'
+Info: line 9 - code[00BB] <= '0000000001000000'
 Info: line -1 - symbol[00BB] <= 'System.Byte[]'
-Info: line 9 - code[00BC] <= '1100_000_000_000_000'
+Info: line 9 - code[00BC] <= '1010_000_000_000_000'
 Info: line -1 - symbol[00BC] <= 'System.Byte[]'
-Info: line 9 - code[00BD] <= '0000000000000011'
+Info: line 9 - code[00BD] <= '0000000000001010'
 Info: line -1 - symbol[00BD] <= 'System.Byte[]'
 Info: line 9 - code[00BE] <= '0010_000_000_000_000'
 Info: line -1 - symbol[00BE] <= 'System.Byte[]'
-Warning: value 11111111111111111111111111100101 truncated to value 1111111111100101 in line 98.
-Info: line 9 - code[00BF] <= '1111111111100101'
+Warning: value 11111111111111111111111111111001 truncated to value 1111111111111001 in line 114.
+Info: line 9 - code[00BF] <= '1111111111111001'
 Info: line -1 - symbol[00BF] <= 'System.Byte[]'
-Info: line 9 - code[00C0] <= '0011_000_000_000_011'
+Info: line 9 - code[00C0] <= '0111_000_100_000_000'
 Info: line -1 - symbol[00C0] <= 'System.Byte[]'
-Info: line 9 - code[00C1] <= '0010_000_000_000_000'
+Info: line 9 - code[00C1] <= '0000000001000000'
 Info: line -1 - symbol[00C1] <= 'System.Byte[]'
-Info: line 9 - code[00C2] <= '0000000000001101'
+Info: line 9 - code[00C2] <= '0011_000_000_000_011'
 Info: line -1 - symbol[00C2] <= 'System.Byte[]'
-Info: line 9 - code[00C3] <= '0111_000_100_000_000'
+Info: line 9 - code[00C3] <= '0010_000_000_000_000'
 Info: line -1 - symbol[00C3] <= 'System.Byte[]'
-Info: line 9 - code[00C4] <= '0000000000000000'
+Warning: value 11111111111111111111111101111110 truncated to value 1111111101111110 in line 121.
+Info: line 9 - code[00C4] <= '1111111101111110'
 Info: line -1 - symbol[00C4] <= 'System.Byte[]'
-Info: line 9 - code[00C5] <= '0111_001_000_000_000'
+Info: line 9 - code[00C5] <= '0111_000_000_101_000'
 Info: line -1 - symbol[00C5] <= 'System.Byte[]'
-Info: line 9 - code[00C6] <= '0000000000100000'
+Info: line 9 - code[00C6] <= '0001000000000000'
 Info: line -1 - symbol[00C6] <= 'System.Byte[]'
-Info: line 9 - code[00C7] <= '0000_111_110_110_000'
+Info: line 9 - code[00C7] <= '0001_000_000_000_010'
 Info: line -1 - symbol[00C7] <= 'System.Byte[]'
-Info: line 9 - code[00C8] <= '0000_000_010_000_000'
+Info: line 9 - code[00C8] <= '0011_000_000_000_011'
 Info: line -1 - symbol[00C8] <= 'System.Byte[]'
-Info: line 9 - code[00C9] <= '0111_000_001_000_000'
+Info: line 9 - code[00C9] <= '0010_000_000_000_000'
 Info: line -1 - symbol[00C9] <= 'System.Byte[]'
-Info: line 9 - code[00CA] <= '0000000001000000'
+Info: line 9 - code[00CA] <= '0000000000101001'
 Info: line -1 - symbol[00CA] <= 'System.Byte[]'
-Info: line 9 - code[00CB] <= '1010_000_000_000_000'
+Info: line 9 - code[00CB] <= '0111_000_100_000_000'
 Info: line -1 - symbol[00CB] <= 'System.Byte[]'
-Info: line 9 - code[00CC] <= '0000000000001010'
+Info: line 9 - code[00CC] <= '0000000000000000'
 Info: line -1 - symbol[00CC] <= 'System.Byte[]'
 Info: line 9 - code[00CD] <= '0010_000_000_000_000'
 Info: line -1 - symbol[00CD] <= 'System.Byte[]'
-Warning: value 11111111111111111111111111111001 truncated to value 1111111111111001 in line 114.
-Info: line 9 - code[00CE] <= '1111111111111001'
+Warning: value 11111111111111111111111110110101 truncated to value 1111111110110101 in line 132.
+Info: line 9 - code[00CE] <= '1111111110110101'
 Info: line -1 - symbol[00CE] <= 'System.Byte[]'
-Info: line 9 - code[00CF] <= '0111_000_100_000_000'
+Info: line 9 - code[00CF] <= '0011_000_000_000_011'
 Info: line -1 - symbol[00CF] <= 'System.Byte[]'
-Info: line 9 - code[00D0] <= '0000000001000000'
+Info: line 9 - code[00D0] <= '0010_000_000_000_000'
 Info: line -1 - symbol[00D0] <= 'System.Byte[]'
-Info: line 9 - code[00D1] <= '0011_000_000_000_011'
+Info: line 9 - code[00D1] <= '0000000000100010'
 Info: line -1 - symbol[00D1] <= 'System.Byte[]'
 Info: line 9 - code[00D2] <= '0010_000_000_000_000'
 Info: line -1 - symbol[00D2] <= 'System.Byte[]'
-Warning: value 11111111111111111111111101111110 truncated to value 1111111101111110 in line 121.
-Info: line 9 - code[00D3] <= '1111111101111110'
-Info: line -1 - symbol[00D3] <= 'System.Byte[]'
-Info: line 9 - code[00D4] <= '0111_000_000_101_000'
-Info: line -1 - symbol[00D4] <= 'System.Byte[]'
-Info: line 9 - code[00D5] <= '0001000000000000'
-Info: line -1 - symbol[00D5] <= 'System.Byte[]'
-Info: line 9 - code[00D6] <= '0001_000_000_000_010'
-Info: line -1 - symbol[00D6] <= 'System.Byte[]'
-Info: line 9 - code[00D7] <= '0011_000_000_000_011'
-Info: line -1 - symbol[00D7] <= 'System.Byte[]'
-Info: line 9 - code[00D8] <= '0010_000_000_000_000'
-Info: line -1 - symbol[00D8] <= 'System.Byte[]'
-Info: line 9 - code[00D9] <= '0000000000101001'
-Info: line -1 - symbol[00D9] <= 'System.Byte[]'
-Info: line 9 - code[00DA] <= '0111_000_100_000_000'
-Info: line -1 - symbol[00DA] <= 'System.Byte[]'
-Info: line 9 - code[00DB] <= '0000000000000000'
-Info: line -1 - symbol[00DB] <= 'System.Byte[]'
-Info: line 9 - code[00DC] <= '0010_000_000_000_000'
-Info: line -1 - symbol[00DC] <= 'System.Byte[]'
-Warning: value 11111111111111111111111110110101 truncated to value 1111111110110101 in line 132.
-Info: line 9 - code[00DD] <= '1111111110110101'
-Info: line -1 - symbol[00DD] <= 'System.Byte[]'
-Info: line 9 - code[00DE] <= '0011_000_000_000_011'
-Info: line -1 - symbol[00DE] <= 'System.Byte[]'
-Info: line 9 - code[00DF] <= '0010_000_000_000_000'
-Info: line -1 - symbol[00DF] <= 'System.Byte[]'
-Info: line 9 - code[00E0] <= '0000000000100010'
-Info: line -1 - symbol[00E0] <= 'System.Byte[]'
-Info: line 9 - code[00E1] <= '0010_000_000_000_000'
-Info: line -1 - symbol[00E1] <= 'System.Byte[]'
 Warning: value 11111111111111111111111110111000 truncated to value 1111111110111000 in line 138.
-Info: line 9 - code[00E2] <= '1111111110111000'
-Info: line -1 - symbol[00E2] <= 'System.Byte[]'
-Info: line 9 - code[00E3] <= '0111_000_100_000_000'
-Info: line -1 - symbol[00E3] <= 'System.Byte[]'
-Info: line 9 - code[00E4] <= '0000000001000000'
-Info: line -1 - symbol[00E4] <= 'System.Byte[]'
-Info: line 9 - code[00E5] <= '0111_000_000_100_000'
-Info: line -1 - symbol[00E5] <= 'System.Byte[]'
-Info: line 9 - code[00E6] <= '0000000000100000'
-Info: line -1 - symbol[00E6] <= 'System.Byte[]'
-Info: line 9 - code[00E7] <= '0011_000_000_000_011'
-Info: line -1 - symbol[00E7] <= 'System.Byte[]'
-Info: line 9 - code[00E8] <= '0010_000_000_000_000'
-Info: line -1 - symbol[00E8] <= 'System.Byte[]'
+Info: line 9 - code[00D3] <= '1111111110111000'
+Info: line -1 - symbol[00D3] <= 'System.Byte[]'
+Info: line 9 - code[00D4] <= '0111_000_100_000_000'
+Info: line -1 - symbol[00D4] <= 'System.Byte[]'
+Info: line 9 - code[00D5] <= '0000000001000000'
+Info: line -1 - symbol[00D5] <= 'System.Byte[]'
+Info: line 9 - code[00D6] <= '0111_000_000_100_000'
+Info: line -1 - symbol[00D6] <= 'System.Byte[]'
+Info: line 9 - code[00D7] <= '0000000000100000'
+Info: line -1 - symbol[00D7] <= 'System.Byte[]'
+Info: line 9 - code[00D8] <= '0011_000_000_000_011'
+Info: line -1 - symbol[00D8] <= 'System.Byte[]'
+Info: line 9 - code[00D9] <= '0010_000_000_000_000'
+Info: line -1 - symbol[00D9] <= 'System.Byte[]'
 Warning: value 11111111111111111111111101101000 truncated to value 1111111101101000 in line 146.
-Info: line 9 - code[00E9] <= '1111111101101000'
-Info: line -1 - symbol[00E9] <= 'System.Byte[]'
-Info: line 9 - code[00EA] <= '0111_000_100_000_000'
-Info: line -1 - symbol[00EA] <= 'System.Byte[]'
-Info: line 9 - code[00EB] <= '0001000000000000'
-Info: line -1 - symbol[00EB] <= 'System.Byte[]'
-Info: line 9 - code[00EC] <= '0111_001_000_000_000'
-Info: line -1 - symbol[00EC] <= 'System.Byte[]'
-Info: line 9 - code[00ED] <= '0000000000100000'
-Info: line -1 - symbol[00ED] <= 'System.Byte[]'
-Info: line 9 - code[00EE] <= '0000_000_000_011_000'
-Info: line -1 - symbol[00EE] <= 'System.Byte[]'
-Info: line 9 - code[00EF] <= '0000_111_110_110_000'
-Info: line -1 - symbol[00EF] <= 'System.Byte[]'
-Info: line 9 - code[00F0] <= '1101_000_000_000_000'
-Info: line -1 - symbol[00F0] <= 'System.Byte[]'
+Info: line 9 - code[00DA] <= '1111111101101000'
+Info: line -1 - symbol[00DA] <= 'System.Byte[]'
+Info: line 9 - code[00DB] <= '0111_000_100_000_000'
+Info: line -1 - symbol[00DB] <= 'System.Byte[]'
+Info: line 9 - code[00DC] <= '0001000000000000'
+Info: line -1 - symbol[00DC] <= 'System.Byte[]'
+Info: line 9 - code[00DD] <= '0111_001_000_000_000'
+Info: line -1 - symbol[00DD] <= 'System.Byte[]'
+Info: line 9 - code[00DE] <= '0000000000100000'
+Info: line -1 - symbol[00DE] <= 'System.Byte[]'
+Info: line 9 - code[00DF] <= '0000_000_000_011_000'
+Info: line -1 - symbol[00DF] <= 'System.Byte[]'
+Info: line 9 - code[00E0] <= '0000_111_110_110_000'
+Info: line -1 - symbol[00E0] <= 'System.Byte[]'
+Info: line 9 - code[00E1] <= '1101_000_000_000_000'
+Info: line -1 - symbol[00E1] <= 'System.Byte[]'
 Warning: value 11111111111111111111111111111101 truncated to value 1111111111111101 in line 154.
-Info: line 9 - code[00F1] <= '1111111111111101'
-Info: line -1 - symbol[00F1] <= 'System.Byte[]'
-Info: line 9 - code[00F2] <= '0000_111_110_110_000'
-Info: line -1 - symbol[00F2] <= 'System.Byte[]'
-Info: line 9 - code[00F3] <= '0111_000_100_100_000'
-Info: line -1 - symbol[00F3] <= 'System.Byte[]'
-Info: line 9 - code[00F4] <= '0000000000000000'
-Info: line -1 - symbol[00F4] <= 'System.Byte[]'
-Info: line 9 - code[00F5] <= '0010_000_000_000_000'
-Info: line -1 - symbol[00F5] <= 'System.Byte[]'
+Info: line 9 - code[00E2] <= '1111111111111101'
+Info: line -1 - symbol[00E2] <= 'System.Byte[]'
+Info: line 9 - code[00E3] <= '0000_111_110_110_000'
+Info: line -1 - symbol[00E3] <= 'System.Byte[]'
+Info: line 9 - code[00E4] <= '0111_000_100_100_000'
+Info: line -1 - symbol[00E4] <= 'System.Byte[]'
+Info: line 9 - code[00E5] <= '0000000000000000'
+Info: line -1 - symbol[00E5] <= 'System.Byte[]'
+Info: line 9 - code[00E6] <= '0010_000_000_000_000'
+Info: line -1 - symbol[00E6] <= 'System.Byte[]'
 Warning: value 11111111111111111111111110011100 truncated to value 1111111110011100 in line 159.
-Info: line 9 - code[00F6] <= '1111111110011100'
+Info: line 9 - code[00E7] <= '1111111110011100'
+Info: line -1 - symbol[00E7] <= 'System.Byte[]'
+Info: line 9 - code[00E8] <= '0000_000_000_100_010'
+Info: line -1 - symbol[00E8] <= 'System.Byte[]'
+Info: line 9 - code[00E9] <= '0001_000_000_000_010'
+Info: line -1 - symbol[00E9] <= 'System.Byte[]'
+Info: line 9 - code[00EA] <= '0000_111_000_000_011'
+Info: line -1 - symbol[00EA] <= 'System.Byte[]'
+Info: line 9 - code[00EB] <= '0000_000_000_111_011'
+Info: line -1 - symbol[00EB] <= 'System.Byte[]'
+Info: line 9 - code[00EC] <= '0111_000_000_100_000'
+Info: line -1 - symbol[00EC] <= 'System.Byte[]'
+Info: line 9 - code[00ED] <= '1111111100000000'
+Info: line -1 - symbol[00ED] <= 'System.Byte[]'
+Info: line 9 - code[00EE] <= '0000_000_111_110_000'
+Info: line -1 - symbol[00EE] <= 'System.Byte[]'
+Info: line 9 - code[00EF] <= '0000_001_000_010_010'
+Info: line -1 - symbol[00EF] <= 'System.Byte[]'
+Info: line 9 - code[00F0] <= '0000_111_000_110_000'
+Info: line -1 - symbol[00F0] <= 'System.Byte[]'
+Info: line 9 - code[00F1] <= '0000_001_000_000_010'
+Info: line -1 - symbol[00F1] <= 'System.Byte[]'
+Info: line 9 - code[00F2] <= '0001_000_000_000_010'
+Info: line -1 - symbol[00F2] <= 'System.Byte[]'
+Info: line 9 - code[00F3] <= '0000_111_000_000_011'
+Info: line -1 - symbol[00F3] <= 'System.Byte[]'
+Info: line 9 - code[00F4] <= '0111_000_000_100_000'
+Info: line -1 - symbol[00F4] <= 'System.Byte[]'
+Info: line 9 - code[00F5] <= '1111111100000000'
+Info: line -1 - symbol[00F5] <= 'System.Byte[]'
+Info: line 9 - code[00F6] <= '0000_000_100_110_000'
 Info: line -1 - symbol[00F6] <= 'System.Byte[]'
-Info: line 9 - code[00F7] <= '0000_000_000_100_010'
+Info: line 9 - code[00F7] <= '0000_000_000_010_000'
 Info: line -1 - symbol[00F7] <= 'System.Byte[]'
-Info: line 9 - code[00F8] <= '0001_000_000_000_010'
+Info: line 9 - code[00F8] <= '0000_001_000_110_000'
 Info: line -1 - symbol[00F8] <= 'System.Byte[]'
 Info: line 9 - code[00F9] <= '0000_111_000_000_011'
 Info: line -1 - symbol[00F9] <= 'System.Byte[]'
-Info: line 9 - code[00FA] <= '0000_000_000_111_011'
+Info: line 9 - code[00FA] <= '0000_000_000_100_010'
 Info: line -1 - symbol[00FA] <= 'System.Byte[]'
-Info: line 9 - code[00FB] <= '0111_000_000_100_000'
+Info: line 9 - code[00FB] <= '0000_001_000_000_010'
 Info: line -1 - symbol[00FB] <= 'System.Byte[]'
-Info: line 9 - code[00FC] <= '1111111100000000'
+Info: line 9 - code[00FC] <= '0001_000_000_000_010'
 Info: line -1 - symbol[00FC] <= 'System.Byte[]'
-Info: line 9 - code[00FD] <= '0000_000_111_110_000'
+Info: line 9 - code[00FD] <= '0000_000_111_000_011'
 Info: line -1 - symbol[00FD] <= 'System.Byte[]'
-Info: line 9 - code[00FE] <= '0000_001_000_010_010'
+Info: line 9 - code[00FE] <= '0000_111_000_000_011'
 Info: line -1 - symbol[00FE] <= 'System.Byte[]'
-Info: line 9 - code[00FF] <= '0000_111_000_110_000'
+Info: line 9 - code[00FF] <= '0111_000_100_000_000'
 Info: line -1 - symbol[00FF] <= 'System.Byte[]'
-Info: line 9 - code[0100] <= '0000_001_000_000_010'
+Info: line 9 - code[0100] <= '0000000001000000'
 Info: line -1 - symbol[0100] <= 'System.Byte[]'
-Info: line 9 - code[0101] <= '0001_000_000_000_010'
+Info: line 9 - code[0101] <= '0011_000_000_000_011'
 Info: line -1 - symbol[0101] <= 'System.Byte[]'
-Info: line 9 - code[0102] <= '0000_111_000_000_011'
+Info: line 9 - code[0102] <= '0010_000_000_000_000'
 Info: line -1 - symbol[0102] <= 'System.Byte[]'
-Info: line 9 - code[0103] <= '0111_000_000_100_000'
-Info: line -1 - symbol[0103] <= 'System.Byte[]'
-Info: line 9 - code[0104] <= '1111111100000000'
-Info: line -1 - symbol[0104] <= 'System.Byte[]'
-Info: line 9 - code[0105] <= '0000_000_100_110_000'
-Info: line -1 - symbol[0105] <= 'System.Byte[]'
-Info: line 9 - code[0106] <= '0000_000_000_010_000'
-Info: line -1 - symbol[0106] <= 'System.Byte[]'
-Info: line 9 - code[0107] <= '0000_001_000_110_000'
-Info: line -1 - symbol[0107] <= 'System.Byte[]'
-Info: line 9 - code[0108] <= '0000_111_000_000_011'
-Info: line -1 - symbol[0108] <= 'System.Byte[]'
-Info: line 9 - code[0109] <= '0000_000_000_100_010'
-Info: line -1 - symbol[0109] <= 'System.Byte[]'
-Info: line 9 - code[010A] <= '0000_001_000_000_010'
-Info: line -1 - symbol[010A] <= 'System.Byte[]'
-Info: line 9 - code[010B] <= '0001_000_000_000_010'
-Info: line -1 - symbol[010B] <= 'System.Byte[]'
-Info: line 9 - code[010C] <= '0000_000_111_000_011'
-Info: line -1 - symbol[010C] <= 'System.Byte[]'
-Info: line 9 - code[010D] <= '0000_111_000_000_011'
-Info: line -1 - symbol[010D] <= 'System.Byte[]'
-Info: line 9 - code[010E] <= '0111_000_100_000_000'
-Info: line -1 - symbol[010E] <= 'System.Byte[]'
-Info: line 9 - code[010F] <= '0000000001000000'
-Info: line -1 - symbol[010F] <= 'System.Byte[]'
-Info: line 9 - code[0110] <= '0011_000_000_000_011'
-Info: line -1 - symbol[0110] <= 'System.Byte[]'
-Info: line 9 - code[0111] <= '0010_000_000_000_000'
-Info: line -1 - symbol[0111] <= 'System.Byte[]'
 Warning: value 11111111111111111111111100111111 truncated to value 1111111100111111 in line 191.
-Info: line 9 - code[0112] <= '1111111100111111'
+Info: line 9 - code[0103] <= '1111111100111111'
+Info: line -1 - symbol[0103] <= 'System.Byte[]'
+Info: line 9 - code[0104] <= '0000_001_000_000_010'
+Info: line -1 - symbol[0104] <= 'System.Byte[]'
+Info: line 9 - code[0105] <= '0000_000_100_000_010'
+Info: line -1 - symbol[0105] <= 'System.Byte[]'
+Info: line 9 - code[0106] <= '0111_000_000_101_000'
+Info: line -1 - symbol[0106] <= 'System.Byte[]'
+Info: line 9 - code[0107] <= '0001000000000000'
+Info: line -1 - symbol[0107] <= 'System.Byte[]'
+Info: line 9 - code[0108] <= '0000_111_110_110_000'
+Info: line -1 - symbol[0108] <= 'System.Byte[]'
+Info: line 9 - code[0109] <= '0001_000_000_000_010'
+Info: line -1 - symbol[0109] <= 'System.Byte[]'
+Info: line 9 - code[010A] <= '0000_000_000_111_011'
+Info: line -1 - symbol[010A] <= 'System.Byte[]'
+Info: line 9 - code[010B] <= '0111_000_000_100_000'
+Info: line -1 - symbol[010B] <= 'System.Byte[]'
+Info: line 9 - code[010C] <= '0001000000000000'
+Info: line -1 - symbol[010C] <= 'System.Byte[]'
+Info: line 9 - code[010D] <= '0111_000_100_000_000'
+Info: line -1 - symbol[010D] <= 'System.Byte[]'
+Info: line 9 - code[010E] <= '0000000000000000'
+Info: line -1 - symbol[010E] <= 'System.Byte[]'
+Info: line 9 - code[010F] <= '0000_001_111_000_000'
+Info: line -1 - symbol[010F] <= 'System.Byte[]'
+Info: line 9 - code[0110] <= '0000_111_110_110_000'
+Info: line -1 - symbol[0110] <= 'System.Byte[]'
+Info: line 9 - code[0111] <= '0000_000_010_000_000'
+Info: line -1 - symbol[0111] <= 'System.Byte[]'
+Info: line 9 - code[0112] <= '0111_000_001_000_000'
 Info: line -1 - symbol[0112] <= 'System.Byte[]'
-Info: line 9 - code[0113] <= '0000_001_000_000_010'
+Info: line 9 - code[0113] <= '0000100000000000'
 Info: line -1 - symbol[0113] <= 'System.Byte[]'
-Info: line 9 - code[0114] <= '0000_000_100_000_010'
+Info: line 9 - code[0114] <= '1011_000_000_000_000'
 Info: line -1 - symbol[0114] <= 'System.Byte[]'
-Info: line 9 - code[0115] <= '0111_000_000_101_000'
-Info: line -1 - symbol[0115] <= 'System.Byte[]'
-Info: line 9 - code[0116] <= '0001000000000000'
-Info: line -1 - symbol[0116] <= 'System.Byte[]'
-Info: line 9 - code[0117] <= '0000_111_110_110_000'
-Info: line -1 - symbol[0117] <= 'System.Byte[]'
-Info: line 9 - code[0118] <= '0001_000_000_000_010'
-Info: line -1 - symbol[0118] <= 'System.Byte[]'
-Info: line 9 - code[0119] <= '0000_000_000_111_011'
-Info: line -1 - symbol[0119] <= 'System.Byte[]'
-Info: line 9 - code[011A] <= '0111_000_000_100_000'
-Info: line -1 - symbol[011A] <= 'System.Byte[]'
-Info: line 9 - code[011B] <= '0001000000000000'
-Info: line -1 - symbol[011B] <= 'System.Byte[]'
-Info: line 9 - code[011C] <= '0111_000_100_000_000'
-Info: line -1 - symbol[011C] <= 'System.Byte[]'
-Info: line 9 - code[011D] <= '0000000000000000'
-Info: line -1 - symbol[011D] <= 'System.Byte[]'
-Info: line 9 - code[011E] <= '0000_001_111_000_000'
-Info: line -1 - symbol[011E] <= 'System.Byte[]'
-Info: line 9 - code[011F] <= '0000_111_110_110_000'
-Info: line -1 - symbol[011F] <= 'System.Byte[]'
-Info: line 9 - code[0120] <= '0000_000_010_000_000'
-Info: line -1 - symbol[0120] <= 'System.Byte[]'
-Info: line 9 - code[0121] <= '0111_000_001_000_000'
-Info: line -1 - symbol[0121] <= 'System.Byte[]'
-Info: line 9 - code[0122] <= '0000100000000000'
-Info: line -1 - symbol[0122] <= 'System.Byte[]'
-Info: line 9 - code[0123] <= '1011_000_000_000_000'
-Info: line -1 - symbol[0123] <= 'System.Byte[]'
 Warning: value 11111111111111111111111111010011 truncated to value 1111111111010011 in line 210.
-Info: line 9 - code[0124] <= '1111111111010011'
-Info: line -1 - symbol[0124] <= 'System.Byte[]'
-Info: line 9 - code[0125] <= '0010_000_000_000_000'
-Info: line -1 - symbol[0125] <= 'System.Byte[]'
+Info: line 9 - code[0115] <= '1111111111010011'
+Info: line -1 - symbol[0115] <= 'System.Byte[]'
+Info: line 9 - code[0116] <= '0010_000_000_000_000'
+Info: line -1 - symbol[0116] <= 'System.Byte[]'
 Warning: value 11111111111111111111111111111000 truncated to value 1111111111111000 in line 212.
-Info: line 9 - code[0126] <= '1111111111111000'
+Info: line 9 - code[0117] <= '1111111111111000'
+Info: line -1 - symbol[0117] <= 'System.Byte[]'
+Info: line 9 - code[0118] <= '0000_000_000_000_011'
+Info: line -1 - symbol[0118] <= 'System.Byte[]'
+Info: line 9 - code[0119] <= '0000_000_111_000_011'
+Info: line -1 - symbol[0119] <= 'System.Byte[]'
+Info: line 9 - code[011A] <= '0000_000_001_000_110'
+Info: line -1 - symbol[011A] <= 'System.Byte[]'
+Info: line 9 - code[011B] <= '1011_000_000_000_000'
+Info: line -1 - symbol[011B] <= 'System.Byte[]'
+Info: line 9 - code[011C] <= '0000000000000010'
+Info: line -1 - symbol[011C] <= 'System.Byte[]'
+Info: line 9 - code[011D] <= '0111_111_111_111_111'
+Info: line -1 - symbol[011D] <= 'System.Byte[]'
+Info: line 9 - code[011E] <= '0000_000_000_111_011'
+Info: line -1 - symbol[011E] <= 'System.Byte[]'
+Info: line 9 - code[011F] <= '0000_000_000_001_110'
+Info: line -1 - symbol[011F] <= 'System.Byte[]'
+Info: line 9 - code[0120] <= '1101_000_000_000_000'
+Info: line -1 - symbol[0120] <= 'System.Byte[]'
+Info: line 9 - code[0121] <= '0000000000000010'
+Info: line -1 - symbol[0121] <= 'System.Byte[]'
+Info: line 9 - code[0122] <= '0111_111_111_111_111'
+Info: line -1 - symbol[0122] <= 'System.Byte[]'
+Info: line 9 - code[0123] <= '0000_111_000_000_011'
+Info: line -1 - symbol[0123] <= 'System.Byte[]'
+Info: line 9 - code[0124] <= '0111_001_100_100_000'
+Info: line -1 - symbol[0124] <= 'System.Byte[]'
+Info: line 9 - code[0125] <= '0000000000000000'
+Info: line -1 - symbol[0125] <= 'System.Byte[]'
+Info: line 9 - code[0126] <= '0000_001_000_000_010'
 Info: line -1 - symbol[0126] <= 'System.Byte[]'
+Info: line 9 - code[0127] <= '0000_000_000_100_010'
+Info: line -1 - symbol[0127] <= 'System.Byte[]'
+Info: line 9 - code[0128] <= '0000_000_100_000_010'
+Info: line -1 - symbol[0128] <= 'System.Byte[]'
+Info: line 9 - code[0129] <= '0000_000_000_000_010'
+Info: line -1 - symbol[0129] <= 'System.Byte[]'
+Info: line 9 - code[012A] <= '0001_000_000_000_010'
+Info: line -1 - symbol[012A] <= 'System.Byte[]'
 Generating code: 
-Warning in line 9: found 217 uninitialized locations:
-0127 .. 01FF
+Warning in line 9: found 213 uninitialized locations:
+012B .. 01FF
 
 Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_code.mif' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_code.cgf' ... Done.
-Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_code.coe' (LF only) ... Done (initialized locations: 295, empty locations: 217, total locations: 512).
+Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_code.coe' (LF only) ... Done (initialized locations: 299, empty locations: 213, total locations: 512).
 Generating code 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_code.vhd' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_code.hex' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_code_lendian.bin' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_code_bendian.bin' ... Done.
 Generating symbol: 
 Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_sym.mif' ... Done.
-Writ
+Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_sym.cgf' ... Done.
+Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_sym.coe' (LF only) ... Done (initialized locations: 512, empty locations: 0, total locations: 512).
+Generating code 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_sym.vhd' ... Done.
+Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sifp\prog\helloworld_sym.hex' ... Done.
+Writing 'C:\Users\zoltanp\Documents\HexCalc\sys_sif

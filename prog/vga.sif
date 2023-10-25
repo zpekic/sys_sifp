@@ -196,12 +196,12 @@ DisplayAt:	PUSHX;	// save column
 			STA, M[Y+X];
 			RTS;
 
-QTest:		PUSHY;
+VGATest:	PUSHY;
 			LDYI;
 			.data VGA_BASE;
 			LDXI;
 			.data 0;
-QTestLoop:	LDA, X;
+VGATLoop:	LDA, X;
 			STA, M[Y+X];
 			INX;
 			CPXI;
@@ -209,5 +209,28 @@ QTestLoop:	LDA, X;
 			IF_XZ;
 			.branchto @Str2VGAExit - $;
 			BRANCH;
-			.to @QTestLoop - $;
+			.to @VGATLoop - $;
+
+// test stack operations
+StackTest:	PUSHF;
+			PUSHX;
+			CPX, M[S];
+			IF_XZ; 
+			.branchto @ContY - $;
+			HALT;	// ERROR!
+ContY:		PUSHY;
+			CPY, M[S];
+			IF_YZ;
+			.branchto @ContA - $;
+			HALT;	// ERROR!
+ContA:		PUSHA;
+			LDA, LDY, LDX, M[IMM];
+			.data 0;
+			POPA;
+			POPY;
+			POPX;
+			POPF;
+			RTS;
+// end test			
+			
 			

@@ -50,7 +50,7 @@ architecture Behavioral of reg_stackpointer is
 -- actual register value
 signal r: std_logic_vector(15 downto 0);
 -- helpers
-signal y: std_logic_vector(16 downto 0);
+signal y: std_logic_vector(17 downto 0);
 signal y_z: std_logic;
 
 begin
@@ -63,7 +63,7 @@ begin
 		if (rising_edge(clk)) then
 			case operation is
 				when r_s_M_POP | r_s_M_PUSH | r_s_ADS | r_s_LDS =>
-					r <= y(15 downto 0);
+					r <= y(16 downto 1);
 				when others =>
 					null;
 			end case;
@@ -73,14 +73,14 @@ end process;
 
 -- ALU is adder generating carry_out and zero flags
 with operation select y <=
-      std_logic_vector(unsigned('0' & r) - unsigned(din)) when r_s_CPS,
-      std_logic_vector(unsigned('0' & r) + 1) when r_s_M_POP,
-      std_logic_vector(unsigned('0' & r) - 1) when r_s_M_PUSH,
-      '0' & din when r_s_LDS,
-      std_logic_vector(unsigned('0' & r) + unsigned(din)) when r_s_ADS,
-		'0' & r when others;
+      std_logic_vector(unsigned('0' & r & '1') + unsigned('0' & (din xor X"FFFF") & '1')) when r_s_CPS,
+      std_logic_vector(unsigned('0' & r & '1') + unsigned('0' & (din and X"0000") & '1')) when r_s_M_POP,
+      std_logic_vector(unsigned('0' & r & '0') + unsigned('0' & (din or  X"FFFF") & '0')) when r_s_M_PUSH,
+      std_logic_vector(unsigned('0' & r & '0') + unsigned('0' & din & '0')) when r_s_ADS,
+      '0' & din & '0' when r_s_LDS,
+		'0' & r & '0' when others;
 		
-y_z <= '1' when (y(15 downto 0) = X"0000") else '0';
+y_z <= '1' when (y(16 downto 1) = X"0000") else '0';
 
 -- zero flag output
 with operation select zo <=
@@ -93,14 +93,14 @@ with operation select zo <=
 
 -- carry flag output
 with operation select co <=
-      y(16) when r_s_CPS,
-      y_z when r_s_M_POP,
-      y_z when r_s_M_PUSH,
-      y(16) when r_s_ADS,
+      y(17) when r_s_CPS,
+      y(17) when r_s_M_POP,
+      y(17) when r_s_M_PUSH,
+      y(17) when r_s_ADS,
 		ci when others;
 
 -- value
-reg <= y(15 downto 0) when (operation = r_s_M_PUSH) else r;
+reg <= y(16 downto 1) when (operation = r_s_M_PUSH) else r;
 
 -- projecting as data
 reg_d <= '1' when (operation = r_s_STS) else '0';
