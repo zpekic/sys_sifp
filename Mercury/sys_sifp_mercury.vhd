@@ -165,6 +165,7 @@ signal VMA: std_logic;		-- valid memory address
 signal FETCH: std_logic;	-- fetching instruction (PnD is also 1)
 signal DONE: std_logic;		-- sync'd with READY
 signal HALT: std_logic;		-- CPU has halted 
+signal OPCNT: std_logic_vector(3 downto 0);	-- operations per current instruction (0 to 5)
 signal RnW: std_logic;		-- Read 1, Write 0
 signal PnD: std_logic;		-- Program 1, Data 0 (can double address space for Harvard architecture)
 -- CPU bus in/out
@@ -173,7 +174,9 @@ signal DBUS: std_logic_vector(15 downto 0);
 -- other
 signal tracer_ready, tracer_continue: std_logic;
 signal led_data: std_logic_vector(15 downto 0);
+signal perfcnt_value: std_logic_vector(31 downto 0);
 signal bus_valid: std_logic;
+signal in_or_op: std_logic_vector(3 downto 0);
 
 begin   
 
@@ -206,6 +209,7 @@ cpu: entity work.SIFP16 Port map (
 		PnD => PnD,
 		HALT => HALT,
 		DONE => DONE,
+		OPCNT => OPCNT,
 		FETCH => FETCH
 	);
 
@@ -218,7 +222,7 @@ cpu: entity work.SIFP16 Port map (
 			txd_clk => clkgen_baudrate,
 			continue => '0', --continue,  
 			ready => tracer_ready,			-- freezes CPU when low
-			txd => PMOD_RXD1,					-- output trace (to any TTY of special tracer running on the host
+			txd => PMOD_RXD0,					-- output trace (to any TTY of special tracer running on the host
 			load => btn_traceload,			-- load mask register if high
 			sel(3 downto 0) => sw_tracesel,		-- set mask register
 			REGW => RegWrite,
@@ -386,8 +390,8 @@ acia0: entity work.uart Port map (
 			RS => ABUS(0),
 			D => DBUS(7 downto 0),
 			debug => open,
-			TXD => PMOD_RXD0,
-			RXD => PMOD_TXD0
+			TXD => PMOD_RXD1,
+			RXD => PMOD_TXD1
 		);
 
 -- LEDs
@@ -412,7 +416,8 @@ led4x7: entity work.fourdigitsevensegled port map (
 	  segment(7) => DOT
 	 );
 			 
-led_data <= ABUS when (btn_ledsel = '1') else DBUS;
+--led_data <= ABUS when (btn_ledsel = '1') else DBUS;
+led_data <= perfcnt_value(31 downto 16);-- when (btn_ledsel = '1') else perfcnt_value(15 downto 0);
 bus_valid <= VMA or (not RnW);	-- bus signals defined if valid memory address, or register debug output
 			 
 -- generate debouncers for 4 buttons and 8 for switches to clean input signals
@@ -437,4 +442,19 @@ begin
 	);
 end generate;
 		
+-- count instructions or operations
+perfcnt: entity work.freqcounter Port map ( 
+		reset => RESET,
+      clk => freq1Hz,
+      freq => FETCH,
+		bcd => '1',
+		add(31 downto 4) => X"0000000",
+		add(3 downto 0) => in_or_op,
+		cin => '0',
+		cout => open,
+      value => perfcnt_value
+	);
+	
+in_or_op <= X"2" when (btn_ledsel = '0') else (OPCNT(2 downto 0) & '0'); -- all both are *2 because base period is 0.5s
+	
 end;

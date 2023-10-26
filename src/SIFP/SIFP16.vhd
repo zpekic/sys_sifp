@@ -43,6 +43,7 @@ entity SIFP16 is
            PnD : out  STD_LOGIC;
 			  HALT: out STD_LOGIC;
 			  DONE: out STD_LOGIC;
+			  OPCNT: out STD_LOGIC_VECTOR(3 downto 0);	-- operations per instruction
            FETCH : out  STD_LOGIC);
 end SIFP16;
 
@@ -132,6 +133,12 @@ signal reg_p_d, reg_a_d, reg_x_d, reg_y_d, reg_s_d: std_logic;
 signal int_abus: std_logic_vector(15 downto 0);
 signal int_dbus, int_fdbus: std_logic_vector(15 downto 0);
 signal int_rnw, int_vma, int_pnd: std_logic;
+signal opr_vector: std_logic_vector(4 downto 0);
+alias opr_p: std_logic is opr_vector(4);
+alias opr_a: std_logic is opr_vector(3);
+alias opr_x: std_logic is opr_vector(2);
+alias opr_y: std_logic is opr_vector(1);
+alias opr_s: std_logic is opr_vector(0);
 
 begin
 
@@ -250,6 +257,15 @@ i_is_ftos <= '1' when (cpu_uinstruction = c_FTOS) else '0';
 i_is_popf <= '1' when (cpu_uinstruction = c_POPF) else '0';
 i_is_pushf <= '1' when (cpu_uinstruction = c_PUSHF) else '0';
 i_is_halt <= '1' when (cpu_uinstruction = c_HALT) else '0';
+
+-- TODO: move operation count sense lines to registers below
+opr_p <= '0' when (reg_i(15 downto 12) = X"0") else '1';
+opr_a <= '0' when (reg_i(11 downto 9) = O"0") else '1';
+opr_x <= '0' when (reg_i(8 downto 6) = O"0") else '1';
+opr_y <= '0' when (reg_i(5 downto 3) = O"0") else '1';
+opr_s <= '0' when (reg_i(2 downto 0) = O"0") else '1';
+
+OPCNT <= bitcnt5(to_integer(unsigned(opr_vector)));
 
 -- programmable registers
 p_reg: entity work.reg_progcounter Port map ( 

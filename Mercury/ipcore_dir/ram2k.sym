@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <symbol version="7" name="ram2k">
     <symboltype>BLOCK</symboltype>
-    <timestamp>2023-10-15T7:36:50</timestamp>
+    <timestamp>2023-10-26T2:21:11</timestamp>
     <pin polarity="Input" x="0" y="80" name="addra[10:0]" />
     <pin polarity="Input" x="0" y="112" name="dina[7:0]" />
     <pin polarity="Input" x="0" y="144" name="ena" />

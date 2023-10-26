@@ -29,13 +29,20 @@ type mem1k16 is array(0 to 1023) of std_logic_vector(15 downto 0);
 --type mem512x8 is array(0 to 511) of std_logic_vector(7 downto 0);
 --type mem64x12 is array(0 to 63) of std_logic_vector(11 downto 0);
 --type mem64x4 is array(0 to 63) of std_logic_vector(3 downto 0);
---type mem16x40 is array (0 to 15) of std_logic_vector(39 downto 0);
+type mem32x4 is array (0 to 31) of std_logic_vector(3 downto 0);
 type mem16x20 is array (0 to 15) of std_logic_vector(19 downto 0);
 type mem16x8 is array(0 to 15) of std_logic_vector(7 downto 0);
 --type mem4x14 is array(0 to 3) of std_logic_vector(13 downto 0);
 --type mem4x10 is array(0 to 3) of std_logic_vector(9 downto 0);
 
 impure function init_filememory(file_name : in string; depth: in integer; default_value: std_logic_vector(15 downto 0)) return mem1k16;
+
+constant bitcnt5: mem32x4 := (
+	X"0",	X"1", X"1", X"2", X"1", X"2", X"2", X"3",
+	X"1",	X"2", X"2", X"3", X"2", X"3", X"3", X"4",
+	X"1",	X"2", X"2", X"3", X"2", X"3", X"3", X"4",
+	X"2",	X"3", X"3", X"4", X"3", X"4", X"4", X"5"
+);
 
 constant hex2ascii: mem16x8 := (
 	c('0'),

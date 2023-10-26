@@ -17,20 +17,30 @@
 //	Execution starts at location 0
 //	---------------------------------------------------------------------------
 			NOP;
-Boot:		MARK2;
-			BRANCH;
-			.to @VGATest - $;
+//			MARK2;
+//			BRANCH;
+//			.to @VGATest - $;
 
+			LDYI;
+			.data UART_CONTROL;
+			LDAI;
+			.data 3;	// reset
+			STA, M[Y];
+			LDAI;
+			.data 0x10;	// all int off, 8N2, baudrate / 1
+			STA, M[Y];
+			
 			LDXI;
 			.data @StrClear;	// points to clear string
-DeadLoop:	MARK2;
-			BRANCH;
-			.to @Str2UART - $;
+DeadLoop:	NOP;
 			MARK2;
 			BRANCH;
-			.to @Str2VGA - $;
+			.to @Str2UART - $;
 			LDXI;
 			.data @StrHWorld;	// points to "Hello World!"
+//			MARK2;
+//			BRANCH;
+//			.to @Str2VGA - $;
 			BRANCH,;
 			.to @DeadLoop - $;
 			

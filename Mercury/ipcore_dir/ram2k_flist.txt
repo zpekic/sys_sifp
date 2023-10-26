@@ -1,7 +1,7 @@
 # Output products list for <ram2k>
+_xmsgs\pn_parser.xmsgs
 ram2k.asy
 ram2k.gise
-ram2k.mif
 ram2k.ngc
 ram2k.sym
 ram2k.vhd
