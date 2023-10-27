@@ -442,11 +442,11 @@ begin
 	);
 end generate;
 		
--- count instructions or operations
+-- count instructions or operations per 1 second
 perfcnt: entity work.freqcounter Port map ( 
 		reset => RESET,
       clk => freq1Hz,
-      freq => FETCH,
+      freq => OPCNT(3),
 		bcd => '1',
 		add(31 downto 4) => X"0000000",
 		add(3 downto 0) => in_or_op,
@@ -455,6 +455,6 @@ perfcnt: entity work.freqcounter Port map (
       value => perfcnt_value
 	);
 	
-in_or_op <= X"2" when (btn_ledsel = '0') else (OPCNT(2 downto 0) & '0'); -- all both are *2 because base period is 0.5s
+in_or_op <= X"2" when (btn_ledsel = '0') else OPCNT(2 downto 0) & '0'; -- all both are *2 because base period is 0.5s
 	
 end;

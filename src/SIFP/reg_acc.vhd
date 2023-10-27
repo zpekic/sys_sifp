@@ -42,7 +42,8 @@ entity reg_acc is
            zo : out  STD_LOGIC;
            co : out  STD_LOGIC;
            reg_d : out  STD_LOGIC;
-           reg_a : out  STD_LOGIC);
+           reg_a : out  STD_LOGIC;
+			  active: out STD_LOGIC);
 end reg_acc;
 
 architecture Behavioral of reg_acc is
@@ -109,6 +110,9 @@ reg_d <= '1' when (operation = r_a_STA) else '0';
 
 -- projecting as address
 reg_a <= '0';
+
+-- active when the operation is anything except NOA
+active <= '0' when (operation = r_a_NOA) else '1';
 
 ---- Start boilerplate code (use with utmost caution!)
 -- with cpu_r_a select r_a <=

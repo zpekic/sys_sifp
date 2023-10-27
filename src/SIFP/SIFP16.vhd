@@ -258,14 +258,8 @@ i_is_popf <= '1' when (cpu_uinstruction = c_POPF) else '0';
 i_is_pushf <= '1' when (cpu_uinstruction = c_PUSHF) else '0';
 i_is_halt <= '1' when (cpu_uinstruction = c_HALT) else '0';
 
--- TODO: move operation count sense lines to registers below
-opr_p <= '0' when (reg_i(15 downto 12) = X"0") else '1';
-opr_a <= '0' when (reg_i(11 downto 9) = O"0") else '1';
-opr_x <= '0' when (reg_i(8 downto 6) = O"0") else '1';
-opr_y <= '0' when (reg_i(5 downto 3) = O"0") else '1';
-opr_s <= '0' when (reg_i(2 downto 0) = O"0") else '1';
-
-OPCNT <= bitcnt5(to_integer(unsigned(opr_vector)));
+-- operation count
+OPCNT <= (not cpu_irexe) & bitcnt5(to_integer(unsigned(opr_vector)))(2 downto 0);
 
 -- programmable registers
 p_reg: entity work.reg_progcounter Port map ( 
@@ -283,7 +277,8 @@ p_reg: entity work.reg_progcounter Port map (
 			cond(0) => flag_ac,
 			reg => p,
 			reg_d => reg_p_d,
-			reg_a => reg_p_a
+			reg_a => reg_p_a,
+			active => opr_p
 		);
 
 a_reg: entity work.reg_acc Port map ( 
@@ -297,7 +292,8 @@ a_reg: entity work.reg_acc Port map (
 			zo => reg_az,
 			co => reg_ac,
 			reg_d => reg_a_d,
-			reg_a => open				-- A[ccumulator] never projects address
+			reg_a => open,				-- A[ccumulator] never projects address
+			active => opr_a
 		);
 
 x_reg: entity work.reg_index Port map ( 
@@ -311,7 +307,8 @@ x_reg: entity work.reg_index Port map (
 			zo => reg_xz,
 			co => reg_xc,
 			reg_d => reg_x_d,
-			reg_a => reg_x_a
+			reg_a => reg_x_a,
+			active => opr_x
 		);
 
 y_reg: entity work.reg_index Port map ( 
@@ -325,7 +322,8 @@ y_reg: entity work.reg_index Port map (
 			zo => reg_yz,
 			co => reg_yc,
 			reg_d => reg_y_d,
-			reg_a => reg_y_a
+			reg_a => reg_y_a,
+			active => opr_y
 		);
 
 s_reg: entity work.reg_stackpointer Port map ( 
@@ -339,7 +337,8 @@ s_reg: entity work.reg_stackpointer Port map (
 			zo => reg_sz,
 			co => reg_sc,
 			reg_d => reg_s_d,
-			reg_a => reg_s_a
+			reg_a => reg_s_a,
+			active => opr_s
 		);
 
 end Behavioral;

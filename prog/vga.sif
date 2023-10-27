@@ -196,20 +196,23 @@ DisplayAt:	PUSHX;	// save column
 			STA, M[Y+X];
 			RTS;
 
-VGATest:	PUSHY;
+VGATest:	PUSHA;		// keep A on stack top
 			LDYI;
 			.data VGA_BASE;
 			LDXI;
 			.data 0;
 VGATLoop:	LDA, X;
+			ADC, M[S];	// add base value from A
 			STA, M[Y+X];
 			INX;
 			CPXI;
 			.data VGA_COLS * VGA_ROWS;
-			IF_XZ;
-			.branchto @Str2VGAExit - $;
+			IF_X_GE;
+			.branchto @VGATestEx - $;
 			BRANCH;
 			.to @VGATLoop - $;
+VGATestEx:	POPA;
+			RTS;
 
 // test stack operations
 StackTest:	PUSHF;

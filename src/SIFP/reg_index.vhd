@@ -42,7 +42,8 @@ entity reg_index is
            zo : out  STD_LOGIC;
            co : out  STD_LOGIC;
            reg_d : out  STD_LOGIC;
-           reg_a : out  STD_LOGIC);
+           reg_a : out  STD_LOGIC;
+			  active: out STD_LOGIC);
 end reg_index;
 
 architecture Behavioral of reg_index is
@@ -107,6 +108,9 @@ reg_d <= '1' when (operation = r_x_STX) else '0';
 
 -- projecting as address
 reg_a <= '1' when (operation = r_x_M_X) else '0';
+
+-- active when the operation is anything except NOX/NOY
+active <= '0' when (operation = r_x_NOX) else '1';
 
 ---- Start boilerplate code (use with utmost caution!)
 -- with cpu_r_x select r_x <=

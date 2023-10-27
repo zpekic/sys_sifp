@@ -39,7 +39,8 @@ entity reg_progcounter is
            cond : in  STD_LOGIC_VECTOR(7 downto 0);
            reg : out STD_LOGIC_VECTOR(15 downto 0);
            reg_d : out  STD_LOGIC;
-           reg_a : out  STD_LOGIC);
+           reg_a : out  STD_LOGIC;
+			  active: out STD_LOGIC);
 end reg_progcounter;
 
 architecture Behavioral of reg_progcounter is
@@ -108,6 +109,9 @@ with operation select reg_a <=
 		'0' when r_p_P4,
 		'0' when r_p_P0,
 		'1' when others;
+
+-- active when the operation is anything except NOP
+active <= '0' when (operation = r_p_NOP) else '1';
 
 ---- Start boilerplate code (use with utmost caution!)
 -- with cpu_r_p select r_p <=

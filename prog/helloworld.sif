@@ -17,9 +17,17 @@
 //	Execution starts at location 0
 //	---------------------------------------------------------------------------
 			NOP;
-//			MARK2;
-//			BRANCH;
-//			.to @VGATest - $;
+			LDAI; 
+			.data ' ';
+DeadLoop1:	PUSHA;
+			MARK2;
+			BRANCH;
+			.to @VGATest - $;
+			POPA;
+			ADCI;
+			.data 1;
+			BRANCH;
+			.to @DeadLoop1 - $;
 
 			LDYI;
 			.data UART_CONTROL;

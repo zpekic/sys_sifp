@@ -42,7 +42,8 @@ entity reg_stackpointer is
            zo : out  STD_LOGIC;
            co : out  STD_LOGIC;
            reg_d : out  STD_LOGIC;
-           reg_a : out  STD_LOGIC);
+           reg_a : out  STD_LOGIC;
+			  active: out STD_LOGIC);
 end reg_stackpointer;
 
 architecture Behavioral of reg_stackpointer is
@@ -111,6 +112,9 @@ with operation select reg_a <=
 	'1' when r_s_M_PUSH,
 	'1' when r_s_M_S,
 	'0' when others;
+
+-- active when the operation is anything except NOS
+active <= '0' when (operation = r_s_NOS) else '1';
 
 ---- Start boilerplate code (use with utmost caution!)
 -- with cpu_r_s select r_s <=
