@@ -88,6 +88,7 @@ with cpuclk_sel select cpu_clk <=
 	freq_25M(9)		when "101",	-- 48.828125kHz
 	freq_25M(2)		when "110",	-- 6.25MHz
 	freq_25M(0)		when others;	-- 25MHz  
+--	CLK				when others;	-- 50MHz  
 	
 -- single step lets through clock cycles between falling edges of ss_start and ss_stop signals
 -- it is assumed that ss_end is triggered by some "end of machine cycle" signal

@@ -17,6 +17,49 @@
 //	Execution starts at location 0
 //	---------------------------------------------------------------------------
 			NOP;
+			
+			MARK2;
+			BRANCH;
+			.into @UART_Init - $;
+			
+EchoLoop:	LDXI;
+			.data TXTBUFFER;
+ReadStatus:	LDYI;
+			.data UART_STATUS;
+			LDA, M[Y];
+			SRC;		// bit 0 is RDRF (reciever data register full)
+			IF_AC;
+			.branchto @ReadChar - $;
+			BRANCH;
+			.to @ReadStatus - $;
+ReadChar:	INY;		// point to UART data register
+			LDA, M[Y];
+			ANDI;
+			.data 0x00FF;	// UART is connected to LSB
+			PUSHA;
+			XOR, M[IMM];
+			.data CR;
+			IF_AZ;
+			.branchto @PrintBuff - $;
+			POPA;
+			STA, M[X];
+			INX, LDA, M[IMM];
+			.data 0;
+			STA, M[X];	// clear next RAM location
+			BRANCH;
+			.to @ReadStatus - $;
+
+PrintBuff:	POPA;
+			LDXI;
+			.data TXTBUFFER;
+			MARK2;
+			BRANCH;
+			.into @Str2UART - $;
+			BRANCH;
+			.to @EchoLoop - $;			
+			
+			
+			
 			LDAI; 
 			.data ' ';
 DeadLoop1:	PUSHA;
@@ -29,14 +72,7 @@ DeadLoop1:	PUSHA;
 			BRANCH;
 			.to @DeadLoop1 - $;
 
-			LDYI;
-			.data UART_CONTROL;
-			LDAI;
-			.data 3;	// reset
-			STA, M[Y];
-			LDAI;
-			.data 0x10;	// all int off, 8N2, baudrate / 1
-			STA, M[Y];
+
 			
 			LDXI;
 			.data @StrClear;	// points to clear string
@@ -92,6 +128,16 @@ Str2UOut:	INY, LDA, M[X];	// get current char from string, Y points to UART data
 			DEY, INX, BRANCH;	// Y back to UART status, X to next character 
 			.to @Str2ULoop - $;
 Done:		POPY;
+			RTS;
+			
+UART_Init: 	LDYI;
+			.data UART_CONTROL;
+			LDAI;
+			.data 3;	// reset
+			STA, M[Y];
+			LDAI;
+			.data 0x10;	// all int off, 8N2, baudrate / 1
+			STA, M[Y];
 			RTS;
 			
 #include "utils.sif";			

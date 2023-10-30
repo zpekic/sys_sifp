@@ -35,7 +35,7 @@ r_a			.valfield 3 values
 				SLC,	// shift left through carry	(AC, AZ)
 				SRC,	// shift right through carry (AC, AZ)
 				ADC,	// add incoming data and carry flag (AC, AZ)
-				SBC,	// substract incoming data and carry flag (AC, AZ)
+				AND,	// logical and with incoming data (AZ)
 				STA|A	// output value as data
 				default NOA;
 //
@@ -106,7 +106,7 @@ POPY		.alias  r_y = LDY, r_s = M[POP];
 LDAI		.alias  r_p = M[IMM], r_a = LDA;
 XORI		.alias  r_p = M[IMM], r_a = XOR;
 ADCI		.alias  r_p = M[IMM], r_a = ADC;
-SBCI		.alias  r_p = M[IMM], r_a = SBC;
+ANDI		.alias  r_p = M[IMM], r_a = AND;
 LDXI		.alias  r_p = M[IMM], r_x = LDX;
 ADXI		.alias  r_p = M[IMM], r_x = ADX;
 CPXI		.alias  r_p = M[IMM], r_x = CPX;

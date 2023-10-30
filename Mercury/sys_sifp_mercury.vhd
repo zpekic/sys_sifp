@@ -39,7 +39,7 @@ entity sys_sifp_mercury is
 				-- 50MHz on the Mercury board
 				CLK: in std_logic;
 				
-				-- 12MHz external clock
+				-- 96MHz external clock
 				EXT_CLK: in std_logic;
 				
 				-- Master reset button on Mercury board
@@ -60,7 +60,7 @@ entity sys_sifp_mercury is
 				-- Push buttons on baseboard
 				-- BTN0 - single step (effective if SW(7 downto 4)) = "X000"
 				-- BTN1 - not used
-				-- BTN2 - not used
+				-- BTN2 - display operations per second, not instructions per second *10000
 				-- BTN3 - not used
 				BTN: in std_logic_vector(3 downto 0); 
 
@@ -120,7 +120,7 @@ alias PMOD_RTS1: std_logic is PMOD(4);
 alias PMOD_RXD1: std_logic is PMOD(5);
 alias PMOD_TXD1: std_logic is PMOD(6);
 alias PMOD_CTS1: std_logic is PMOD(7);
-signal rts1_pulse, rts1_delay: std_logic;
+signal rts0_pulse, rts0_delay: std_logic;
 
 --
 signal switch: std_logic_vector(7 downto 0);
@@ -184,7 +184,7 @@ begin
 RESET <= USR_BTN;
 
 -- debug!
-counter: process(EXT_CLK)
+counter: process(EXT_CLK, RESET)
 begin
 	if (RESET = '1') then
 		cnt <= X"00000000";
@@ -220,7 +220,7 @@ cpu: entity work.SIFP16 Port map (
 			reset => reset,
 			cpu_clk => clkgen_cpu,
 			txd_clk => clkgen_baudrate,
-			continue => '0', --continue,  
+			continue => continue,  
 			ready => tracer_ready,			-- freezes CPU when low
 			txd => PMOD_RXD0,					-- output trace (to any TTY of special tracer running on the host
 			load => btn_traceload,			-- load mask register if high
@@ -240,13 +240,13 @@ RegWrite <= (not VMA) and (not RnW);
 -- Tracer works best when the output is intercepted on the host and resolved using symbolic .lst file
 -- In addition, host is able to flip RTS pin to start/stop tracing 
 -- See https://github.com/zpekic/sys9080/blob/master/Tracer/Tracer/Program.cs
-rts1_pulse <= PMOD_RTS1 xor rts1_delay;
-on_rts1_pulse: process(reset, rts1_pulse)
+rts0_pulse <= PMOD_RTS0 xor rts0_delay;
+on_rts0_pulse: process(reset, rts0_pulse)
 begin
 	if ((USR_BTN or btn_clk) = '1') then
 		continue <= '1';
 	else
-		if (rising_edge(rts1_pulse)) then
+		if (rising_edge(rts0_pulse)) then
 			continue <= not continue;
 		end if;
 	end if;

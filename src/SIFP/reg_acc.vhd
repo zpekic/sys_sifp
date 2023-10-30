@@ -63,7 +63,7 @@ begin
 	else
 		if (rising_edge(clk)) then
 			case operation is
-				when r_a_LDA | r_a_XOR | r_a_SLC | r_a_SRC | r_a_ADC | r_a_SBC =>
+				when r_a_LDA | r_a_XOR | r_a_SLC | r_a_SRC | r_a_ADC | r_a_AND =>
 					r <= y(16 downto 1);
 				when others =>
 					null;
@@ -79,25 +79,20 @@ with operation select y <=
       r & ci & '0' when r_a_SLC,
 		'0' & ci & r when r_a_SRC,
       std_logic_vector(unsigned('0' & r & ci) + unsigned('0' & din & ci)) when r_a_ADC,
-      std_logic_vector(unsigned('0' & r & ci) + unsigned('0' & (din xor X"FFFF") & ci)) when r_a_SBC,
+      '0' & (r and din) & '0' when r_a_AND,
 		'0' & r & '0' when others;
 		
 y_z <= '1' when (y(16 downto 1) = X"0000") else '0';
 
 -- zero flag output
 with operation select zo <=
-      y_z when r_a_LDA,
-      y_z when r_a_XOR,
-      y_z when r_a_SLC,
-		y_z when r_a_SRC,
-      y_z when r_a_ADC,
-      y_z when r_a_SBC,
-		zi when others;
+      zi when r_a_NOA,
+      zi when r_a_STA,
+      y_z when others;
 
 -- carry flag output
 with operation select co <=
       y(17) when r_a_ADC,
-      y(17) when r_a_SBC,
       y(17) when r_a_SLC,
       y(0) when r_a_SRC,
 		ci when others;
@@ -108,7 +103,7 @@ reg <= r;
 -- projecting as data
 reg_d <= '1' when (operation = r_a_STA) else '0';
 
--- projecting as address
+-- projecting as address (never)
 reg_a <= '0';
 
 -- active when the operation is anything except NOA
@@ -122,7 +117,7 @@ active <= '0' when (operation = r_a_NOA) else '1';
 --      SLC when r_a_SLC,
 --      SRC when r_a_SRC,
 --      ADC when r_a_ADC,
---      SBC when r_a_SBC,
+--      AND when r_a_AND,
 --      STA when r_a_STA;
 --      STA when r_a_A;
 ---- End boilerplate code

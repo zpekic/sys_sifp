@@ -81,7 +81,6 @@ constant cpu_program: mem16x20 := (
 	"1000" & r_p_P0 & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS		-- output P
 );
 
-
 signal clk_cnt: std_logic_vector(15 downto 0); -- free running counter, 3 LSB bits are the program counter
 signal cpu_upc: std_logic_vector(3 downto 0);
 
@@ -139,6 +138,7 @@ alias opr_a: std_logic is opr_vector(3);
 alias opr_x: std_logic is opr_vector(2);
 alias opr_y: std_logic is opr_vector(1);
 alias opr_s: std_logic is opr_vector(0);
+signal opr_nop: std_logic;
 
 begin
 
@@ -260,6 +260,8 @@ i_is_halt <= '1' when (cpu_uinstruction = c_HALT) else '0';
 
 -- operation count
 OPCNT <= (not cpu_irexe) & bitcnt5(to_integer(unsigned(opr_vector)))(2 downto 0);
+-- all registers are idle
+opr_nop <= '1' when (opr_vector(3 downto 0) = X"0") else '0';
 
 -- programmable registers
 p_reg: entity work.reg_progcounter Port map ( 
