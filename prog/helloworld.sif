@@ -22,72 +22,66 @@
 			BRANCH;
 			.into @UART_Init - $;
 			
-EchoLoop:	LDXI;
-			.data TXTBUFFER;
-ReadStatus:	LDYI;
-			.data UART_STATUS;
-			LDA, M[Y];
-			SRC;		// bit 0 is RDRF (reciever data register full)
-			IF_AC;
-			.branchto @ReadChar - $;
+			LDXI;
+			.data @StrHWorld;
+			MARK2;
 			BRANCH;
-			.to @ReadStatus - $;
-ReadChar:	INY;		// point to UART data register
+			.into @UART_OutStr - $;
+			
+EchoLoop:	MARK2;
+			BRANCH;
+			.into @UART_GetChr - $;
+			MARK2;
+			BRANCH;
+			.into @UART_OutChr - $;
+			MARK2;
+			BRANCH;
+			.into @VGA_OutChr - $;
+ 			BRANCH;
+			.to @EchoLoop - $;
+			
+UART_GetChr:PUSHY;
+			LDYI;
+			.data UART_STATUS;
+RdStatus0:	LDA, M[Y];
+			SRC;		// bit 0 is RDRF (receiver data register full)
+			IF_AC;
+			.branchto @GetChr - $;
+			BRANCH;
+			.to @RdStatus0 - $;
+GetChr:		INY;		// point to UART data register
 			LDA, M[Y];
 			ANDI;
 			.data 0x00FF;	// UART is connected to LSB
+			POPY;
+			RTS;
+
+UART_OutChr:PUSHY;
 			PUSHA;
-			XOR, M[IMM];
-			.data CR;
+			LDYI;
+			.data UART_STATUS;
+RdStatus1:	LDA, M[Y];
+			SRC;
+			SRC;		// bit 1 is TDRE (transmit register empty)
+			IF_AC;
+			.branchto @OutChr - $;
+			BRANCH;
+			.to @RdStatus1 - $;
+OutChr:		INY, LDA, M[POP];	// Y points to UART data register, get the char back		
+			STA, M[Y];
+			POPY;
+			RTS;
+			
+UART_OutStr:LDA, M[X];
 			IF_AZ;
-			.branchto @PrintBuff - $;
-			POPA;
-			STA, M[X];
-			INX, LDA, M[IMM];
-			.data 0;
-			STA, M[X];	// clear next RAM location
-			BRANCH;
-			.to @ReadStatus - $;
-
-PrintBuff:	POPA;
-			LDXI;
-			.data TXTBUFFER;
+			.branchto @Done - $;
 			MARK2;
 			BRANCH;
-			.into @Str2UART - $;
-			BRANCH;
-			.to @EchoLoop - $;			
-			
-			
-			
-			LDAI; 
-			.data ' ';
-DeadLoop1:	PUSHA;
-			MARK2;
-			BRANCH;
-			.to @VGATest - $;
-			POPA;
-			ADCI;
-			.data 1;
-			BRANCH;
-			.to @DeadLoop1 - $;
+			.into @UART_OutChr - $;
+			INX, BRANCH;
+			.data @UART_OutStr - $;
+Done:		RTS;
 
-
-			
-			LDXI;
-			.data @StrClear;	// points to clear string
-DeadLoop:	NOP;
-			MARK2;
-			BRANCH;
-			.to @Str2UART - $;
-			LDXI;
-			.data @StrHWorld;	// points to "Hello World!"
-//			MARK2;
-//			BRANCH;
-//			.to @Str2VGA - $;
-			BRANCH,;
-			.to @DeadLoop - $;
-			
 StrClear:	.data CLS;
 			.data 0;
 			
@@ -107,29 +101,7 @@ StrHWorld:	.data 'H';
 			.data LF;
 			.data 0;
 			
-// Print string pointed by X to UART 
-//			
-Str2UART:	NOP;
-			PUSHY;
-			LDYI;			// Y points to UART memory mapped register
-			.data UART_STATUS;
-Str2ULoop:	LDA, M[X];		// check if reached end (nul end char)
-			IF_AZ;
-			.branchto @Done - $;
-ChkTxdRdy:	LDA, M[Y];		// read UART status
-			SRC;
-			SRC;			// TDRE (transmit data register empty) bit is now in AC
-			IF_AC;
-			.branchto @Str2UOut - $;
-			BRANCH;
-			.to @ChkTxdRdy - $;
-Str2UOut:	INY, LDA, M[X];	// get current char from string, Y points to UART data register
-			STA, M[Y];		// output to UART
-			DEY, INX, BRANCH;	// Y back to UART status, X to next character 
-			.to @Str2ULoop - $;
-Done:		POPY;
-			RTS;
-			
+		
 UART_Init: 	LDYI;
 			.data UART_CONTROL;
 			LDAI;

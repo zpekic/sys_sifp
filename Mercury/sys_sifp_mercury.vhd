@@ -183,19 +183,6 @@ begin
 -- master reset
 RESET <= USR_BTN;
 
--- debug!
-counter: process(EXT_CLK, RESET)
-begin
-	if (RESET = '1') then
-		cnt <= X"00000000";
-	else
-		if (rising_edge(EXT_CLK)) then
-			cnt <= std_logic_vector(unsigned(cnt) + 1);
-		end if;
-	end if;
-end process;
-
-
 -- CPU!
 cpu: entity work.SIFP16 Port map (
 		CLK => clkgen_cpu,
@@ -243,8 +230,8 @@ RegWrite <= (not VMA) and (not RnW);
 rts0_pulse <= PMOD_RTS0 xor rts0_delay;
 on_rts0_pulse: process(reset, rts0_pulse)
 begin
-	if ((USR_BTN or btn_clk) = '1') then
-		continue <= '1';
+	if ((RESET = '1') or (sw_cpuclk = "000")) then
+		continue <= '0';
 	else
 		if (rising_edge(rts0_pulse)) then
 			continue <= not continue;
@@ -257,7 +244,7 @@ clkgen: entity work.clockgen Port map (
 		CLK => CLK, 	-- 50MHz on Mercury board
 		RESET => RESET,
 		baudrate_sel => "111",	-- 38400
-		cpuclk_sel =>	 sw_cpuclk,
+		cpuclk_sel => sw_cpuclk,
 		ss_start => (not btn_clk),
 		ss_end => DONE,
 		cpu_clk => clkgen_cpu,
@@ -416,8 +403,8 @@ led4x7: entity work.fourdigitsevensegled port map (
 	  segment(7) => DOT
 	 );
 			 
---led_data <= ABUS when (btn_ledsel = '1') else DBUS;
-led_data <= perfcnt_value(31 downto 16);-- when (btn_ledsel = '1') else perfcnt_value(15 downto 0);
+led_data <= ABUS when (btn_ledsel = '1') else DBUS;
+--led_data <= perfcnt_value(31 downto 16);-- when (btn_ledsel = '1') else perfcnt_value(15 downto 0);
 bus_valid <= VMA or (not RnW);	-- bus signals defined if valid memory address, or register debug output
 			 
 -- generate debouncers for 4 buttons and 8 for switches to clean input signals

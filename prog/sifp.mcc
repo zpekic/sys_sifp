@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------------
-//	Include to adapt mcc as assembler SIFP (c) 2023-... zpekic@hotmail.com
+//	Include to adapt mcc as assembler for SIFP (c) 2023-... zpekic@hotmail.com
 //  More about mcc:  https://github.com/zpekic/MicroCodeCompiler
 //---------------------------------------------------------------------------------------------
 // Full description: 
@@ -62,6 +62,7 @@ r_y			.valfield 3 values
 				M[Y],	// output value as address 
 				STY|Y	// output value as data
 				default NOY;
+//
 // 16-bit stack pointer S  (has own carry (SC) and zero (SZ) flags, changes only during execute phases)
 r_s			.valfield 3 values
 				NOS,	// no operation on X register 
@@ -119,7 +120,7 @@ CPSI		.alias  r_p = M[IMM], r_s = CPS;
 
 //
 // Special case instruction combinations
-FTOS		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[S];		// mostly for flag output is trace mode 
+FTOS		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[S];		// mostly for flag output in trace mode 
 PUSHF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[PUSH];	// flags to stack
 POPF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[POP];	// pick up flags from stack
 HALT		.alias  r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S;			// ABUS will indicate where CPU halted
