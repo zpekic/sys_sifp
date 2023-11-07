@@ -118,15 +118,13 @@ VGA_CR:		POPA;
 			LDXI;
 			.data 0;
 SetCursorXY:PUSHY;
-			PUSHX;
 			LDYI;
 			.data CURSOR_X;
 			STX, M[Y];	// M[CURSOR_X] <= X
 			LDXI;
 			.data CURSOR_Y;
-			STY, M[X];	// M[CURSOR_Y] <= Y
-			POPX;
 			POPY;
+			STY, M[X];	// M[CURSOR_Y] <= Y
 			RTS;
 
 

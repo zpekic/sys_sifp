@@ -139,14 +139,13 @@ alias btn_clk: std_logic is button(3);
 signal clkgen_vga: std_logic;	-- should be 25MHz
 signal clkgen_debounce: std_logic;
 signal clkgen_baudrate4, clkgen_baudrate: std_logic;	
-signal clkgen_cpu, cpu_clk: std_logic;
+signal clkgen_cpu: std_logic;
 signal freq100Hz, freq50Hz, freq1Hz: std_logic;
 
-signal cnt: std_logic_vector(31 downto 0);
 signal continue, MemRead, MemWrite, RegWrite: std_logic;
 
 -- VGA signals
-signal hactive, vactive: std_logic;
+--signal hactive, vactive: std_logic;
 signal win_x, win_y, win: std_logic;
 signal char_x, char_y: std_logic_vector(7 downto 0);
 signal vga_x, vga_y: std_logic_vector(7 downto 0);
@@ -172,7 +171,7 @@ signal PnD: std_logic;		-- Program 1, Data 0 (can double address space for Harva
 signal DBUS: std_logic_vector(15 downto 0);
 
 -- other
-signal tracer_ready, tracer_continue: std_logic;
+signal tracer_ready, tracer_continue, ss_start: std_logic;
 signal led_data: std_logic_vector(15 downto 0);
 signal perfcnt_value: std_logic_vector(31 downto 0);
 signal bus_valid: std_logic;
@@ -224,10 +223,11 @@ MemRead <= VMA and RnW;
 MemWrite <= VMA and (not RnW);
 RegWrite <= (not VMA) and (not RnW);
 	 
--- Tracer works best when the output is intercepted on the host and resolved using symbolic .lst file
+-- Tracer works best when it is paired with tracer.exe running on the host!
 -- In addition, host is able to flip RTS pin to start/stop tracing 
 -- See https://github.com/zpekic/sys9080/blob/master/Tracer/Tracer/Program.cs
 rts0_pulse <= PMOD_RTS0 xor rts0_delay;
+
 on_rts0_pulse: process(reset, rts0_pulse)
 begin
 	if ((RESET = '1') or (sw_cpuclk = "000")) then
@@ -239,13 +239,21 @@ begin
 	end if;
 end process;
 
+on_clk: process(CLK)
+begin
+	if (rising_edge(CLK)) then
+		rts0_delay <= PMOD_RTS0;
+	end if;
+end process;
+
+ss_start <= not (btn_clk or PMOD_RTS0);
 -- generate various frequencies
 clkgen: entity work.clockgen Port map ( 
 		CLK => CLK, 	-- 50MHz on Mercury board
 		RESET => RESET,
 		baudrate_sel => "111",	-- 38400
 		cpuclk_sel => sw_cpuclk,
-		ss_start => (not btn_clk),
+		ss_start => ss_start,
 		ss_end => DONE,
 		cpu_clk => clkgen_cpu,
 		debounce_clk => clkgen_debounce,
@@ -266,8 +274,8 @@ vga: entity work.mwvga Port map (
 		win_char => vram_doutb,
 		win => win,
 		win_color => sw_trace,	-- change color based on run/trace mode
-		hactive => hactive,
-		vactive => vactive,
+		hactive => open, --hactive,
+		vactive => open, --vactive,
 		x => vga_x,
 		y => vga_y,
 		cursor_enable => '0',
@@ -382,8 +390,8 @@ acia0: entity work.uart Port map (
 		);
 
 -- LEDs
-LED(0) <= DONE; 
-LED(1) <= HALT;
+LED(0) <= continue; --DONE; 
+LED(1) <= PMOD_RTS0; --HALT;
 	
 -- 7segment LED 
 led4x7: entity work.fourdigitsevensegled port map ( 
@@ -442,6 +450,6 @@ perfcnt: entity work.freqcounter Port map (
       value => perfcnt_value
 	);
 	
-in_or_op <= X"2" when (btn_ledsel = '0') else OPCNT(2 downto 0) & '0'; -- all both are *2 because base period is 0.5s
+in_or_op <= X"2" when (btn_ledsel = '0') else OPCNT(2 downto 0) & '0'; -- double both because base period is 0.5s
 	
 end;

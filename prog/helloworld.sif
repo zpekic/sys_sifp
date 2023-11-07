@@ -22,11 +22,19 @@
 			BRANCH;
 			.into @UART_Init - $;
 			
+//			LDXI;
+//			.data @StrHWorld;
+//			MARK2;
+//			BRANCH;
+//			.into @UART_OutStr - $;
+
 			LDXI;
-			.data @StrHWorld;
+			.data 3;
+			LDYI;
+			.data 7;
 			MARK2;
 			BRANCH;
-			.into @UART_OutStr - $;
+			.into @SetCursorXY - $;
 			
 EchoLoop:	MARK2;
 			BRANCH;
@@ -37,8 +45,8 @@ EchoLoop:	MARK2;
 			MARK2;
 			BRANCH;
 			.into @VGA_OutChr - $;
- 			BRANCH;
-			.to @EchoLoop - $;
+ 			JUMP;
+			.to @EchoLoop;
 			
 UART_GetChr:PUSHY;
 			LDYI;

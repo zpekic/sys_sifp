@@ -10,11 +10,11 @@
 // 16-bit program counter (has no flags, changes during both fetch and execute phases)
 r_p			.valfield 4 values
 				NOP,				// continue (increment P during fetch phase)
-				LDP|JMP|JUMP|GOTO,	// load from incoming data (jump)
-				ADP|BRANCH, 		// add incoming data (relative jump / branch)
-				P2,					// output P+x as data (usually for push)
-				P3,
+				LDP,				// load from incoming data (mostly from stack, for return)
+				BRANCH|IF_TRUE,		// unconditional branch (add next word)
+				JUMP|GOTO,			// unconditional jump (load with next word)
 				P4,
+				P2,
 				P0,
 				M[IMM],		// output value as address, increment (used for immediate values)
 				BAC|IF_AC|IF_A_GE,	// branch if A flag C set
@@ -95,7 +95,7 @@ data16		.valfield r_p .. r_s values * default 0;
 M[Y+X]		.alias  r_x = M[X], r_y = M[Y];
 M[X+Y]		.alias  r_x = M[X], r_y = M[Y];
 // Convenient stack operations
-RTS			.alias 	r_p = JMP, r_s = M[POP];
+RTS			.alias 	r_p = LDP, r_s = M[POP];
 MARK2		.alias 	r_p = P2, r_s = M[PUSH];
 PUSHA		.alias  r_a = STA, r_s = M[PUSH];
 POPA		.alias  r_a = LDA, r_s = M[POP];

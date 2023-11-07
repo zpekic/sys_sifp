@@ -68,8 +68,10 @@ begin
 			else
 			-- not conditional
 				case operation is
-					when r_p_JMP =>
-						r <= din;
+					when r_p_JUMP =>
+						r <= din;	-- din <= M[P]
+					when r_p_LDP =>
+						r <= din;	-- din <= any other reg/mem
 					when r_p_BRANCH =>
 						r <= std_logic_vector(unsigned(r) + unsigned(din)); 
 					when r_p_M_IMM =>
@@ -88,24 +90,21 @@ cond_current <= (not operation_is_conditional) or cond(to_integer(unsigned(opera
 -- value
 with operation select reg <= 
 		std_logic_vector(unsigned(r) + 2) when r_p_P2,
-		std_logic_vector(unsigned(r) + 3) when r_p_P3,
 		std_logic_vector(unsigned(r) + 4) when r_p_P4,
 		r when others;
 
 -- projecting as data
 with operation select reg_d <= 
-		'1' when r_p_P2,
-		'1' when r_p_P3,
-		'1' when r_p_P4,
 		'1' when r_p_P0,
+		'1' when r_p_P2,
+		'1' when r_p_P4,
 		'0' when others;
 
 -- projecting as address
 with operation select reg_a <= 
 		'0' when r_p_NOP,
-		'0' when r_p_JMP,
+		'0' when r_p_LDP,
 		'0' when r_p_P2,
-		'0' when r_p_P3,
 		'0' when r_p_P4,
 		'0' when r_p_P0,
 		'1' when others;
@@ -117,14 +116,12 @@ active <= '0' when (operation = r_p_NOP) else '1';
 -- with cpu_r_p select r_p <=
 --      NOP when r_p_NOP, -- default value
 --      LDP when r_p_LDP,
---      LDP when r_p_JMP,
---      LDP when r_p_JUMP,
---      LDP when r_p_GOTO,
---      ADP when r_p_ADP,
---      ADP when r_p_BRANCH,
---      P2 when r_p_P2,
---      P3 when r_p_P3,
+--      BRANCH when r_p_BRANCH,
+--      BRANCH when r_p_IF_TRUE,
+--      JUMP when r_p_JUMP,
+--      JUMP when r_p_GOTO,
 --      P4 when r_p_P4,
+--      P2 when r_p_P2,
 --      P0 when r_p_P0,
 --      M[IMM] when r_p_M[IMM],
 --      BAC when r_p_BAC,

@@ -96,7 +96,7 @@ ss_clk <= ss_end when (ss_q = '1') else ss_start;
 on_ss_clk: process(RESET, ss_clk, ss_q)
 begin
 	if (RESET = '1') then
-		ss_q <= '0';
+		ss_q <= '1';
 	else
 		if (falling_edge(ss_clk)) then
 			ss_q <= not ss_q;

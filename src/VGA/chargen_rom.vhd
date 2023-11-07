@@ -191,14 +191,14 @@ mask <= (others => a(10)); -- codes 128..255 are reverse pattern
 --d <= mask xor pattern;
 
 with h select
-	pixel <= (a(10) xor pattern(7)) when "000",
-				(a(10) xor pattern(6)) when "001",
-				(a(10) xor pattern(5)) when "010",
-				(a(10) xor pattern(4)) when "011",
-				(a(10) xor pattern(3)) when "100",
-				(a(10) xor pattern(2)) when "101",
-				(a(10) xor pattern(1)) when "110",
-				(a(10) xor pattern(0)) when others;
+	pixel <= (a(10) xor pattern(0)) when "000",
+				(a(10) xor pattern(7)) when "001",
+				(a(10) xor pattern(6)) when "010",
+				(a(10) xor pattern(5)) when "011",
+				(a(10) xor pattern(4)) when "100",
+				(a(10) xor pattern(3)) when "101",
+				(a(10) xor pattern(2)) when "110",
+				(a(10) xor pattern(1)) when others;
 
 end Behavioral;
 
