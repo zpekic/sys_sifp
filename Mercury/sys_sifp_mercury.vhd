@@ -246,7 +246,7 @@ begin
 	end if;
 end process;
 
-ss_start <= not (btn_clk or PMOD_RTS0);
+ss_start <= not (btn_clk or rts0_delay);
 -- generate various frequencies
 clkgen: entity work.clockgen Port map ( 
 		CLK => CLK, 	-- 50MHz on Mercury board

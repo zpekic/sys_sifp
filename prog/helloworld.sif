@@ -20,6 +20,10 @@
 			
 			MARK2;
 			BRANCH;
+			.into @VGA_Init - $;
+			
+			MARK2;
+			BRANCH;
 			.into @UART_Init - $;
 			
 //			LDXI;
@@ -28,13 +32,13 @@
 //			BRANCH;
 //			.into @UART_OutStr - $;
 
-			LDXI;
-			.data 3;
-			LDYI;
-			.data 7;
-			MARK2;
-			BRANCH;
-			.into @SetCursorXY - $;
+//			LDXI;
+//			.data 3;
+//			LDYI;
+//			.data 7;
+//			MARK2;
+//			BRANCH;
+//			.into @SetCursorXY - $;
 			
 EchoLoop:	MARK2;
 			BRANCH;
