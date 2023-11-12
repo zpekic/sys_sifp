@@ -141,6 +141,7 @@ signal clkgen_debounce: std_logic;
 signal clkgen_baudrate4, clkgen_baudrate: std_logic;	
 signal clkgen_cpu: std_logic;
 signal freq100Hz, freq50Hz, freq1Hz: std_logic;
+signal cpuclk_sel: std_logic_vector(2 downto 0);
 
 signal continue, MemRead, MemWrite, RegWrite: std_logic;
 
@@ -164,6 +165,7 @@ signal VMA: std_logic;		-- valid memory address
 signal FETCH: std_logic;	-- fetching instruction (PnD is also 1)
 signal DONE: std_logic;		-- sync'd with READY
 signal HALT: std_logic;		-- CPU has halted 
+signal TRACEOUT: std_logic;-- CPU is outputing register values after each instruction
 signal OPCNT: std_logic_vector(3 downto 0);	-- operations per current instruction (0 to 5)
 signal RnW: std_logic;		-- Read 1, Write 0
 signal PnD: std_logic;		-- Program 1, Data 0 (can double address space for Harvard architecture)
@@ -187,7 +189,7 @@ cpu: entity work.SIFP16 Port map (
 		CLK => clkgen_cpu,
 		RESET => RESET,
 		READY => tracer_ready,
-		TRACE => sw_trace,
+		TRACEIN => sw_trace,
 		ABUS => ABUS,
 		DBUS => DBUS,
 		RnW => RnW,
@@ -195,6 +197,7 @@ cpu: entity work.SIFP16 Port map (
 		PnD => PnD,
 		HALT => HALT,
 		DONE => DONE,
+		TRACEOUT => TRACEOUT,
 		OPCNT => OPCNT,
 		FETCH => FETCH
 	);
@@ -203,7 +206,7 @@ cpu: entity work.SIFP16 Port map (
 -- the cycle by asserting low READY signal, and outputing the trace record to serial port
 -- After that, cycle will continue if continue signal is high, or stop there.	 
 	tracer: entity work.debugtracer Port map(
-			reset => reset,
+			reset => RESET,
 			cpu_clk => clkgen_cpu,
 			txd_clk => clkgen_baudrate,
 			continue => continue,  
@@ -247,12 +250,13 @@ begin
 end process;
 
 ss_start <= not (btn_clk or rts0_delay);
+cpuclk_sel <= "000" when (TRACEOUT = '1') else sw_cpuclk;
 -- generate various frequencies
 clkgen: entity work.clockgen Port map ( 
-		CLK => CLK, 	-- 50MHz on Mercury board
+		CLK => CLK, 				-- 50MHz on Mercury board
 		RESET => RESET,
-		baudrate_sel => "111",	-- 38400
-		cpuclk_sel => sw_cpuclk,
+		baudrate_sel => "111",	-- 57600
+		cpuclk_sel => cpuclk_sel,
 		ss_start => ss_start,
 		ss_end => DONE,
 		cpu_clk => clkgen_cpu,
@@ -390,8 +394,8 @@ acia0: entity work.uart Port map (
 		);
 
 -- LEDs
-LED(0) <= continue; --DONE; 
-LED(1) <= PMOD_RTS0; --HALT;
+LED(0) <= DONE; 
+LED(1) <= HALT;
 	
 -- 7segment LED 
 led4x7: entity work.fourdigitsevensegled port map ( 

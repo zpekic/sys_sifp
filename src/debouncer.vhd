@@ -38,7 +38,7 @@ end debouncer;
 
 architecture Behavioral of debouncer is
 
-signal debounced: std_logic := '0';
+signal debounced: std_logic;
 signal shifter: std_logic_vector(7 downto 0);
 signal all0, all1: std_logic;
 
@@ -54,28 +54,25 @@ all1 <= '1' when shifter = "11111111" else '0';
 --				 (all1 and all1 and debounced);
 signal_out <= debounced; 
 
-debounce: process(clock, debounced)
-begin
-    if (rising_edge(clock)) then
-        if (all1 = '1') then
-            debounced <= '1'; 
-        else
-            if (all0 = '1') then
-                debounced <= '0';
-            else
-                debounced <= debounced;
-            end if;
-        end if;
-    end if;
-end process;
-
 sample: process(clock, reset, signal_in)
 begin
 	if (reset = '1') then
 		shifter <= (others => signal_in);
+		debounced <= signal_in;
 	else
 		if (rising_edge(clock)) then
+			-- shift register (== delay line)
 			shifter <= shifter(6 downto 0) & signal_in;
+			-- determine new state of debounced output
+		  if (all1 = '1') then
+				debounced <= '1'; 
+		  else
+				if (all0 = '1') then
+					 debounced <= '0';
+				else
+					 debounced <= debounced;
+				end if;
+		  end if;
 		end if;
 	end if;
 end process; 

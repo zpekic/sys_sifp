@@ -11,12 +11,12 @@ VGA_Init:	MARK2;
 			LDAI;
 			.data VGA_COLS;
 			PUSHA;
+			LDAI;
+			.data VGA_BASE;	// base address is the start of video RAM
 			LDXI;
 			.data VGA_ROWS;
 			LDYI;
 			.data ROW_OFFSET;
-			LDAI;
-			.data 0;
 			STA, M[Y];
 RowOffLoop:	LDA, M[Y];		// previous row 
 			INY, ADC, M[S];	// add number of columns, point to current row
@@ -27,7 +27,9 @@ RowOffLoop:	LDA, M[Y];		// previous row
 			.to @RowOffLoop - $;
 RowOffDone:	POPA;
 			LDAI;
-			.data CLS;
+			.data HOME;
+			
+			//.data CLS;
 			// continue with "clear screen"
 			
 // Display ASCII in A at row Y, column X	
@@ -43,7 +45,6 @@ VGA_OutChr: PUSHA;
 			.data CLS;
 			IF_AZ; 
 			.branchto @VGA_CLS - $;
-
 			
 			MARK2;
 			BRANCH;
@@ -62,11 +63,15 @@ VGA_OutChr: PUSHA;
 			.branchto @VGA_LF - $;
 
 //			default "printable" character output
-			LDA, M[S];
+			POPA;
+			
+DisplayAt:	TRACEON;
+			PUSHY;
 			MARK2;
 			BRANCH;
-			.into @DisplayAt - $;
-			INX;
+			.into @GetRowBase - $;
+			STA, M[Y+X];
+			INX, POPY;
 			CPXI;
 			.data VGA_COLS;
 			IF_X_GE;
@@ -128,7 +133,7 @@ ClrRowLoop:	STA, M[Y+X];
 			CPXI;
 			.data VGA_COLS;
 			IF_X_GE;
-			.branchto @ScrDone - $;
+			.branchto @VGA_Done - $;
 			BRANCH;
 			.to @ClrRowLoop - $;
 				
@@ -143,7 +148,7 @@ SetCursorXY:PUSHY;
 			.data CURSOR_Y;
 			POPY;
 			STY, M[X];	// M[CURSOR_Y] <= Y
-ScrDone:	RTS;
+			RTS;
 
 VGA_LF:		POPA;
 			BRANCH;
@@ -154,17 +159,16 @@ VGA_CLS:	POPA;
 			.data ' ';	// use space character to clear screen
 			LDYI;
 			.data 0;
-ClrNextRow:	MARK2;
-			BRANCH;
-			.into @GetRowBase - $;
+ClrNextRow:	PUSHY; 
 			MARK2;
 			BRANCH;
 			.into @ClearRow - $;
+			POPY;
 			INY;
 			CPYI;
 			.data VGA_ROWS;
 			IF_Y_GE;
-			.branchto @ScrDone - $;
+			.branchto @VGA_HOME - $;
 			BRANCH;
 			.to @ClrNextRow - $;
 			
@@ -175,11 +179,12 @@ ClearRow: 	MARK2;
 			.data VGA_COLS - 1;
 ClrRLoop:	STA, M[Y+X];
 			IF_XZ;
-			.branchto @ScrDone - $;
+			.branchto @VGA_Done - $;
 			DEX, BRANCH;
 			.to @ClrRLoop - $;
 			
-VGA_HOME:	LDX, LDY, M[IMM];
+VGA_HOME:	POPA;
+			LDX, LDY, M[IMM];
 			.data 0;			// X, Y <= 0
 			BRANCH;
 			.to @SetCursorXY - $;
@@ -202,11 +207,15 @@ GetRowBase:	PUSHA;
 			POPA;
 			RTS;
 			
-DisplayAt:	MARK2;
+VGA_OutStr:	LDA, M[X];
+			IF_AZ;
+			.branchto @VGA_Done - $;
+			MARK2;
 			BRANCH;
-			.into @GetRowBase - $;
-			STA, M[Y+X];
-			RTS;
+			.into @VGA_OutChr - $;
+			INX, BRANCH;
+			.data @VGA_OutStr - $;
+VGA_Done:	RTS;
 
 VGATest:	PUSHA;		// keep A on stack top
 			LDYI;
@@ -226,26 +235,6 @@ VGATLoop:	LDA, X;
 VGATestEx:	POPA;
 			RTS;
 
-// test stack operations
-StackTest:	PUSHF;
-			PUSHX;
-			CPX, M[S];
-			IF_XZ; 
-			.branchto @ContY - $;
-			HALT;	// ERROR!
-ContY:		PUSHY;
-			CPY, M[S];
-			IF_YZ;
-			.branchto @ContA - $;
-			HALT;	// ERROR!
-ContA:		PUSHA;
-			LDA, LDY, LDX, M[IMM];
-			.data 0;
-			POPA;
-			POPY;
-			POPX;
-			POPF;
-			RTS;
-// end test			
+		
 			
 			

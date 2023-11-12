@@ -35,7 +35,7 @@ entity SIFP16 is
     Port ( CLK : in  STD_LOGIC;
            RESET : in  STD_LOGIC;
            READY : in  STD_LOGIC;
-           TRACE : in  STD_LOGIC;
+           TRACEIN : in  STD_LOGIC;
            ABUS : out  STD_LOGIC_VECTOR (15 downto 0);
            DBUS : inout  STD_LOGIC_VECTOR (15 downto 0);
            RnW : out  STD_LOGIC;
@@ -43,6 +43,7 @@ entity SIFP16 is
            PnD : out  STD_LOGIC;
 			  HALT: out STD_LOGIC;
 			  DONE: out STD_LOGIC;
+			  TRACEOUT: out STD_LOGIC;
 			  OPCNT: out STD_LOGIC_VECTOR(3 downto 0);	-- operations per instruction
            FETCH : out  STD_LOGIC);
 end SIFP16;
@@ -52,11 +53,15 @@ architecture Behavioral of SIFP16 is
 --
 -- Special case instruction combinations
 constant c_FETCH: std_logic_vector(15 downto 0) := r_p_M_IMM & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS;
-constant c_NOP, c_EXEC: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS;		-- only increment P
+constant c_NOP, c_EXEC: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS;-- only increment P
 constant c_FTOS: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_S;		-- mostly for flag output in trace mode
 constant c_PUSHF: std_logic_vector(15 downto 0) := r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_PUSH;	-- flags to stack
 constant c_POPF: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_POP;	-- pick up flags from stack
-constant c_HALT: std_logic_vector(15 downto 0) :=	r_p_M_IMM & r_a_A & r_x_X & r_y_Y & r_s_S;				-- ABUS will indicate where CPU halted
+constant c_HALT: std_logic_vector(15 downto 0) :=	r_p_M_IMM & r_a_A & r_x_X & r_y_Y & r_s_S;			-- ABUS will indicate where CPU halted
+constant c_INTON:		std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_A & r_x_X & r_y_Y & r_s_S;		-- Enable interrupts (set flag_ie to 1)
+constant c_INTOFF:	std_logic_vector(15 downto 0) :=	r_p_P4 &  r_a_A & r_x_X & r_y_Y & r_s_S;		-- Disable interrupts (set flag_ie to 0)
+constant c_TRACEON:	std_logic_vector(15 downto 0) :=	r_p_P2 &  r_a_A & r_x_X & r_y_Y & r_s_S;		-- Enable tracing (set flag_te to 1)
+constant c_TRACEOFF:	std_logic_vector(15 downto 0) :=	r_p_P0 &  r_a_A & r_x_X & r_y_Y & r_s_S;		-- Disable tracing (set flag_te to 0)
 
 -- CPU program
 -- CPU always executes only 8 instructions continously!
@@ -91,8 +96,15 @@ alias cpu_bctrl: std_logic is cpu_i(18); -- 0: alternative bus control (ABUS = r
 alias cpu_irexe: std_logic is cpu_i(17); -- 1: execute from instruction register 
 alias cpu_fetch: std_logic is cpu_i(16); -- 1: fetch
 alias cpu_instr: std_logic_vector(15 downto 0) is cpu_i(15 downto 0);
-signal i_is_ftos, i_is_pushf, i_is_popf: std_logic; 
-signal i_is_halt: std_logic;
+
+-- special instruction decode
+signal i_is_special: std_logic_vector(7 downto 0);
+alias i_is_ftos:	std_logic is i_is_special(0); 
+alias i_is_pushf:	std_logic is i_is_special(1); 
+alias i_is_popf:	std_logic is i_is_special(2);
+alias i_is_halt:	std_logic is i_is_special(3); 
+alias i_is_int:   std_logic_vector(1 downto 0) is i_is_special(5 downto 4);
+alias i_is_trace: std_logic_vector(1 downto 0) is i_is_special(7 downto 6);
 
 -- internally sync'd with CLK
 signal int_trace, int_halt, int_ready: std_logic;
@@ -102,14 +114,17 @@ signal reg_clk: std_logic;
 signal reg_i: std_logic_vector(15 downto 0); -- instruction register
 signal reg_f: std_logic_vector(15 downto 0); -- flags
 -- flags are arranged for debug convenience
-alias flag_ac: std_logic is reg_f(15);
-alias flag_az: std_logic is reg_f(12);
-alias flag_xc: std_logic is reg_f(11);
-alias flag_xz: std_logic is reg_f(8);
-alias flag_yc: std_logic is reg_f(7);
-alias flag_yz: std_logic is reg_f(4);
-alias flag_sc: std_logic is reg_f(3);
+alias flag_ie: std_logic is reg_f(15); -- interrupt enable
+alias flag_te:	std_logic is reg_f(14);	-- trace enable
+alias flag_ac: std_logic is reg_f(7);
+alias flag_xc: std_logic is reg_f(6);
+alias flag_yc: std_logic is reg_f(5);
+alias flag_sc: std_logic is reg_f(4);
+alias flag_az: std_logic is reg_f(3);
+alias flag_xz: std_logic is reg_f(2);
+alias flag_yz: std_logic is reg_f(1);
 alias flag_sz: std_logic is reg_f(0);
+signal new_ie, new_te: std_logic;
 -- currently consumed flag value
 signal flag: std_logic;
 
@@ -147,6 +162,7 @@ RnW <= cpu_bctrl and int_rnw;
 VMA <= cpu_bctrl and int_vma;
 PnD <= cpu_bctrl and int_pnd;
 HALT <= int_halt;
+TRACEOUT <= int_trace;
 DONE <= (not reg_clk) and cpu_done;
 FETCH <= cpu_fetch;
 
@@ -213,19 +229,25 @@ begin
 		reg_f <= X"0001";-- initialize C,Z flags to reflect register values
 	else
 		if (rising_edge(reg_clk)) then
-			clk_cnt <= std_logic_vector(unsigned(clk_cnt) + 1);
-			if (i_is_halt = '1') then
+			if (i_is_halt = '0') then
+				clk_cnt <= std_logic_vector(unsigned(clk_cnt) + 1);
+			else 
 				int_halt <= '1';
 			end if;
 			-- safely change run/trace mode only at the start of full sequence
 			if (clk_cnt(2 downto 0) = "000") then
-				int_trace <= TRACE; 
+				-- turn on trace either from internal flag or external "pin" 
+				int_trace <= (TRACEIN or flag_te);	
 			end if;
 			-- load Flags register
 			if (i_is_popf = '1') then
 				reg_f <= DBUS;
 			else
-				-- only change 8 bits of 16 bits in F[lags] register
+				-- only change the used bits of 16 bits in F[lags] register
+				-- coming from special instructions
+				flag_ie <= new_ie;
+				flag_te <= new_te;
+				-- coming from A, X, Y, S
 				flag_ac <= reg_ac;
 				flag_az <= reg_az;
 				flag_xc <= reg_xc;
@@ -257,7 +279,22 @@ i_is_ftos <= '1' when (cpu_uinstruction = c_FTOS) else '0';
 i_is_popf <= '1' when (cpu_uinstruction = c_POPF) else '0';
 i_is_pushf <= '1' when (cpu_uinstruction = c_PUSHF) else '0';
 i_is_halt <= '1' when (cpu_uinstruction = c_HALT) else '0';
+i_is_int(1) <= '1' when (cpu_uinstruction = c_INTON) else '0';
+i_is_int(0) <= '1' when (cpu_uinstruction = c_INTOFF) else '0';
+i_is_trace(1) <= '1' when (cpu_uinstruction = c_TRACEON) else '0';
+i_is_trace(0) <= '1' when (cpu_uinstruction = c_TRACEOFF) else '0';
 
+-- clunky way to update interrupt and trace flags
+with i_is_int select new_ie <=
+	'1' when "10",
+	'0' when "01",
+	flag_ie when others;
+	
+with i_is_trace select new_te <=
+	'1' when "10",
+	'0' when "01",
+	flag_te when others;
+	
 -- operation count
 OPCNT <= (not cpu_irexe) & bitcnt5(to_integer(unsigned(opr_vector)))(2 downto 0);
 -- all registers are idle

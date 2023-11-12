@@ -49,4 +49,24 @@ Nextbit:	SRC;
 			POPX;
 			RTS;
 			
-			
+// test stack operations
+StackTest:	PUSHF;
+			PUSHX;
+			CPX, M[S];
+			IF_XZ; 
+			.branchto @ContY - $;
+			HALT;	// ERROR!
+ContY:		PUSHY;
+			CPY, M[S];
+			IF_YZ;
+			.branchto @ContA - $;
+			HALT;	// ERROR!
+ContA:		PUSHA;
+			LDA, LDY, LDX, M[IMM];
+			.data 0;
+			POPA;
+			POPY;
+			POPX;
+			POPF;
+			RTS;
+// end test				

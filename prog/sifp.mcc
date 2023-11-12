@@ -63,9 +63,9 @@ r_y			.valfield 3 values
 				STY|Y	// output value as data
 				default NOY;
 //
-// 16-bit stack pointer S  (has own carry (SC) and zero (SZ) flags, changes only during execute phases)
+// 16-bit stack pointer S (has own carry (SC) and zero (SZ) flags, changes only during execute phases)
 r_s			.valfield 3 values
-				NOS,	// no operation on X register 
+				NOS,	// no operation on S register 
 				CPS,	// compare with incoming data (SC, SZ)
 				M[POP],	// address is S, then increment
 				M[PUSH],// address is S - 1, then decrement
@@ -124,4 +124,8 @@ FTOS		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[S];		// mostly
 PUSHF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[PUSH];	// flags to stack
 POPF		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = NOY, r_s = M[POP];	// pick up flags from stack
 HALT		.alias  r_p = M[IMM], r_a = A, r_x = X, r_y = Y, r_s = S;			// ABUS will indicate where CPU halted
+INTON		.alias  r_p = NOP, r_a = A, r_x = X, r_y = Y, r_s = S;			// Enable interrupts (set flag_ie to 1)
+INTOFF		.alias  r_p = P4,  r_a = A, r_x = X, r_y = Y, r_s = S;			// Disable interrupts (set flag_ie to 0)
+TRACEON		.alias  r_p = P2,  r_a = A, r_x = X, r_y = Y, r_s = S;			// Enable tracing (set flag_te to 1)
+TRACEOFF	.alias  r_p = P0,  r_a = A, r_x = X, r_y = Y, r_s = S;			// Disable tracing (set flag_te to 0)
 

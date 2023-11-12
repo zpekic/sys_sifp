@@ -21,79 +21,47 @@
 			MARK2;
 			BRANCH;
 			.into @VGA_Init - $;
+
+			LDXI;
+			.data @StrHWorld;
+			MARK2;
+			BRANCH;
+			.into @VGA_OutStr - $;
 			
 			MARK2;
 			BRANCH;
 			.into @UART_Init - $;
 			
-//			LDXI;
-//			.data @StrHWorld;
-//			MARK2;
-//			BRANCH;
-//			.into @UART_OutStr - $;
+			LDXI;
+			.data @StrHWorld;
+			MARK2;
+			BRANCH;
+			.into @UART_OutStr - $;
 
-//			LDXI;
-//			.data 3;
-//			LDYI;
-//			.data 7;
-//			MARK2;
-//			BRANCH;
-//			.into @SetCursorXY - $;
+			INTON;	// enable interrupts
 			
 EchoLoop:	MARK2;
 			BRANCH;
 			.into @UART_GetChr - $;
+EchoOut:	PUSHA;
 			MARK2;
 			BRANCH;
 			.into @UART_OutChr - $;
 			MARK2;
 			BRANCH;
 			.into @VGA_OutChr - $;
+			POPA;
+			XORI;
+			.data CR;
+			IF_AZ;
+			.branchto @EchoLF - $;
  			JUMP;
 			.to @EchoLoop;
+EchoLF:		LDAI;
+			.data LF;
+			JUMP;
+			.to @EchoOut;
 			
-UART_GetChr:PUSHY;
-			LDYI;
-			.data UART_STATUS;
-RdStatus0:	LDA, M[Y];
-			SRC;		// bit 0 is RDRF (receiver data register full)
-			IF_AC;
-			.branchto @GetChr - $;
-			BRANCH;
-			.to @RdStatus0 - $;
-GetChr:		INY;		// point to UART data register
-			LDA, M[Y];
-			ANDI;
-			.data 0x00FF;	// UART is connected to LSB
-			POPY;
-			RTS;
-
-UART_OutChr:PUSHY;
-			PUSHA;
-			LDYI;
-			.data UART_STATUS;
-RdStatus1:	LDA, M[Y];
-			SRC;
-			SRC;		// bit 1 is TDRE (transmit register empty)
-			IF_AC;
-			.branchto @OutChr - $;
-			BRANCH;
-			.to @RdStatus1 - $;
-OutChr:		INY, LDA, M[POP];	// Y points to UART data register, get the char back		
-			STA, M[Y];
-			POPY;
-			RTS;
-			
-UART_OutStr:LDA, M[X];
-			IF_AZ;
-			.branchto @Done - $;
-			MARK2;
-			BRANCH;
-			.into @UART_OutChr - $;
-			INX, BRANCH;
-			.data @UART_OutStr - $;
-Done:		RTS;
-
 StrClear:	.data CLS;
 			.data 0;
 			
@@ -112,18 +80,8 @@ StrHWorld:	.data 'H';
 			.data CR;
 			.data LF;
 			.data 0;
-			
-		
-UART_Init: 	LDYI;
-			.data UART_CONTROL;
-			LDAI;
-			.data 3;	// reset
-			STA, M[Y];
-			LDAI;
-			.data 0x10;	// all int off, 8N2, baudrate / 1
-			STA, M[Y];
-			RTS;
-			
-#include "utils.sif";			
+				
+#include "utils.sif";
+#include "uart.sif";
 #include "vga.sif";			
 			
