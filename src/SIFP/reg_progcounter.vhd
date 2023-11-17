@@ -89,24 +89,24 @@ cond_current <= (not operation_is_conditional) or cond(to_integer(unsigned(opera
 
 -- value
 with operation select reg <= 
-		std_logic_vector(unsigned(r) + 2) when r_p_P2,
-		std_logic_vector(unsigned(r) + 4) when r_p_P4,
+		std_logic_vector(unsigned(r) + 2) when r_p_STP2,
+		std_logic_vector(unsigned(r) + 4) when r_p_STP4,
 		r when others;
 
 -- projecting as data
 with operation select reg_d <= 
-		'1' when r_p_P0,
-		'1' when r_p_P2,
-		'1' when r_p_P4,
+		'1' when r_p_STP,
+		'1' when r_p_STP2,
+		'1' when r_p_STP4,
 		'0' when others;
 
 -- projecting as address
 with operation select reg_a <= 
 		'0' when r_p_NOP,
 		'0' when r_p_LDP,
-		'0' when r_p_P2,
-		'0' when r_p_P4,
-		'0' when r_p_P0,
+		'0' when r_p_STP2,
+		'0' when r_p_STP4,
+		'0' when r_p_STP,
 		'1' when others;
 
 -- active when the operation is anything except NOP
@@ -115,15 +115,15 @@ active <= '0' when (operation = r_p_NOP) else '1';
 ---- Start boilerplate code (use with utmost caution!)
 -- with cpu_r_p select r_p <=
 --      NOP when r_p_NOP, -- default value
---      LDP when r_p_LDP,
+--      M[IMM] when r_p_M[IMM],
 --      BRANCH when r_p_BRANCH,
 --      BRANCH when r_p_IF_TRUE,
 --      JUMP when r_p_JUMP,
 --      JUMP when r_p_GOTO,
---      P4 when r_p_P4,
---      P2 when r_p_P2,
---      P0 when r_p_P0,
---      M[IMM] when r_p_M[IMM],
+--      LDP when r_p_LDP,
+--      STP4 when r_p_STP4,
+--      STP2 when r_p_STP2,
+--      STP when r_p_STP,
 --      BAC when r_p_BAC,
 --      BAC when r_p_IF_AC,
 --      BAC when r_p_IF_A_GE,
@@ -149,6 +149,5 @@ active <= '0' when (operation = r_p_NOP) else '1';
 --      BSZ when r_p_IF_SZ;
 --      BSZ when r_p_IF_S_EQ;
 ---- End boilerplate code
-
 end Behavioral;
 

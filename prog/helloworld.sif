@@ -22,11 +22,13 @@
 			BRANCH;
 			.into @VGA_Init - $;
 
-			LDXI;
+Loop:		LDXI;
 			.data @StrHWorld;
 			MARK2;
 			BRANCH;
 			.into @VGA_OutStr - $;
+			JUMP;
+			.to @Loop;
 			
 			MARK2;
 			BRANCH;

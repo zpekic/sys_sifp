@@ -112,15 +112,14 @@ active <= '0' when (operation = r_a_NOA) else '1';
 ---- Start boilerplate code (use with utmost caution!)
 -- with cpu_r_a select r_a <=
 --      NOA when r_a_NOA, -- default value
---      LDA when r_a_LDA,
 --      XOR when r_a_XOR,
 --      SLC when r_a_SLC,
 --      SRC when r_a_SRC,
+--      LDA when r_a_LDA,
 --      ADC when r_a_ADC,
 --      AND when r_a_AND,
 --      STA when r_a_STA;
 --      STA when r_a_A;
 ---- End boilerplate code
-
 end Behavioral;
 

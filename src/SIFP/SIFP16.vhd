@@ -59,9 +59,9 @@ constant c_PUSHF: std_logic_vector(15 downto 0) := r_p_NOP & r_a_NOA & r_x_NOX &
 constant c_POPF: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_POP;	-- pick up flags from stack
 constant c_HALT: std_logic_vector(15 downto 0) :=	r_p_M_IMM & r_a_A & r_x_X & r_y_Y & r_s_S;			-- ABUS will indicate where CPU halted
 constant c_INTON:		std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_A & r_x_X & r_y_Y & r_s_S;		-- Enable interrupts (set flag_ie to 1)
-constant c_INTOFF:	std_logic_vector(15 downto 0) :=	r_p_P4 &  r_a_A & r_x_X & r_y_Y & r_s_S;		-- Disable interrupts (set flag_ie to 0)
-constant c_TRACEON:	std_logic_vector(15 downto 0) :=	r_p_P2 &  r_a_A & r_x_X & r_y_Y & r_s_S;		-- Enable tracing (set flag_te to 1)
-constant c_TRACEOFF:	std_logic_vector(15 downto 0) :=	r_p_P0 &  r_a_A & r_x_X & r_y_Y & r_s_S;		-- Disable tracing (set flag_te to 0)
+constant c_INTOFF:	std_logic_vector(15 downto 0) :=	r_p_STP4 & r_a_A & r_x_X & r_y_Y & r_s_S;		-- Disable interrupts (set flag_ie to 0)
+constant c_TRACEON:	std_logic_vector(15 downto 0) :=	r_p_STP2 & r_a_A & r_x_X & r_y_Y & r_s_S;		-- Enable tracing (set flag_te to 1)
+constant c_TRACEOFF:	std_logic_vector(15 downto 0) :=	r_p_STP &  r_a_A & r_x_X & r_y_Y & r_s_S;		-- Disable tracing (set flag_te to 0)
 
 -- CPU program
 -- CPU always executes only 8 instructions continously!
@@ -83,7 +83,7 @@ constant cpu_program: mem16x20 := (
 	"0000" & r_p_NOP & r_a_NOA & r_x_X	 & r_y_NOY & r_s_NOS,	-- output X
 	"0000" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_Y	  & r_s_NOS,	-- output Y
 	"0000" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_S,		-- output S
-	"1000" & r_p_P0 & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS		-- output P
+	"1000" & r_p_STP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS		-- output P
 );
 
 signal clk_cnt: std_logic_vector(15 downto 0); -- free running counter, 3 LSB bits are the program counter
