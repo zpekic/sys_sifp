@@ -415,8 +415,8 @@ led4x7: entity work.fourdigitsevensegled port map (
 	  segment(7) => DOT
 	 );
 			 
-led_data <= ABUS when (btn_ledsel = '1') else DBUS;
---led_data <= perfcnt_value(31 downto 16);-- when (btn_ledsel = '1') else perfcnt_value(15 downto 0);
+--led_data <= ABUS when (btn_ledsel = '1') else DBUS;
+led_data <= perfcnt_value(15 downto 0) when (perfcnt_value(31 downto 16) = X"0000") else perfcnt_value(31 downto 16);
 bus_valid <= VMA or (not RnW);	-- bus signals defined if valid memory address, or register debug output
 			 
 -- generate debouncers for 4 buttons and 8 for switches to clean input signals

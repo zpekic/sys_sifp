@@ -67,7 +67,7 @@ VGA_OutChr: PUSHX;
 //			default "printable" character output
 			POPA;
 			
-VGA_Print:	NOP; //TRACEON;
+VGA_Print:	NOP; 
 			PUSHY;
 			MARK2;
 			BRANCH;
@@ -101,16 +101,15 @@ NextRow1:	INY;
 			BRANCH;
 			.to @SetCursorXY - $;
 
-ScrollUp:	NOP;
-			LDYI;
+ScrollUp:	LDYI;
 			.data 0;
 NxtRow:		PUSHY; 		// we will need row later
 			LDXI;
 			.data 0;
-NxtCol:		MARK2;
+			MARK2;
 			BRANCH;
 			.into @GetRowBase - $;
-			PUSHY;		// destination base on stack
+NxtCol:		PUSHY;		// destination base on stack
 			ADYI;		// add to get source base
 			.data VGA_COLS;
 			LDA, M[Y+X];	// get character from VGA RAM
@@ -122,7 +121,7 @@ NxtCol:		MARK2;
 			IF_X_GE;
 			.branchto @ChkRow - $;
 			BRANCH;
-			.to @NxtCol;
+			.to @NxtCol - $;
 ChkRow:		POPY;
 			INY;
 			CPYI;
@@ -132,7 +131,8 @@ ChkRow:		POPY;
 			BRANCH;
 			.to @NxtRow - $;
 			// clear last row
-ClrLastRow:	LDYI;
+ClrLastRow:	NOP;
+			LDYI;
 			.data VGA_ROWS - 1;
 			PUSHY;	
 			MARK2;
@@ -173,6 +173,8 @@ ClrNextRow:	PUSHY;
 ClearRow: 	MARK2;
 			BRANCH;
 			.into @GetRowBase - $;
+			LDAI;
+			.data ' ';
 			LDXI;
 			.data VGA_COLS - 1;
 ClrRLoop:	STA, M[Y+X];

@@ -22,11 +22,20 @@
 			BRANCH;
 			.into @VGA_Init - $;
 
-Loop:		LDXI;
-			.data @StrHWorld;
+			LDAI;
+			.data ' ';
+Loop:		ADCI;
+			.data 1;
+			PUSHA;
+			MARK2;
+			BRANCH;
+			.into @VGA_OutChr - $;
+			LDXI;
+			.data @StrEnd;
 			MARK2;
 			BRANCH;
 			.into @VGA_OutStr - $;
+			POPA;
 			JUMP;
 			.to @Loop;
 			
@@ -79,7 +88,7 @@ StrHWorld:	.data 'H';
 			.data 'l';
 			.data 'd';
 			.data '!';
-			.data CR;
+StrEnd:		.data CR;
 			.data LF;
 			.data 0;
 				
