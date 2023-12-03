@@ -215,25 +215,26 @@ begin
 	end if;
 end process;
 
--- internal clock 
-reg_clk <= CLK and int_ready and (not int_halt);
+-- internal clock
+-- halt instruction forces clock high, stopping the state machine, after which reset is needed
+reg_clk <= (CLK and int_ready) or i_is_halt;
 
 -- execution sequence counter and non-program accessible registers
 on_reg_clk: process(reg_clk, RESET)
 begin
 	if (RESET = '1') then
 		clk_cnt <= X"0000";
-		int_halt <= '0';
+		--int_halt <= '0';
 		int_trace <= '1';
 		reg_i <= c_NOP;	-- has no effect, won't be executed
 		reg_f <= X"0001";-- initialize C,Z flags to reflect register values
 	else
 		if (rising_edge(reg_clk)) then
-			if (i_is_halt = '0') then
+			--if (i_is_halt = '0') then
 				clk_cnt <= std_logic_vector(unsigned(clk_cnt) + 1);
-			else 
-				int_halt <= '1';
-			end if;
+			--else 
+			--	int_halt <= '1';
+			--end if;
 			-- safely change run/trace mode only at the start of full sequence
 			if (clk_cnt(2 downto 0) = "000") then
 				-- turn on trace either from internal flag or external "pin" 

@@ -21,34 +21,22 @@
 			MARK2;
 			BRANCH;
 			.into @VGA_Init - $;
-
-			LDAI;
-			.data ' ';
-Loop:		ADCI;
-			.data 1;
-			PUSHA;
-			MARK2;
-			BRANCH;
-			.into @VGA_OutChr - $;
 			LDXI;
-			.data @StrEnd;
+			.data @StrHWorld;
 			MARK2;
 			BRANCH;
 			.into @VGA_OutStr - $;
-			POPA;
-			JUMP;
-			.to @Loop;
-			
+
 			MARK2;
 			BRANCH;
 			.into @UART_Init - $;
-			
 			LDXI;
 			.data @StrHWorld;
 			MARK2;
 			BRANCH;
 			.into @UART_OutStr - $;
 
+			//TRACEON; 
 			INTON;	// enable interrupts
 			
 EchoLoop:	MARK2;

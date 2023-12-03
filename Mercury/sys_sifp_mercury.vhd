@@ -138,6 +138,7 @@ alias btn_clk: std_logic is button(3);
 --- frequency signals
 signal clkgen_vga: std_logic;	-- should be 25MHz
 signal clkgen_debounce: std_logic;
+signal clkgen_reset: std_logic; -- one time high to low pulse
 signal clkgen_baudrate4, clkgen_baudrate: std_logic;	
 signal clkgen_cpu: std_logic;
 signal freq100Hz, freq50Hz, freq1Hz: std_logic;
@@ -178,11 +179,12 @@ signal led_data: std_logic_vector(15 downto 0);
 signal perfcnt_value: std_logic_vector(31 downto 0);
 signal bus_valid: std_logic;
 signal in_or_op: std_logic_vector(3 downto 0);
+signal reset_delay: std_logic_vector(15 downto 0) := X"0000";
 
 begin   
 
 -- master reset
-RESET <= USR_BTN;
+RESET <= USR_BTN when (reset_delay = X"FFFF") else '1';
 
 -- CPU!
 cpu: entity work.SIFP16 Port map (
@@ -246,6 +248,7 @@ on_clk: process(CLK)
 begin
 	if (rising_edge(CLK)) then
 		rts0_delay <= PMOD_RTS0;
+		reset_delay <= reset_delay(14 downto 0) & '1';
 	end if;
 end process;
 
@@ -420,6 +423,7 @@ led_data <= perfcnt_value(15 downto 0) when (perfcnt_value(31 downto 16) = X"000
 bus_valid <= VMA or (not RnW);	-- bus signals defined if valid memory address, or register debug output
 			 
 -- generate debouncers for 4 buttons and 8 for switches to clean input signals
+switch <= SW;
 debouncer_generate: for i in 0 to 7 generate
 begin
 	dbc: if (i < 4) generate
@@ -432,13 +436,13 @@ begin
 		);
 	end generate;
 	
-	db_sw: entity work.debouncer port map 
-	(
-		clock => clkgen_debounce,
-		reset => RESET,
-		signal_in => SW(i),
-		signal_out => switch(i)
-	);
+--	db_sw: entity work.debouncer port map 
+--	(
+--		clock => clkgen_debounce,
+--		reset => RESET,
+--		signal_in => SW(i),
+--		signal_out => switch(i)
+--	);
 end generate;
 		
 -- count instructions or operations per 1 second

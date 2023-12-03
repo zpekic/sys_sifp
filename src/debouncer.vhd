@@ -44,8 +44,8 @@ signal all0, all1: std_logic;
 
 begin
 
-all0 <= '1' when shifter = "00000000" else '0';
-all1 <= '1' when shifter = "11111111" else '0';
+all0 <= '1' when (shifter = X"00") else '0';
+all1 <= '1' when (shifter = X"FF") else '0';
 
 -- all 1 or all 0 in shift register surely mean 1 or 0, but anything else keeps last state
 --debounced <= (not all1 and not all0 and debounced) or 
@@ -64,15 +64,15 @@ begin
 			-- shift register (== delay line)
 			shifter <= shifter(6 downto 0) & signal_in;
 			-- determine new state of debounced output
-		  if (all1 = '1') then
-				debounced <= '1'; 
-		  else
-				if (all0 = '1') then
-					 debounced <= '0';
-				else
-					 debounced <= debounced;
+			if (debounced = '0') then
+				if (all1 = '1') then
+					debounced <= '1';
 				end if;
-		  end if;
+			else
+				if (all0 = '1') then
+					debounced <= '0';
+				end if;
+			end if;
 		end if;
 	end if;
 end process; 

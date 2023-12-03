@@ -94,7 +94,9 @@ begin
 					char <= data;
 					bitSel <= std_logic_vector(unsigned(bitSel) + 1);
 				when X"E" =>
-					bitSel <= X"0";
+					if (send = '0') then
+						bitSel <= X"0";
+					end if;
 				when others =>
 					bitSel <= std_logic_vector(unsigned(bitSel) + 1);
 			end case;

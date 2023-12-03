@@ -27,10 +27,9 @@ RowOffLoop:	LDA, M[Y];		// previous row
 			.to @RowOffLoop - $;
 RowOffDone:	POPA;
 			LDAI;
-			.data HOME;
-			
-			//.data CLS;
+			.data CLS;
 			// continue with "clear screen"
+			//TRACEON;
 			
 // Display ASCII in A at CURSOR_X, CURSOR_Y
 VGA_OutChr: PUSHX;
@@ -166,7 +165,7 @@ ClrNextRow:	PUSHY;
 			CPYI;
 			.data VGA_ROWS;
 			IF_Y_GE;
-			.branchto @VGA_HOME - $;
+			.branchto @vga_home1 - $;
 			BRANCH;
 			.to @ClrNextRow - $;
 			
@@ -176,7 +175,7 @@ ClearRow: 	MARK2;
 			LDAI;
 			.data ' ';
 			LDXI;
-			.data VGA_COLS - 1;
+			.data VGA_COLS / 8 - 1; // bar on the left just to save time
 ClrRLoop:	STA, M[Y+X];
 			IF_XZ;
 			.branchto @ClrDone - $;
@@ -185,7 +184,7 @@ ClrRLoop:	STA, M[Y+X];
 ClrDone:	RTS;			
 			
 VGA_HOME:	POPA;
-			LDX, LDY, M[IMM];
+vga_home1:	LDX, LDY, M[IMM];
 			.data 0;			// X, Y <= 0
 			BRANCH;
 			.to @SetCursorXY - $;

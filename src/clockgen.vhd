@@ -48,12 +48,6 @@ end clockgen;
 
 architecture Behavioral of clockgen is
 
-component sn74hc4040 is
-    Port ( clock : in  STD_LOGIC;
-           reset : in  STD_LOGIC;
-           q : out  STD_LOGIC_VECTOR(11 downto 0));
-end component;
-
 constant clk_board: integer := 50000000;	-- 50MHz
 
 type prescale_lookup is array (0 to 7) of integer range 0 to 65535;
@@ -81,11 +75,11 @@ begin
 -- connect to outputs
 with cpuclk_sel select cpu_clk <=
 	(ss_q and freq_2048(8)) when "000",	-- single step
-	freq_2048(9)	when "001",	-- 4Hz
-	freq_2048(7)	when "010",	-- 16Hz
-	freq_2048(5)	when "011",	-- 64Hz
-	freq_25M(10)	when "100",	-- 24.4140625kHz
-	freq_25M(9)		when "101",	-- 48.828125kHz
+	freq_2048(8)	when "001",	-- 8Hz
+	freq_2048(6)	when "010",	-- 32Hz
+	freq_2048(4)	when "011",	-- 128Hz
+	freq_25M(6)		when "100",	-- 390.625kHz
+	freq_25M(4)		when "101",	-- 1.5625MHz
 	freq_25M(2)		when "110",	-- 6.25MHz
 	freq_25M(0)		when others;	-- 25MHz  
 --	CLK				when others;	-- 50MHz  
@@ -137,7 +131,7 @@ begin
 	end if;
 end process; 	
 
-baudgen: sn74hc4040 port map (
+baudgen: entity work.sn74hc4040 port map (
 			clock => baudrate_x8,
 			reset => RESET,
 			q(0) => baudrate_x4, 
@@ -146,24 +140,23 @@ baudgen: sn74hc4040 port map (
 			q(11 downto 3) => open		
 		);	
 
-clockgen: sn74hc4040 port map (
+clockgen: entity work.sn74hc4040 port map (
 			clock => CLK,	-- 50MHz crystal on Anvyl board
 			reset => RESET,
 			q => freq_25M
 		);
 
-powergen: sn74hc4040 port map (
+powergen: entity work.sn74hc4040 port map (
 			clock => freq4096,
 			reset => RESET,
 			q => freq_2048
 		);
 		
-mainsgen: sn74hc4040 port map (
+mainsgen: entity work.sn74hc4040 port map (
 			clock => freq3200,
 			reset => RESET,
 			q => freq_1600
 		);
-
 
 end Behavioral;
 
