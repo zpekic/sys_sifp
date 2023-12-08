@@ -63,6 +63,12 @@ VGA_OutChr: PUSHX;
 			IF_AZ; 
 			.branchto @VGA_LF - $;
 
+			LDA, M[S];
+			XORI;
+			.data BS;
+			IF_AZ;
+			.branchto $VGA_BS - $;
+			
 //			default "printable" character output
 			POPA;
 			
@@ -147,6 +153,22 @@ SetX0:		LDXI;
 			BRANCH;
 			.to @SetCursorXY - $;
 
+VGA_BS:		POPA;
+			CPXI;
+			.data 0;
+			IF_XZ;
+			.branchto @PrevRow - $;
+			DEX, BRANCH;
+			.to @SetCursorXY - $;
+PrevRow:	CPYI;
+			.data 0;
+			IF_YZ;
+			.branchto @SetCursorXY - $;
+			LDXI;
+			.data VGA_COLS - 1;
+			DEY, BRANCH;
+			.to @SetCursorXY - $;
+			
 VGA_LF:		POPA;
 			BRANCH;
 			.to @NextRow1 - $;

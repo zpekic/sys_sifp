@@ -138,7 +138,6 @@ alias btn_clk: std_logic is button(3);
 --- frequency signals
 signal clkgen_vga: std_logic;	-- should be 25MHz
 signal clkgen_debounce: std_logic;
-signal clkgen_reset: std_logic; -- one time high to low pulse
 signal clkgen_baudrate4, clkgen_baudrate: std_logic;	
 signal clkgen_cpu: std_logic;
 signal freq100Hz, freq50Hz, freq1Hz: std_logic;
@@ -192,6 +191,8 @@ cpu: entity work.SIFP16 Port map (
 		RESET => RESET,
 		READY => tracer_ready,
 		TRACEIN => sw_trace,
+		HOLD => '0',
+		INT => '0',
 		ABUS => ABUS,
 		DBUS => DBUS,
 		RnW => RnW,
@@ -199,6 +200,8 @@ cpu: entity work.SIFP16 Port map (
 		PnD => PnD,
 		HALT => HALT,
 		DONE => DONE,
+		HOLDA => open,
+		INTA => open,
 		TRACEOUT => TRACEOUT,
 		OPCNT => OPCNT,
 		FETCH => FETCH
@@ -418,12 +421,12 @@ led4x7: entity work.fourdigitsevensegled port map (
 	  segment(7) => DOT
 	 );
 			 
---led_data <= ABUS when (btn_ledsel = '1') else DBUS;
-led_data <= perfcnt_value(15 downto 0) when (perfcnt_value(31 downto 16) = X"0000") else perfcnt_value(31 downto 16);
+led_data <= ABUS when (btn_ledsel = '1') else DBUS;
+--led_data <= perfcnt_value(15 downto 0) when (perfcnt_value(31 downto 16) = X"0000") else perfcnt_value(31 downto 16);
 bus_valid <= VMA or (not RnW);	-- bus signals defined if valid memory address, or register debug output
 			 
 -- generate debouncers for 4 buttons and 8 for switches to clean input signals
-switch <= SW;
+--switch <= SW;
 debouncer_generate: for i in 0 to 7 generate
 begin
 	dbc: if (i < 4) generate
@@ -436,13 +439,13 @@ begin
 		);
 	end generate;
 	
---	db_sw: entity work.debouncer port map 
---	(
---		clock => clkgen_debounce,
---		reset => RESET,
---		signal_in => SW(i),
---		signal_out => switch(i)
---	);
+	db_sw: entity work.debouncer port map 
+	(
+		clock => clkgen_debounce,
+		reset => RESET,
+		signal_in => SW(i),
+		signal_out => switch(i)
+	);
 end generate;
 		
 -- count instructions or operations per 1 second

@@ -36,6 +36,8 @@ entity SIFP16 is
            RESET : in  STD_LOGIC;
            READY : in  STD_LOGIC;
            TRACEIN : in  STD_LOGIC;
+			  HOLD: in STD_LOGIC;
+			  INT: in STD_LOGIC;
            ABUS : out  STD_LOGIC_VECTOR (15 downto 0);
            DBUS : inout  STD_LOGIC_VECTOR (15 downto 0);
            RnW : out  STD_LOGIC;
@@ -43,6 +45,8 @@ entity SIFP16 is
            PnD : out  STD_LOGIC;
 			  HALT: out STD_LOGIC;
 			  DONE: out STD_LOGIC;
+			  HOLDA: out STD_LOGIC;
+			  INTA: out STD_LOGIC;
 			  TRACEOUT: out STD_LOGIC;
 			  OPCNT: out STD_LOGIC_VECTOR(3 downto 0);	-- operations per instruction
            FETCH : out  STD_LOGIC);
@@ -53,49 +57,91 @@ architecture Behavioral of SIFP16 is
 --
 -- Special case instruction combinations
 constant c_FETCH: std_logic_vector(15 downto 0) := r_p_M_IMM & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS;
-constant c_NOP, c_EXEC: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS;-- only increment P
-constant c_FTOS: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_S;		-- mostly for flag output in trace mode
+constant c_NOP: std_logic_vector(15 downto 0) 	:=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS;		-- only increment P
+constant c_LDP: std_logic_vector(15 downto 0) 	:=	r_p_LDP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS;		-- load P
+constant c_FTOS: std_logic_vector(15 downto 0) 	:=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_S;		-- mostly for flag output in trace mode
+constant c_PUSHP: std_logic_vector(15 downto 0) := r_p_STP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_PUSH;	-- P (program counter) to stack
 constant c_PUSHF: std_logic_vector(15 downto 0) := r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_PUSH;	-- flags to stack
-constant c_POPF: std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_POP;	-- pick up flags from stack
-constant c_HALT: std_logic_vector(15 downto 0) :=	r_p_M_IMM & r_a_A & r_x_X & r_y_Y & r_s_S;			-- ABUS will indicate where CPU halted
+constant c_POPF: std_logic_vector(15 downto 0) 	:=	r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_M_POP;	-- pick up flags from stack
+constant c_HALT: std_logic_vector(15 downto 0) 	:=	r_p_M_IMM & r_a_A & r_x_X & r_y_Y & r_s_S;			-- ABUS will indicate where CPU halted
 constant c_INTON:		std_logic_vector(15 downto 0) :=	r_p_NOP & r_a_A & r_x_X & r_y_Y & r_s_S;		-- Enable interrupts (set flag_ie to 1)
 constant c_INTOFF:	std_logic_vector(15 downto 0) :=	r_p_STP4 & r_a_A & r_x_X & r_y_Y & r_s_S;		-- Disable interrupts (set flag_ie to 0)
 constant c_TRACEON:	std_logic_vector(15 downto 0) :=	r_p_STP2 & r_a_A & r_x_X & r_y_Y & r_s_S;		-- Enable tracing (set flag_te to 1)
 constant c_TRACEOFF:	std_logic_vector(15 downto 0) :=	r_p_STP &  r_a_A & r_x_X & r_y_Y & r_s_S;		-- Disable tracing (set flag_te to 0)
 
+-- internal program constants
+constant if_hold:	std_logic_vector(1 downto 0) := "00";
+constant if_cont:	std_logic_vector(1 downto 0) := "01";
+constant if_trce: std_logic_vector(1 downto 0) := "10";
+constant if_intr:	std_logic_vector(1 downto 0) := "11";
+
 -- CPU program
--- CPU always executes only 8 instructions continously!
-constant cpu_program: mem16x20 := (
--- 8 instructions to execute in RUN mode (4 times the FETCH-EXECUTE sequence)
-	"0101" & c_FETCH,
-	"1110" & c_EXEC,
-	"0101" & c_FETCH,
-	"1110" & c_EXEC,
-	"0101" & c_FETCH,
-	"1110" & c_EXEC,
-	"0101" & c_FETCH,
-	"1110" & c_EXEC,
--- 8 instructions to execute in TRACE mode (FETCH-EXECUTE-6*REGISTER OUT)
-	"0101" & c_FETCH, -- FETCH (load instruction register)
-	"0110" & c_EXEC, 	-- EXECUTE (from instruction register)
-	"0000" & c_FTOS,														 	-- output F(lags) 
-	"0000" & r_p_NOP & r_a_A 	& r_x_NOX & r_y_NOY & r_s_NOS,	-- output A
-	"0000" & r_p_NOP & r_a_NOA & r_x_X	 & r_y_NOY & r_s_NOS,	-- output X
-	"0000" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_Y	  & r_s_NOS,	-- output Y
-	"0000" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_S,		-- output S
-	"1000" & r_p_STP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS		-- output P
+-- CPU always executes only these instructions continously
+-- except at step 1 when the instruction executed is coming from instruction register
+-- which was loaded from external memory
+-- this works because the lower 16 bits of the instructions in this program are same as
+-- instruction format stored in external memory
+constant cpu_program: mem16x32 := (
+	-- basic loop (fetch / execute)
+	-- 0: fetch, then hold or execute
+	if_hold & X"F" & X"1" & "000101" & c_FETCH,
+	-- 1: execute, then continue (fetch next instruction) or special path
+	if_cont & X"0" & X"2" & "001110" & c_NOP,
+	
+	-- trace routine outputs register index on A bus and value on D bus
+	-- 2: output F(flags), if trace then output other regs else push regs (interrupt)
+	if_trce & X"3" & X"8" & "000000" & c_FTOS,								
+	-- 3: output A, continue	
+	if_intr & X"4" & X"4" & "000000" & r_p_NOP & r_a_A 	& r_x_NOX & r_y_NOY & r_s_NOS,
+	-- 4: output X, continue
+	if_intr & X"5" & X"5" & "000000" & r_p_NOP & r_a_NOA & r_x_X	 & r_y_NOY & r_s_NOS,
+	-- 5: output Y, continue
+	if_intr & X"6" & X"6" & "000000" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_Y	  & r_s_NOS,	
+	-- 6: output S, continue
+	if_intr & X"7" & X"7" & "000000" & r_p_NOP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_S,
+	-- 7: output P, if interrupt then push regs else fetch (new instruction) 
+	if_intr & X"8" & X"0" & "001000" & r_p_STP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS,
+	
+	-- interrupt routine pushes P and F on the stack, disables tracing and interrupts, and then load the int vector
+	-- 8: push P, continue
+	if_cont & X"9" & X"9" & "000100" & c_PUSHP,
+	-- 9: push F, continue
+	if_cont & X"A" & X"A" & "000100" & c_PUSHF,
+	-- A: turn trace flag off, continue
+	if_cont & X"B" & X"B" & "000100" & c_TRACEOFF,
+	-- B: turn interrupt enable off, continue
+	if_cont & X"C" & X"C" & "000100" & c_INTOFF,
+	-- C: load intrrupt vector, then fetch next instruction
+	if_cont & X"0" & X"0" & "010100" & c_LDP,
+	
+	-- unused, reserved for future use
+	-- D: unreachable nop
+	if_cont & X"0" & X"0" & "000100" & c_NOP,
+	-- E: unreachable nop
+	if_cont & X"0" & X"0" & "000100" & c_NOP,
+	
+	-- bus hold routine
+	-- F: hold (tri-state) until HOLD signal detected low, otherwise execute
+	if_hold & X"F" & X"1" & "100000" & c_NOP
 );
 
-signal clk_cnt: std_logic_vector(15 downto 0); -- free running counter, 3 LSB bits are the program counter
-signal cpu_upc: std_logic_vector(3 downto 0);
-
 -- instruction word
-signal cpu_i: std_logic_vector(19 downto 0);
-alias cpu_done:  std_logic is cpu_i(19); -- 1: last in machine cycle
-alias cpu_bctrl: std_logic is cpu_i(18); -- 0: alternative bus control (ABUS = register address; VMA, PnD, RnW = '0')
-alias cpu_irexe: std_logic is cpu_i(17); -- 1: execute from instruction register 
-alias cpu_fetch: std_logic is cpu_i(16); -- 1: fetch
-alias cpu_instr: std_logic_vector(15 downto 0) is cpu_i(15 downto 0);
+signal cpu_instruction: std_logic_vector(31 downto 0);
+alias cpu_if:	  std_logic_vector(1 downto 0) is cpu_instruction(31 downto 30); -- select condition ("IF")
+alias cpu_then:  std_logic_vector(3 downto 0) is cpu_instruction(29 downto 26); -- next state if condition true ("THEN")
+alias cpu_else:  std_logic_vector(3 downto 0) is cpu_instruction(25 downto 22); -- next state if condition false ("ELSE")
+alias cpu_hlda:  std_logic is cpu_instruction(21); -- 0: bus hold (tri-state) machine cycle
+alias cpu_inta:  std_logic is cpu_instruction(20); -- 0: load interrupt vector
+alias cpu_done:  std_logic is cpu_instruction(19); -- 1: last machine cycle in instruction
+alias cpu_bctrl: std_logic is cpu_instruction(18); -- 0: alternative bus control (ABUS = register address; VMA, PnD, RnW = '0')
+alias cpu_irexe: std_logic is cpu_instruction(17); -- 1: execute from instruction register 
+alias cpu_fetch: std_logic is cpu_instruction(16); -- 1: fetch
+-- format of lower 16-bit is exactly the same like the instructions stored in external memory!
+alias cpu_i: std_logic_vector(15 downto 0) is cpu_instruction(15 downto 0);
+
+-- current microinstruction program counter and condition
+signal cpu_upc: std_logic_vector(3 downto 0);
+signal cpu_cond: std_logic;
 
 -- special instruction decode
 signal i_is_special: std_logic_vector(7 downto 0);
@@ -106,8 +152,8 @@ alias i_is_halt:	std_logic is i_is_special(3);
 alias i_is_int:   std_logic_vector(1 downto 0) is i_is_special(5 downto 4);
 alias i_is_trace: std_logic_vector(1 downto 0) is i_is_special(7 downto 6);
 
--- internally sync'd with CLK
-signal int_trace, int_halt, int_ready: std_logic;
+-- internally sync'd
+signal int_trace, int_intr, int_ready, int_done: std_logic;
 signal reg_clk: std_logic;
 
 -- non-programmable registers
@@ -157,23 +203,33 @@ signal opr_nop: std_logic;
 
 begin
 
--- CPU control bus outputs
-RnW <= cpu_bctrl and int_rnw;
-VMA <= cpu_bctrl and int_vma;
-PnD <= cpu_bctrl and int_pnd;
-HALT <= int_halt;
+--------------------------------------------------------------------------
+-- CPU control bus outputs 
+--------------------------------------------------------------------------
+-- tristate
+RnW <= 'Z' when (cpu_hlda = '1') else (cpu_bctrl and int_rnw);
+VMA <= 'Z' when (cpu_hlda = '1') else (cpu_bctrl and int_vma);
+PnD <= 'Z' when (cpu_hlda = '1') else (cpu_bctrl and int_pnd);
+-- not tristate
+HALT <= i_is_halt;
 TRACEOUT <= int_trace;
-DONE <= (not reg_clk) and cpu_done;
+DONE <= (not reg_clk) and int_done;
 FETCH <= cpu_fetch;
+HOLDA <= cpu_hlda;
+INTA <= cpu_inta;
+
+int_done <= (not int_trace) when (cpu_irexe = '1') else cpu_done;
 
 ----------------------------------------------------------------------------
 -- CPU Address bus output
 ----------------------------------------------------------------------------
--- in trace mode, address bits 2,1,0 (values 2..7) indicating a register
-ABUS <= ("0000000000000" & clk_cnt(2 downto 0)) when (cpu_bctrl = '0') else int_abus;	
+ABUS <= "ZZZZZZZZZZZZZZZZ" when (cpu_hlda = '1') else int_abus;	
 
--- internal address bus is an addition of all registers that project address
-int_abus <= std_logic_vector(unsigned(p2a) + unsigned(x2a) + unsigned(y2a) + unsigned(s2a));
+-- internal address bus is either:
+-- addition of all registers that project address (VMA = 1, RnW = 0/1, normal memory read/write)
+-- or 
+-- register address (VMA = 1, RnW = 0, trace mode)
+int_abus <= ("0000000000000" & cpu_upc(2 downto 0)) when (cpu_bctrl = '0') else std_logic_vector(unsigned(p2a) + unsigned(x2a) + unsigned(y2a) + unsigned(s2a));
 p2a <= p when (reg_p_a = '1') else X"0000"; 
 x2a <= x when (reg_x_a = '1') else X"0000"; 
 y2a <= y when (reg_y_a = '1') else X"0000"; 
@@ -189,7 +245,7 @@ int_pnd <= reg_p_a;
 -- CPU data bus outputs
 ---------------------------------------------------------------------------
 -- internal data bus is logical OR of all registers that project data
-DBUS <= "ZZZZZZZZZZZZZZZZ" when ((int_rnw and cpu_bctrl) = '1') else int_fdbus;
+DBUS <= "ZZZZZZZZZZZZZZZZ" when (((int_rnw and cpu_bctrl) or cpu_hlda) = '1') else int_fdbus;
 
 -- memory write if valid memory address and trying to output at least 1 register
 int_rnw <= not(reg_p_d or reg_a_d or reg_x_d or reg_y_d or reg_s_d or i_is_ftos or i_is_pushf) when (int_vma = '1') else '1';
@@ -205,13 +261,25 @@ x2d <= x when (reg_x_d = '1') else X"0000";
 y2d <= y when (reg_y_d = '1') else X"0000"; 
 s2d <= s when (reg_s_d = '1') else X"0000"; 
 -- read from external memory bus if valid memory address and not write mode
-d2d <= DBUS when ((int_rnw and int_vma) = '1') else X"0000"; 
+d2d <= DBUS when ((int_rnw and int_vma) or cpu_inta = '1') else X"0000"; 
 
 -- capture READY at falling edge of CLK
 on_clk: process(CLK)
 begin
 	if (falling_edge(CLK)) then
 		int_ready <= READY;
+	end if;
+end process;
+
+-- capture interrupt (positive edge triggered)
+on_int: process(INT, RESET)
+begin
+	if (RESET = '1') then
+		int_intr <= '0';
+	else
+		if (rising_edge(INT)) then
+			int_intr <= flag_ie;
+		end if;
 	end if;
 end process;
 
@@ -223,23 +291,26 @@ reg_clk <= (CLK and int_ready) or i_is_halt;
 on_reg_clk: process(reg_clk, RESET)
 begin
 	if (RESET = '1') then
-		clk_cnt <= X"0000";
-		--int_halt <= '0';
-		int_trace <= '1';
+		cpu_upc <= X"0";
+		int_trace <= '0';
 		reg_i <= c_NOP;	-- has no effect, won't be executed
-		reg_f <= X"0001";-- initialize C,Z flags to reflect register values
+		reg_f <= X"0001";	-- initialize C,Z flags to reflect register values
 	else
 		if (rising_edge(reg_clk)) then
-			--if (i_is_halt = '0') then
-				clk_cnt <= std_logic_vector(unsigned(clk_cnt) + 1);
-			--else 
-			--	int_halt <= '1';
-			--end if;
-			-- safely change run/trace mode only at the start of full sequence
-			if (clk_cnt(2 downto 0) = "000") then
-				-- turn on trace either from internal flag or external "pin" 
+			-- next instruction / state
+			if (cpu_cond = '1') then
+				cpu_upc <= cpu_then;
+			else
+				cpu_upc <= cpu_else;
+			end if;
+
+			-- load instruction register
+			if (cpu_fetch = '1') then
+				reg_i <= DBUS;
+				-- change trace mode only at this time (at beginning of each new instruction)
 				int_trace <= (TRACEIN or flag_te);	
 			end if;
+
 			-- load Flags register
 			if (i_is_popf = '1') then
 				reg_f <= DBUS;
@@ -258,22 +329,22 @@ begin
 				flag_sc <= reg_sc;
 				flag_sz <= reg_sz;
 			end if;
-			-- load instruction register
-			if (cpu_fetch = '1') then
-				reg_i <= DBUS;
-			end if;
 		end if;
 	end if;
 end process;
 
--- internal instruction program counter is only 4 bits!
-cpu_upc <= int_trace & clk_cnt(2 downto 0);
+-- internal condition code flag
+with cpu_if select cpu_cond <= 
+	HOLD when if_hold,
+	not(int_trace or int_intr) when if_cont,
+	int_trace when if_trce,
+	int_intr when others;
 
--- current instruction is 1 out of 16 20-bit words
-cpu_i <= cpu_program(to_integer(unsigned(cpu_upc)));
+-- current instruction is 1 out of 16 32-bit words
+cpu_instruction <= cpu_program(to_integer(unsigned(cpu_upc)));
 
 -- CPU executes either internal instruction, or the one from instruction register
-cpu_uinstruction <= reg_i when (cpu_irexe = '1') else cpu_instr;
+cpu_uinstruction <= reg_i when (cpu_irexe = '1') else cpu_i;
 
 -- decode some instructions to drive internal control signals
 i_is_ftos <= '1' when (cpu_uinstruction = c_FTOS) else '0';
