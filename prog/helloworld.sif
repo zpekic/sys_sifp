@@ -6,8 +6,8 @@
 // Full description: 
 // https://hackaday.io/project/173996-sifp-single-instruction-format-processor
 //---------------------------------------------------------------------------------------------
-			.code 9, 16, helloworld_code.mif, helloworld_code.cgf, helloworld_code.coe, cpu:helloworld_code.vhd, helloworld_code.hex, helloworld_code.bin, 2;
-			.symbol 9, 256, helloworld_sym.mif, helloworld_sym.cgf, helloworld_sym.coe, sym:helloworld_sym.vhd, helloworld_sym.hex, helloworld_sym.bin, 32;
+			.code 10, 16, helloworld_code.mif, helloworld_code.cgf, helloworld_code.coe, cpu:helloworld_code.vhd, helloworld_code.hex, helloworld_code.bin, 2;
+			.symbol 10, 256, helloworld_sym.mif, helloworld_sym.cgf, helloworld_sym.coe, sym:helloworld_sym.vhd, helloworld_sym.hex, helloworld_sym.bin, 32;
 
 #include "sifp.mcc";
 #include "sifp_sys.mcc";
@@ -17,8 +17,69 @@
 //	Execution starts at location 0
 //	---------------------------------------------------------------------------
 			NOP;
+			JUMP;
+			.to @Init;
 			
+//	---------------------------------------------------------------------------
+//	interrupt handling routine
+//	---------------------------------------------------------------------------
+			.org 8;
+			//TRACEON;
+			PUSHA;
+			PUSHX;
+			PUSHY;
+
 			MARK2;
+			BRANCH;
+			.into @GetCursorXY - $;
+			PUSHY;
+			PUSHX;
+			MARK2;
+			BRANCH;
+			.into @GetOldCrsXY - $;
+			CPX, M[POP];	// old X - new X
+			CPY, M[POP];	// old Y - new Y
+			IF_XZ;
+			.branchto @CheckY - $;
+			BRANCH;
+			.to @Revert - $; 
+CheckY:		IF_YZ;
+			.branchto @Flip - $;
+			BRANCH;
+			.to @Revert - $;
+
+Flip:		MARK2;
+			BRANCH;
+			.into @GetRowBase - $;
+			LDA, M[Y+X];	// get character from VGA RAM
+			XORI;
+			.data 0x0080;	// reverse back and forth
+			STA, M[Y+X];
+			BRANCH;
+			.to @IntExit - $;
+			
+Revert:		MARK2;
+			BRANCH;
+			.into @GetRowBase - $;
+			LDA, M[Y+X];	// get character from VGA RAM
+			ANDI;
+			.data 0xFF7F;	// revert to original
+			STA, M[Y+X];
+			MARK2;
+			BRANCH;
+			.into @GetCursorXY - $;
+			MARK2;
+			BRANCH;
+			.into @SetOldCrsXY - $;
+
+IntExit:	POPY;
+			POPX;
+			POPA;
+			POPF;	// F and P were saved when entering the interrupt routine
+			RTS;
+//	---------------------------------------------------------------------------			
+
+Init:		MARK2;
 			BRANCH;
 			.into @VGA_Init - $;
 			LDXI;

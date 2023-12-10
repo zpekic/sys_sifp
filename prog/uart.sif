@@ -25,6 +25,8 @@ GetChr:		INY;		// point to UART data register
 			POPY;
 			RTS;
 			
+UART_Beep:	LDAI;
+			.data BEL;
 UART_OutChr:PUSHY;
 			PUSHA;
 			LDYI;

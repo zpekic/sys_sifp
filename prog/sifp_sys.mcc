@@ -15,4 +15,5 @@ CLS:		.alias 0x1;			// ASCII code, clear device
 HOME:		.alias 0x2;			// ASCII code, cursor to top, left
 CR:			.alias 0xD;			// ASCII code, carriage return
 LF:			.alias 0xA;			// ASCII code, newline
+BEL:		.alias 0x7;			// ASCII code, bell (beep)
 BS:			.alias 0x8;			// ASCII code, backspace

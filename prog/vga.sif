@@ -1,4 +1,6 @@
 ROW_OFFSET	.alias RAM_BASE + 0;	// space to mark first address of up to 61 rows
+CUR_OLDX	.alias RAM_BASE + 60;
+CUR_OLDY	.alias RAM_BASE + 61;
 CURSOR_X	.alias RAM_BASE + 62;
 CURSOR_Y	.alias RAM_BASE + 63;
 
@@ -26,6 +28,11 @@ RowOffLoop:	LDA, M[Y];		// previous row
 			BRANCH;
 			.to @RowOffLoop - $;
 RowOffDone:	POPA;
+			LDX, LDY, M[IMM];		// X, Y = 0
+			.data 0;
+			MARK2;
+			BRANCH;
+			.into @SetOldCrsXY - $;	// set "old" cursor (new will be set by CLS)
 			LDAI;
 			.data CLS;
 			// continue with "clear screen"
@@ -67,7 +74,7 @@ VGA_OutChr: PUSHX;
 			XORI;
 			.data BS;
 			IF_AZ;
-			.branchto $VGA_BS - $;
+			.branchto @VGA_BS - $;
 			
 //			default "printable" character output
 			POPA;
@@ -94,6 +101,16 @@ SetCursorXY:PUSHY;
 // main exit restores Y and X
 			POPY;
 			POPX;
+			RTS;
+
+SetOldCrsXY:PUSHY;
+			LDYI;
+			.data CUR_OLDX;
+			STX, M[Y];	// M[CUR_OLDX] <= X
+			LDXI;
+			.data CUR_OLDY;
+			POPY;
+			STY, M[X];	// M[CUR_OLDY] <= Y
 			RTS;
 			
 NextRow:	LDXI;
@@ -210,14 +227,23 @@ vga_home1:	LDX, LDY, M[IMM];
 			.data 0;			// X, Y <= 0
 			BRANCH;
 			.to @SetCursorXY - $;
-					
+
+GetOldCrsXY:LDYI;
+			.data CUR_OLDX;
+			LDX, M[Y];		// X <= M[CURSOR_X]
+			PUSHX;
+			LDXI;
+			.data CUR_OLDY;
+			BRANCH;
+			.to @GetCursorY - $;
+
 GetCursorXY:LDYI;
 			.data CURSOR_X;
 			LDX, M[Y];		// X <= M[CURSOR_X]
 			PUSHX;
 			LDXI;
 			.data CURSOR_Y;
-			LDY, M[X];		// Y <= M[CURSOR_Y]
+GetCursorY:	LDY, M[X];		// Y <= M[CURSOR_Y]
 			POPX;
 			RTS;	
 
@@ -238,25 +264,3 @@ VGA_OutStr:	LDA, M[X];
 			INX, BRANCH;
 			.to @VGA_OutStr - $;
 OutStrDone:	RTS;
-
-VGATest:	PUSHA;		// keep A on stack top
-			LDYI;
-			.data VGA_BASE;
-			LDXI;
-			.data 0;
-VGATLoop:	LDA, X;
-			ADC, M[S];	// add base value from A
-			STA, M[Y+X];
-			INX;
-			CPXI;
-			.data VGA_COLS * VGA_ROWS;
-			IF_X_GE;
-			.branchto @VGATestEx - $;
-			BRANCH;
-			.to @VGATLoop - $;
-VGATestEx:	POPA;
-			RTS;
-
-		
-			
-			

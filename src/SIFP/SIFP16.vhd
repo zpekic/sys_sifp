@@ -108,9 +108,9 @@ constant cpu_program: mem16x32 := (
 	-- 9: push F, continue
 	if_cont & X"A" & X"A" & "000100" & c_PUSHF,
 	-- A: turn trace flag off, continue
-	if_cont & X"B" & X"B" & "000100" & c_TRACEOFF,
+	if_cont & X"B" & X"B" & "000100" & c_INTOFF,
 	-- B: turn interrupt enable off, continue
-	if_cont & X"C" & X"C" & "000100" & c_INTOFF,
+	if_cont & X"C" & X"C" & "000100" & c_TRACEOFF,
 	-- C: load intrrupt vector, then fetch next instruction
 	if_cont & X"0" & X"0" & "010100" & c_LDP,
 	
@@ -236,7 +236,7 @@ y2a <= y when (reg_y_a = '1') else X"0000";
 s2a <= s when (reg_s_a = '1') else X"0000"; 
 
 -- indicate valid memory address if at least one register is projecting address
-int_vma <= reg_p_a or reg_x_a or reg_y_a or reg_s_a;
+int_vma <= '0' when (cpu_inta = '1') else (reg_p_a or reg_x_a or reg_y_a or reg_s_a);
 
 -- for Harvard mode, we need to know if program counter is involved in address generation
 int_pnd <= reg_p_a;
@@ -261,7 +261,7 @@ x2d <= x when (reg_x_d = '1') else X"0000";
 y2d <= y when (reg_y_d = '1') else X"0000"; 
 s2d <= s when (reg_s_d = '1') else X"0000"; 
 -- read from external memory bus if valid memory address and not write mode
-d2d <= DBUS when ((int_rnw and int_vma) or cpu_inta = '1') else X"0000"; 
+d2d <= DBUS when (((int_rnw and int_vma) or cpu_inta) = '1') else X"0000"; 
 
 -- capture READY at falling edge of CLK
 on_clk: process(CLK)
@@ -272,9 +272,9 @@ begin
 end process;
 
 -- capture interrupt (positive edge triggered)
-on_int: process(INT, RESET)
+on_int: process(INT, RESET, cpu_inta)
 begin
-	if (RESET = '1') then
+	if ((RESET or cpu_inta) = '1') then
 		int_intr <= '0';
 	else
 		if (rising_edge(INT)) then

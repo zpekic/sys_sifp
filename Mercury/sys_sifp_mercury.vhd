@@ -133,6 +133,7 @@ signal button: std_logic_vector(3 downto 0);
 alias btn_traceload: std_logic is button(0);
 alias btn_continue: std_logic is button(1);
 alias btn_ledsel: std_logic is button(2);
+alias btn_int: std_logic is button(2);
 alias btn_clk: std_logic is button(3);
 
 --- frequency signals
@@ -162,6 +163,7 @@ signal cs_ram: std_logic := '0';
 -- CPU bus output
 signal ABUS: std_logic_vector(15 downto 0);
 signal VMA: std_logic;		-- valid memory address
+signal INTA: std_logic;		-- ack interrupt and read interrupt vector
 signal FETCH: std_logic;	-- fetching instruction (PnD is also 1)
 signal DONE: std_logic;		-- sync'd with READY
 signal HALT: std_logic;		-- CPU has halted 
@@ -192,7 +194,8 @@ cpu: entity work.SIFP16 Port map (
 		READY => tracer_ready,
 		TRACEIN => sw_trace,
 		HOLD => '0',
-		INT => '0',
+		INT => freq1Hz,
+--		INT => btn_int,
 		ABUS => ABUS,
 		DBUS => DBUS,
 		RnW => RnW,
@@ -201,11 +204,14 @@ cpu: entity work.SIFP16 Port map (
 		HALT => HALT,
 		DONE => DONE,
 		HOLDA => open,
-		INTA => open,
+		INTA => INTA,
 		TRACEOUT => TRACEOUT,
 		OPCNT => OPCNT,
 		FETCH => FETCH
 	);
+
+-- interrupt vector 0x0008
+DBUS <= X"0008" when ((INTA and RnW) = '1') else "ZZZZZZZZZZZZZZZZ";
 
 -- Tracer watches system bus activity and if signal match is detected, freezes the CPU in 
 -- the cycle by asserting low READY signal, and outputing the trace record to serial port
@@ -421,8 +427,8 @@ led4x7: entity work.fourdigitsevensegled port map (
 	  segment(7) => DOT
 	 );
 			 
-led_data <= ABUS when (btn_ledsel = '1') else DBUS;
---led_data <= perfcnt_value(15 downto 0) when (perfcnt_value(31 downto 16) = X"0000") else perfcnt_value(31 downto 16);
+--led_data <= ABUS when (btn_ledsel = '1') else DBUS;
+led_data <= perfcnt_value(15 downto 0) when (perfcnt_value(31 downto 16) = X"0000") else perfcnt_value(31 downto 16);
 bus_valid <= VMA or (not RnW);	-- bus signals defined if valid memory address, or register debug output
 			 
 -- generate debouncers for 4 buttons and 8 for switches to clean input signals
