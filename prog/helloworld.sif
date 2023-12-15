@@ -31,34 +31,10 @@
 
 			MARK2;
 			BRANCH;
-			.into @GetCursorXY - $;
+			.into @GetOldCrsXY - $;
 			PUSHY;
 			PUSHX;
 			MARK2;
-			BRANCH;
-			.into @GetOldCrsXY - $;
-			CPX, M[POP];	// old X - new X
-			CPY, M[POP];	// old Y - new Y
-			IF_XZ;
-			.branchto @CheckY - $;
-			BRANCH;
-			.to @Revert - $; 
-CheckY:		IF_YZ;
-			.branchto @Flip - $;
-			BRANCH;
-			.to @Revert - $;
-
-Flip:		MARK2;
-			BRANCH;
-			.into @GetRowBase - $;
-			LDA, M[Y+X];	// get character from VGA RAM
-			XORI;
-			.data 0x0080;	// reverse back and forth
-			STA, M[Y+X];
-			BRANCH;
-			.to @IntExit - $;
-			
-Revert:		MARK2;
 			BRANCH;
 			.into @GetRowBase - $;
 			LDA, M[Y+X];	// get character from VGA RAM
@@ -68,10 +44,33 @@ Revert:		MARK2;
 			MARK2;
 			BRANCH;
 			.into @GetCursorXY - $;
+			CPX, M[POP];	// new X - old X
+			CPY, M[POP];	// new Y - old Y
+			IF_XZ;
+			.branchto @CheckY - $;
+			BRANCH;
+			.to @Revert - $; 
+CheckY:		IF_YZ;
+			.branchto @Flip - $;
 			MARK2;
 			BRANCH;
 			.into @SetOldCrsXY - $;
-
+			BRANCH;
+			.to @IntExit - $;
+			
+Flip:		MARK2;
+			BRANCH;
+			.into @GetCursorXY - $;
+			MARK2;
+			BRANCH;
+			.into @GetRowBase - $;
+			LDA, M[Y+X];	// get character from VGA RAM
+			XORI;
+			.data 0x0080;	// reverse back and forth
+			STA, M[Y+X];
+			BRANCH;
+			.to @IntExit - $;
+			
 IntExit:	POPY;
 			POPX;
 			POPA;

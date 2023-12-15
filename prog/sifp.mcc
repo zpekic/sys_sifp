@@ -7,24 +7,24 @@
 //---------------------------------------------------------------------------------------------
 // define slices of the instruction word format
 //
-// 16-bit program counter (has no flags, changes during both fetch and execute phases)
+// 16-bit program counter (has no flags, always increment during fetch phase, changes as below during execute phase)
 r_p			.valfield 4 values
-				NOP,				// continue (increment P during fetch phase)
+				NOP,				// continue (increment P during next fetch phase)
 				M[IMM],				// output value as address, increment (used for immediate values)
-				BRANCH|IF_TRUE,		// unconditional branch (add next word)
-				JUMP|GOTO,			// unconditional jump (load with next word)
+				BRANCH|IF_TRUE,		// unconditional branch (add word pointed by P)
+				JUMP|GOTO,			// unconditional jump (load with word pointed by P)
 				LDP,				// load from incoming data (mostly from stack, for return)
 				STP4,				// put P + 4 to internal data bus
 				STP2,				// put P + 2 to internal data bus
-				STP,				// put P to internal data bus
-				BAC|IF_AC|IF_A_GE,	// branch if A flag C set
-				BAZ|IF_AZ|IF_A_EQ,	// branch if A flag Z set
+				STP,				// put P to internal data bus (mostly to output during trace mode)
+				BAC|IF_AC|IF_A_GE,	// if A flag C set add word pointed by P (branch), else increment P
+				BAZ|IF_AZ|IF_A_EQ,	// if A flag Z set
 				BXC|IF_XC|IF_X_GE,
 				BXZ|IF_XZ|IF_X_EQ,
 				BYC|IF_YC|IF_Y_GE,
 				BYZ|IF_YZ|IF_Y_EQ,
 				BSC|IF_SC|IF_S_GE,
-				BSZ|IF_SZ|IF_S_EQ	// branch is S flag Z set
+				BSZ|IF_SZ|IF_S_EQ
 				default NOP;
 //				
 // 16-bit accumulator (has own carry (AC) and zero (AZ) flags, changes only during execute phases)
