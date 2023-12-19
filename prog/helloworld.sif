@@ -49,10 +49,10 @@
 			IF_XZ;
 			.branchto @CheckY - $;
 			BRANCH;
-			.to @Revert - $; 
+			.to @NoFlip - $; 
 CheckY:		IF_YZ;
 			.branchto @Flip - $;
-			MARK2;
+NoFlip:		MARK2;
 			BRANCH;
 			.into @SetOldCrsXY - $;
 			BRANCH;
@@ -68,8 +68,6 @@ Flip:		MARK2;
 			XORI;
 			.data 0x0080;	// reverse back and forth
 			STA, M[Y+X];
-			BRANCH;
-			.to @IntExit - $;
 			
 IntExit:	POPY;
 			POPX;
@@ -87,6 +85,8 @@ Init:		MARK2;
 			BRANCH;
 			.into @VGA_OutStr - $;
 
+			TRACEON; 
+
 			MARK2;
 			BRANCH;
 			.into @UART_Init - $;
@@ -96,7 +96,6 @@ Init:		MARK2;
 			BRANCH;
 			.into @UART_OutStr - $;
 
-			//TRACEON; 
 			INTON;	// enable interrupts
 			
 EchoLoop:	MARK2;
@@ -106,6 +105,7 @@ EchoOut:	PUSHA;
 			MARK2;
 			BRANCH;
 			.into @UART_OutChr - $;
+			LDA, M[S];
 			MARK2;
 			BRANCH;
 			.into @VGA_OutChr - $;

@@ -35,6 +35,7 @@ entity debugtracer is
 			  cpu_clk: in STD_LOGIC;
 			  txd_clk: in STD_LOGIC;
 			  continue: in STD_LOGIC;
+			  enable: in STD_LOGIC;
            ready : out  STD_LOGIC;
            txd : out STD_LOGIC;
 			  load : in STD_LOGIC;							-- load trigger selection
@@ -50,7 +51,7 @@ end debugtracer;
 
 architecture Behavioral of debugtracer is
 
-signal trace, trace_enable, tr_clk, tr_on, tr_off: std_logic;
+signal trace, tr_clk, tr_on, tr_off: std_logic;
 signal reg_sel, cbus: std_logic_vector(3 downto 0);
 signal counter: std_logic_vector(7 downto 0);
 alias chrSel: std_logic_vector(3 downto 0) is counter(7 downto 4);
@@ -66,7 +67,7 @@ ready <= not trace;
 on_cpu_clk: process(reset, cpu_clk, ABUS, sel)
 begin
 	if (reset = '1') then 
-		trace_enable <= '1';
+--		trace_enable <= '1';
 		reg_sel <= sel;
 	else
 		if (rising_edge(cpu_clk)) then
@@ -74,7 +75,7 @@ begin
 			-- responds to OUT 0x00 (trace off) to OUT 0x01 (trace on)
 			if (load = '1') then
 				reg_sel <= sel;
-				trace_enable <= '1';
+--				trace_enable <= '1';
 			end if;
 --			if ((ABUS(7 downto 1) = "0000000") and (nIOW = '0')) then
 --				trace_enable <= ABUS(0);
@@ -82,7 +83,7 @@ begin
 		end if;
 		if (falling_edge(cpu_clk)) then
 			if (trace = '0') then
-				if (trace_enable = '1') then
+				if (enable = '1') then
 					trace <= (reg_sel(3) and REGW) or 
 								(reg_sel(2) and FETCH) or 
 								(reg_sel(1) and MEMW) or 

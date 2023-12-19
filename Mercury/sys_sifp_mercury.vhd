@@ -176,9 +176,9 @@ signal DBUS: std_logic_vector(15 downto 0);
 
 -- other
 signal tracer_ready, tracer_continue, ss_start: std_logic;
-signal led_data: std_logic_vector(15 downto 0);
+signal led_data, led_bus, led_perf: std_logic_vector(19 downto 0);
+signal led_flash: std_logic;
 signal perfcnt_value: std_logic_vector(31 downto 0);
-signal bus_valid: std_logic;
 signal in_or_op: std_logic_vector(3 downto 0);
 signal reset_delay: std_logic_vector(15 downto 0) := X"0000";
 
@@ -221,6 +221,7 @@ DBUS <= X"0008" when ((INTA and RnW) = '1') else "ZZZZZZZZZZZZZZZZ";
 			cpu_clk => clkgen_cpu,
 			txd_clk => clkgen_baudrate,
 			continue => continue,  
+			enable => TRACEOUT,
 			ready => tracer_ready,			-- freezes CPU when low
 			txd => PMOD_RXD0,					-- output trace (to any TTY of special tracer running on the host
 			load => btn_traceload,			-- load mask register if high
@@ -262,13 +263,13 @@ begin
 end process;
 
 ss_start <= not (btn_clk or rts0_delay);
-cpuclk_sel <= "000" when (TRACEOUT = '1') else sw_cpuclk;
+--cpuclk_sel <= "000" when (TRACEOUT = '1') else sw_cpuclk;
 -- generate various frequencies
 clkgen: entity work.clockgen Port map ( 
 		CLK => CLK, 				-- 50MHz on Mercury board
 		RESET => RESET,
 		baudrate_sel => "111",	-- 57600
-		cpuclk_sel => cpuclk_sel,
+		cpuclk_sel => sw_cpuclk, --cpuclk_sel,
 		ss_start => ss_start,
 		ss_end => DONE,
 		cpu_clk => clkgen_cpu,
@@ -406,30 +407,33 @@ acia0: entity work.uart Port map (
 		);
 
 -- LEDs
-LED(0) <= DONE; 
-LED(1) <= HALT;
+LED(0) <= TRACEOUT;  
+LED(1) <= INTA;
 	
 -- 7segment LED 
 led4x7: entity work.fourdigitsevensegled port map ( 
 	  -- inputs
-	  data => led_data,
+	  data => led_data(15 downto 0),
 	  digsel(1) => freq50Hz,
 	  digsel(0) => freq100Hz,
 	  showdigit => "1111",
-	  showdot(3) => VMA,
-	  showdot(2) => PnD,
-	  showdot(1) => FETCH,
-	  showdot(0) => RnW,
-	  showsegments => bus_valid,
+	  showdot => led_data(19 downto 16),
+	  --showdot(3) => VMA,
+	  --showdot(2) => PnD,
+	  --showdot(1) => FETCH,
+	  --showdot(0) => RnW,
+	  showsegments => led_flash,	-- flash when CPU is halted
 	  -- outputs
 	  anode => AN,
 	  segment(6 downto 0) => A_TO_G(6 downto 0),
 	  segment(7) => DOT
 	 );
-			 
---led_data <= ABUS when (btn_ledsel = '1') else DBUS;
-led_data <= perfcnt_value(15 downto 0) when (perfcnt_value(31 downto 16) = X"0000") else perfcnt_value(31 downto 16);
-bus_valid <= VMA or (not RnW);	-- bus signals defined if valid memory address, or register debug output
+
+led_flash <= freq1Hz or (not HALT);
+led_data <= led_bus when (TRACEOUT = '1') else led_perf;
+led_bus <= (VMA & PnD & FETCH & RnW & ABUS) when (btn_ledsel = '1') else (VMA & PnD & FETCH & RnW & DBUS);
+led_perf <= "0001" & perfcnt_value(15 downto 0) when (perfcnt_value(31 downto 16) = X"0000") else "0100" & perfcnt_value(31 downto 16);
+--bus_valid <= VMA or (not RnW);	-- bus signals defined if valid memory address, or register debug output
 			 
 -- generate debouncers for 4 buttons and 8 for switches to clean input signals
 --switch <= SW;

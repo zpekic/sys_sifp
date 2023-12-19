@@ -24,6 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
 use work.sifp_package.all;
+use work.helloworld_code.all;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -47,11 +48,12 @@ architecture Behavioral of rom1k is
 
 -- function defined in the package pulls in the content of the 
 -- hex file in generic parameter
-constant rom: mem1k16 := init_filememory(filename, 1024, default_value);
+--constant rom: mem1k16 := init_filememory(filename, 1024, default_value);
 
 begin
 
-	D <= rom(to_integer(unsigned(A))) when ((CS and OE) = '1') else "ZZZZZZZZZZZZZZZZ";
+--	D <= rom(to_integer(unsigned(A))) when ((CS and OE) = '1') else "ZZZZZZZZZZZZZZZZ";
+D <= cpu_microcode(to_integer(unsigned(A))) when ((CS and OE) = '1') else "ZZZZZZZZZZZZZZZZ";
 
 end Behavioral;
 

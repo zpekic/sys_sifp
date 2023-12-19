@@ -18,7 +18,7 @@ r_p			.valfield 4 values
 				STP2,				// put P + 2 to internal data bus
 				STP,				// put P to internal data bus (mostly to output during trace mode)
 				BAC|IF_AC|IF_A_GE,	// if A flag C set add word pointed by P (branch), else increment P
-				BAZ|IF_AZ|IF_A_EQ,	// if A flag Z set
+				BAZ|IF_AZ|IF_A_EQ,	// if A flag Z set add word pointed by P (branch), else increment P
 				BXC|IF_XC|IF_X_GE,
 				BXZ|IF_XZ|IF_X_EQ,
 				BYC|IF_YC|IF_Y_GE,
