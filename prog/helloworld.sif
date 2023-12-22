@@ -80,7 +80,7 @@ Init:		MARK2;
 			BRANCH;
 			.into @VGA_Init - $;
 			LDXI;
-			.data @StrHWorld;
+			.data @StrReady;
 			MARK2;
 			BRANCH;
 			.into @VGA_OutStr - $;
@@ -91,56 +91,190 @@ Init:		MARK2;
 			BRANCH;
 			.into @UART_Init - $;
 			LDXI;
-			.data @StrHWorld;
+			.data @StrReady;
 			MARK2;
 			BRANCH;
 			.into @UART_OutStr - $;
 
 			INTON;	// enable interrupts
 			
-EchoLoop:	MARK2;
+// -------------------------------------
+// MainLoop START
+// -------------------------------------
+MainLoop:	LDYI;
+			.data TXTBUFFER;
+			
+			// clear text buffer
+			LDX, LDA, M[IMM];
+			.data 0;
+TxtClear:	STA, M[Y+X];
+			CPXI;
+			.data TXTBUFLEN;
+			IF_XC;
+			.branchto @TxtCleared - $;
+			INX, BRANCH;
+			.to @TxtClear - $;
+
+TxtCleared: TRACEON;
+
+			// edit within the text buffer
+			MARK2;
+			BRANCH;
+			.into @CmdEdit - $;
+			IF_AC;
+			.branchto @ErrOrBrk - $;
+
+			// print text buffer
+			MARK2;
+			BRANCH;
+			.into @Print - $;
+			
+			// execute command in text buffer
+			MARK2;
+			BRANCH;
+			.into @CmdExec - $;
+			IF_AC;
+			.branchto @ErrOrBrk - $;
+
+			// dead loop
+			BRANCH;
+			.to @MainLoop - $;
+// -------------------------------------
+// MainLoop END
+// -------------------------------------
+
+CmdExec:	MARK2;
+			BRANCH;
+			.into @UART_IsBrk - $;
+			IF_AC;
+			.branchto @CmdBreak - $;
+			LDAI;
+			.data 0xFFFF;
+			SRC;	
+CmdBreak:	RTS;	// just return now with an error code
+			
+ErrOrBrk:	LDYI;
+			.data @StrBreak;
+			ANDI;
+			.data 0xFFFF;	// check if 0
+			IF_AZ;
+			.branchto @Print - $;
+			PUSHA;			// save error code
+			LDYI;
+			.data @StrError;
+			MARK2;
+			BRANCH;
+			.into @Print - $;
+			POPA;			// restore error code
+			MARK2;
+			BRANCH;
+			.into @PrintHexA - $;
+			LDYI;
+			.data @StrEnd;
+			BRANCH;
+			.to @Print - $;
+
+CmdEdit:	MARK2;
 			BRANCH;
 			.into @UART_GetChr - $;
-EchoOut:	PUSHA;
+			PUSHA;
+
 			MARK2;
 			BRANCH;
-			.into @UART_OutChr - $;
+			.into @PrintChr - $;
+
 			LDA, M[S];
-			MARK2;
-			BRANCH;
-			.into @VGA_OutChr - $;
-			POPA;
 			XORI;
-			.data CR;
+			.data CR;	// Enter? 
 			IF_AZ;
-			.branchto @EchoLF - $;
- 			JUMP;
-			.to @EchoLoop;
-EchoLF:		LDAI;
-			.data LF;
-			JUMP;
-			.to @EchoOut;
+			.branchto @LeaveEdit - $;
 			
-StrClear:	.data CLS;
-			.data 0;
+			LDA, M[S];
+			XORI;
+			.data ETX;	// CTRL-C? 
+			IF_AZ;
+			.branchto @BrkEdit - $;
 			
-StrHWorld:	.data 'H';
-			.data 'e';
-			.data 'l';
-			.data 'l';
-			.data 'o';
-			.data ' ';
-			.data 'W';
-			.data 'o';
-			.data 'r';
-			.data 'l';
-			.data 'd';
-			.data '!';
-StrEnd:		.data CR;
-			.data LF;
+			LDA, M[S];
+			XORI;
+			.data CLS;	// CLS? 
+			IF_AZ;
+			.branchto @BrkEdit - $;
+
+			LDA, M[S];
+			XORI;
+			.data HOME;	// HOME? 
+			IF_AZ;
+			.branchto @BrkEdit - $;
+			
+			LDA, M[S];
+			XORI;
+			.data BS;
+			IF_AZ;
+			.branchto @BSEdit - $;
+			
+			// "regular character"
+			POPA;
+			STA, M[Y+X];
+			CPXI;
+			.data TXTBUFLEN;
+			IF_XZ;
+			.branchto @BumpEnd - $;
+			LDAI;
 			.data 0;
-				
+			STA, M[Y+X];
+			INX, BRANCH;
+			.to @CmdEdit - $;
+
+			// break edit mode with AC set
+BrkEdit:	POPA;
+			LDAI;
+			.data 1;
+			SRC;
+			RTS;
+			
+			// break edit mode with AC cleared
+LeaveEdit:	POPA;
+			LDAI;
+			.data 0;
+			STA, M[Y+X];
+			SRC;
+			RTS;
+			
+			// clear current character and move one left
+BSEdit:		POPA;
+			LDAI;
+			.data 0;
+			STA, M[Y+X];
+			CPXI;
+			.data 0;
+			IF_XZ;
+			.branchto @BumpStart - $;
+			DEX, BRANCH;
+			.to @CmdEdit - $;
+
+BumpStart:	PUSHX;
+			PUSHY;
+			LDYI;
+			.data @StrBeep;
+Bumped:		MARK2;
+			BRANCH;
+			.into @Print - $;
+			POPY;
+			POPX;
+			BRANCH;
+			.to @CmdEdit - $;
+			
+BumpEnd:	PUSHX;
+			PUSHY;
+			LDYI;
+			.data @StrBack;
+			BRANCH;
+			.to @Bumped - $;
+			
 #include "utils.sif";
 #include "uart.sif";
-#include "vga.sif";			
+#include "vga.sif";		
+#include "strings.sif";
+	
 			

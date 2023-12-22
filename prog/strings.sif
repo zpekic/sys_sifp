@@ -1,0 +1,42 @@
+			.org $;
+
+StrBreak:	.data CR;
+			.data LF;
+			.data '*';
+			.data 'B';
+			.data 'R';
+			.data 'E';
+			.data 'A';
+			.data 'K';
+//			.data BEL;
+			.data 0;
+
+StrError:	.data CR;
+			.data LF;
+			.data '*';
+			.data 'E';
+			.data 'R';
+			.data 'R';
+			.data 'O';
+			.data 'R';
+			.data ' ';
+StrBeep:	.data BEL;
+			.data 0;
+
+StrBack:	.data BS;
+			.data BEL;
+			.data 0;
+			
+StrClear:	.data CLS;
+			.data 0;
+			
+StrReady:	.data 'R';
+			.data 'e';
+			.data 'a';
+			.data 'd';
+			.data 'y';
+			.data '.';
+StrEnd:		.data CR;
+			.data LF;
+			.data 0;
+

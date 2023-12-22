@@ -53,6 +53,12 @@ VGA_OutChr: PUSHX;
 			.data CLS;
 			IF_AZ; 
 			.branchto @VGA_CLS - $;
+
+			LDA, M[S];
+			XORI;
+			.data BEL;
+			IF_AZ; 
+			.branchto @VGA_Ignore - $;
 			
 			MARK2;
 			BRANCH;
@@ -103,6 +109,11 @@ SetCursorXY:PUSHY;
 			POPX;
 			RTS;
 
+VGA_Ignore: POPA;
+			POPY;
+			POPX;
+			RTS;
+			
 SetOldCrsXY:PUSHY;
 			LDYI;
 			.data CUR_OLDX;

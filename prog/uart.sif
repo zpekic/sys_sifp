@@ -12,17 +12,48 @@ UART_Init: 	LDYI;
 UART_GetChr:PUSHY;
 			LDYI;
 			.data UART_STATUS;
-RdStatus0:	LDA, M[Y];
-			SRC;		// bit 0 is RDRF (receiver data register full)
-			IF_AC;
-			.branchto @GetChr - $;
+RdStatus0:	MARK2;
 			BRANCH;
-			.to @RdStatus0 - $;
+			.into @GetStatus - $;
+			ANDI;
+			.data 0x0001; // check if RDRF (bit 0, receiver data register full) is 1
+			IF_AZ;
+			.branchto @RdStatus0 - $;
 GetChr:		INY;		// point to UART data register
 			LDA, M[Y];
 			ANDI;
 			.data 0x00FF;	// UART is connected to LSB
 			POPY;
+			RTS;
+
+UART_IsBrk: PUSHA;
+			PUSHY;
+			LDYI;
+			.data UART_STATUS;
+			MARK2;
+			BRANCH;
+			.into @GetStatus - $;
+			ANDI;
+			.data 0x0001; // check if RDRF (bit 0, receiver data register full) is 1
+			IF_AZ;
+			.branchto @NoBrk - $;
+
+			INY;		// point to UART data register
+			LDA, M[Y];	// get received character
+			XORI;
+			.data ETX;	// compare with CTRL/C
+			IF_AZ;
+			.branchto @Brk - $;
+
+NoBrk:		LDAI;
+			.data 0;
+			BRANCH;
+			.to @BrkExit - $;
+Brk:		LDAI;
+			.data 1;
+			SRC;		// AC carry, indicates break character detection;
+BrkExit:	POPY;
+			POPA;
 			RTS;
 			
 UART_Beep:	LDAI;
@@ -31,16 +62,28 @@ UART_OutChr:PUSHY;
 			PUSHA;
 			LDYI;
 			.data UART_STATUS;
-RdStatus1:	LDA, M[Y];
-			SRC;
-			SRC;		// bit 1 is TDRE (transmit register empty)
-			IF_AC;
-			.branchto @OutChr - $;
+RdStatus1:	MARK2;
 			BRANCH;
-			.to @RdStatus1 - $;
+			.into @GetStatus - $;
+			ANDI;
+			.data 0x0002; // check if TDRE (bit 1, transmit register empty) is 1
+			IF_AZ;
+			.branchto @RdStatus1 - $;
 OutChr:		INY, LDA, M[POP];	// Y points to UART data register, get the char back		
 			STA, M[Y];
 			POPY;
+			RTS;
+			
+GetStatus:	LDA, M[Y];
+			PUSHA;
+			LDA, M[Y];
+			XOR, M[S];
+			IF_AZ;
+			.branchto @StIsStable - $;
+			POPA;
+			BRANCH;
+			.to @GetStatus - $;
+StIsStable:	POPA;
 			RTS;
 			
 UART_OutStr:LDA, M[X];

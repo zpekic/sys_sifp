@@ -1,0 +1,95 @@
+			.org $;
+
+
+// Compare A words between M[X] and M[Y];
+MemCompare:	PUSHA;
+			XORI;
+			.data 0;
+			IF_AZ;
+			.branchto @CompDone - $;
+			LDA, M[Y];
+			XOR, M[X];
+			IF_AZ;
+			.branchto @CompCont - $;
+CompDone:	ADSI;			// fake POP
+			.data 1;
+			RTS;
+CompCont:	INX, INY, POPA;
+			MARK2;
+			BRANCH;
+			.into @DECA - $;
+			BRANCH;
+			.to @MemCompare - $;
+
+INCA:		IF_AC;
+			.branchto @INC0 - $;
+			ADCI;
+			.data 1;
+			RTS;
+INC0:		ADCI;
+			.data 0;
+			RTS;
+			
+DECA:		IF_AC;
+			.branchto @DEC2 - $;
+			ADCI;
+			.data 0xFFFF; // -1
+			RTS;
+DEC2:		ADCI;
+			.data 0xFFFE; // -2
+			RTS;
+			
+// Unsigned Multiply 
+// A.Y <= X * Y
+MulU:		PUSHX;		// multiplicand will be at the top of stack
+			LDXI;
+			.data 16;	// 16 iterations
+			LDAI;
+			.data 0;	// clear upper 16-bits of product
+
+CheckY0:	PUSHA;		// check LSB of Y
+			LDA, Y;
+			SRC;
+			POPA;
+			IF_AC;
+			.branchto @Y01 - $;
+Y00:		ADCI;		// carry-in is already 0
+			.data 0;
+			BRANCH;
+			.to @Nextbit - $;
+Y01:		MARK2;		// clear carry
+			BRANCH;
+			.into @CLC - $;
+			ADC, M[S];	// add original X
+Nextbit:	SRC;	
+			PUSHA;
+			LDA, Y;
+			SRC;
+			LDY, A;
+			DEX, LDA, M[POP];	// decrement iteration count and restore A
+			IF_XZ;	
+			.branchto @CheckY0 - $;
+			POPX;
+			RTS;
+			
+// test stack operations
+StackTest:	PUSHF;
+			PUSHX;
+			CPX, M[S];
+			IF_XZ; 
+			.branchto @ContY - $;
+			HALT;	// ERROR!
+ContY:		PUSHY;
+			CPY, M[S];
+			IF_YZ;
+			.branchto @ContA - $;
+			HALT;	// ERROR!
+ContA:		PUSHA;
+			LDA, LDY, LDX, M[IMM];
+			.data 0;
+			POPA;
+			POPY;
+			POPX;
+			POPF;
+			RTS;
+// end test				

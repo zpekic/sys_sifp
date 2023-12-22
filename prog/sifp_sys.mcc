@@ -4,7 +4,8 @@ VGA_ROWS	.alias 32;	// 64*32 characters in 640*480 basic VGA mode (fits in 2k RA
 VGA_COLS	.alias 64;	// each character is 8*8 matrix
 VGA_BASE	.alias 0x1000;	// text video memory base address
 RAM_BASE	.alias 0xFF00;	// only 256 words of RAM is sufficient
-TXTBUFFER	.alias 0xFF00;
+TXTBUFFER	.alias 0xFF40;	// command buffer start
+TXTBUFLEN	.alias 0x0010;	// TODO: change to 64 words length
 
 // UART looks like a much simplified M6850 device
 UART_CONTROL	.alias 0xE000;	// when writing
@@ -13,6 +14,7 @@ UART_DATA		.alias 0xE001;	// when reading and writing
 
 CLS:		.alias 0x1;			// ASCII code, clear device
 HOME:		.alias 0x2;			// ASCII code, cursor to top, left
+ETX:		.alias 0x3;			// ASCII code, End of Text == CTRL/C
 CR:			.alias 0xD;			// ASCII code, carriage return
 LF:			.alias 0xA;			// ASCII code, newline
 BEL:		.alias 0x7;			// ASCII code, bell (beep)
