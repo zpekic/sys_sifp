@@ -37,7 +37,7 @@ entity rom1k is
 		default_value: STD_LOGIC_VECTOR(15 downto 0) := X"7FFF" -- HALT instruction
 	);
 	Port ( 
-		A : in  STD_LOGIC_VECTOR (9 downto 0);
+		A : in  STD_LOGIC_VECTOR (11 downto 0);
 		D : out  STD_LOGIC_VECTOR (15 downto 0);
 		CS : in  STD_LOGIC;
 		OE : in  STD_LOGIC

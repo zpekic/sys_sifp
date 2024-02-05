@@ -9,89 +9,70 @@ ACDone:		RTS;
 
 // Set carry flag
 SEC:		IF_AC;
-			.branchto @ACDone - $;
+			.relative ACDone;
 CSet:		PUSHA;
 			LDAI;
 			.data -1;
 			BRANCH;
-			.to @ACSet - $;
+			.relative ACSet;
 
 Print:		LDA, M[Y];
 			IF_AZ;
-			.branchto @PrintDone - $;
+			.relative PrintDone;
 			MARK2;
 			BRANCH;
-			.into @PrintChr - $;
+			.relative PrintChr;
 			INY, BRANCH;
-			.to @Print - $;
+			.relative Print;
 PrintDone:	RTS;
 			
 PrintChr:	MARK2;
 			BRANCH;
-			.into @VGA_OutChr - $;
+			.relative VGA_OutChr;
 			MARK2;
 			BRANCH;
-			.into @UART_OutChr - $;
+			.relative UART_OutChr;
 			RTS;
 
-PrintHexA:	PUSHX;
+PrintHex:	PUSHY;
+			PUSHX;
+			LDYI;
+			.absolute StrHex;
+
+			LDXI;
+			.data 12;	// 12, 8, 4, 0 shifts right
+			PUSHX;
 			PUSHA;
-			
-			LDXI;
-			.data 12;
-			MARK2;
-			BRANCH;
-			.into @PrintHex - $;
 
-			LDA, M[S];
-			LDXI;
-			.data 8;
-			MARK2;
-			BRANCH;
-			.into @PrintHex - $;
-			
-			LDA, M[S];
-			LDXI;
-			.data 4;
-			MARK2;
-			BRANCH;
-			.into @PrintHex - $;
-
-			LDA, M[S];
-			LDXI;
-			.data 0;
-			MARK2;
-			BRANCH;
-			.into @PrintHex - $;
-			
-			POPA;
-			POPX;
-			RTS;
-			
-PrintHex:	CPXI;
+SrcLoopX:	CPXI;
 			.data 0;
 			IF_XZ;
-			.branchto @PrintHex1 - $;
-			SRC, DEX, BRANCH;
-			.to @PrintHex - $;
-PrintHex1:	ANDI;
+			.relative PrintNib; 
+			DEX, SRC, BRANCH;
+			.relative SrcLoopX; 
+			
+PrintNib:	ANDI;
 			.data 0x000F;
 			LDX, A;
-			ADXI;
-			.data '0';
-			CPXI;
-			.data '0';	// TODO!!!
-			IF_XC;
-			.branchto @ConvAtoF - $;
-			BRANCH;
-			.to @Conv0to9 - $;
-ConvAtoF:	ADXI;
-			.data '7';
-Conv0to9:	LDA, X;
+			LDA, M[Y+X];
 			MARK2;
 			BRANCH;
-			.into @VGA_OutChr - $;
-			MARK2;
+			.relative PrintChr;
+
+			POPA;
+			POPX;
+			IF_XZ;
+			.relative PrintHexEx;
+			DEX;
+			DEX; 
+			DEX;
+			DEX;
+			PUSHX;
+			PUSHA;
 			BRANCH;
-			.into @UART_OutChr - $;
+			.relative SrcLoopX;
+			
+PrintHexEx:	POPX;
+			POPY;
 			RTS;
+			

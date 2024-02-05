@@ -8,7 +8,7 @@ StrBreak:	.data CR;
 			.data 'E';
 			.data 'A';
 			.data 'K';
-//			.data BEL;
+			.data BEL;
 			.data 0;
 
 StrError:	.data CR;
@@ -19,7 +19,6 @@ StrError:	.data CR;
 			.data 'R';
 			.data 'O';
 			.data 'R';
-			.data ' ';
 StrBeep:	.data BEL;
 			.data 0;
 
@@ -39,4 +38,22 @@ StrReady:	.data 'R';
 StrEnd:		.data CR;
 			.data LF;
 			.data 0;
+			
+StrHex:		.data '0';
+			.data '1';
+			.data '2';
+			.data '3';
+			.data '4';
+			.data '5';
+			.data '6';
+			.data '7';
+			.data '8';
+			.data '9';
+			.data 'A';
+			.data 'B';
+			.data 'C';
+			.data 'D';
+			.data 'E';
+			.data 'F';
+			
 

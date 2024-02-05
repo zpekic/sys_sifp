@@ -171,8 +171,12 @@ signal TRACEOUT: std_logic;-- CPU is outputing register values after each instru
 signal OPCNT: std_logic_vector(3 downto 0);	-- operations per current instruction (0 to 5)
 signal RnW: std_logic;		-- Read 1, Write 0
 signal PnD: std_logic;		-- Program 1, Data 0 (can double address space for Harvard architecture)
+signal IE: std_logic;		-- state of CPU "interrupt enable" flag
+signal TE: std_logic;		-- state of CPU "trace enable" flag
 -- CPU bus in/out
 signal DBUS: std_logic_vector(15 downto 0);
+-- CPU bus input
+signal INT: std_logic;
 
 -- other
 signal tracer_ready, tracer_continue, ss_start: std_logic;
@@ -195,7 +199,7 @@ cpu: entity work.SIFP16 Port map (
 		TRACEIN => sw_trace,
 		HOLD => '0',
 		INT => freq1Hz,
---		INT => btn_int,
+--		INT => INT,
 		ABUS => ABUS,
 		DBUS => DBUS,
 		RnW => RnW,
@@ -206,12 +210,15 @@ cpu: entity work.SIFP16 Port map (
 		HOLDA => open,
 		INTA => INTA,
 		TRACEOUT => TRACEOUT,
+		IE => IE,
+		TE => TE,
 		OPCNT => OPCNT,
 		FETCH => FETCH
 	);
 
 -- interrupt vector 0x0008
 DBUS <= X"0008" when ((INTA and RnW) = '1') else "ZZZZZZZZZZZZZZZZ";
+INT <= btn_int when (TRACEOUT = '1') else freq1Hz;
 
 -- Tracer watches system bus activity and if signal match is detected, freezes the CPU in 
 -- the cycle by asserting low READY signal, and outputing the trace record to serial port
@@ -241,7 +248,7 @@ RegWrite <= (not VMA) and (not RnW);
 -- Tracer works best when it is paired with tracer.exe running on the host!
 -- In addition, host is able to flip RTS pin to start/stop tracing 
 -- See https://github.com/zpekic/sys9080/blob/master/Tracer/Tracer/Program.cs
-rts0_pulse <= PMOD_RTS0 xor rts0_delay;
+rts0_pulse <= (PMOD_RTS0 xor rts0_delay) or btn_continue;
 
 on_rts0_pulse: process(reset, rts0_pulse)
 begin
@@ -263,13 +270,15 @@ begin
 end process;
 
 ss_start <= not (btn_clk or rts0_delay);
---cpuclk_sel <= "000" when (TRACEOUT = '1') else sw_cpuclk;
+-- run CPU at higher speed if not in trace mode
+-- cpuclk_sel <= "100" when (TRACEOUT = '0') else sw_cpuclk;
 -- generate various frequencies
 clkgen: entity work.clockgen Port map ( 
 		CLK => CLK, 				-- 50MHz on Mercury board
 		RESET => RESET,
 		baudrate_sel => "111",	-- 57600
-		cpuclk_sel => sw_cpuclk, --cpuclk_sel,
+		--cpuclk_sel => cpuclk_sel,
+		cpuclk_sel => sw_cpuclk,
 		ss_start => ss_start,
 		ss_end => DONE,
 		cpu_clk => clkgen_cpu,
@@ -343,8 +352,8 @@ DBUS(7 downto 0) <= vram_douta when ((RnW and cs_vram) = '1') else "ZZZZZZZZ";
 vram_wea <= "" & (not RnW);
 vram_web <= "" & '0';
 
--- SYSTEM ROM (1k words of ROM contains the "helloworld" program) 
--- 0x0XXX (repeats twice)
+-- SYSTEM ROM (4k words of ROM contains the system software) 
+-- 0x0XXX
 cs_rom <= VMA when (ABUS(15 downto 12) = X"0") else '0';
 
 bootrom: entity work.rom1k generic map(
@@ -353,7 +362,7 @@ bootrom: entity work.rom1k generic map(
 	)	
 	port map(
 		D => DBUS,
-		A => ABUS(9 downto 0),
+		A => ABUS(11 downto 0),
 		CS => cs_rom, 
 		OE => RnW
 	);
@@ -389,8 +398,8 @@ port map(
 );
 		
 -- UART/ACIA (simplified MC6850, connected to lower byte)		
--- 0xEXXX (repeats 1024 times)
-cs_acia0 <= VMA when (ABUS(15 downto 12) = X"E") else '0';
+-- 0x2XXX (repeats 1024 times)
+cs_acia0 <= VMA when (ABUS(15 downto 12) = X"2") else '0';
 		
 acia0: entity work.uart Port map (
 			reset => Reset,
@@ -407,8 +416,8 @@ acia0: entity work.uart Port map (
 		);
 
 -- LEDs
-LED(0) <= TRACEOUT;  
-LED(1) <= INTA;
+LED(0) <= TE; --TRACEOUT;  
+LED(1) <= IE; --INTA;
 	
 -- 7segment LED 
 led4x7: entity work.fourdigitsevensegled port map ( 

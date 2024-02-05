@@ -6,8 +6,8 @@
 // Full description: 
 // https://hackaday.io/project/173996-sifp-single-instruction-format-processor
 //---------------------------------------------------------------------------------------------
-			.code 10, 16, helloworld_code.mif, helloworld_code.cgf, helloworld_code.coe, cpu:helloworld_code.vhd, helloworld_code.hex, helloworld_code.bin, 2;
-			.symbol 10, 256, helloworld_sym.mif, helloworld_sym.cgf, helloworld_sym.coe, sym:helloworld_sym.vhd, helloworld_sym.hex, helloworld_sym.bin, 32;
+			.code 12, 16, helloworld_code.mif, helloworld_code.cgf, helloworld_code.coe, cpu:helloworld_code.vhd, helloworld_code.hex, helloworld_code.bin, 2;
+			.symbol 12, 256, helloworld_sym.mif, helloworld_sym.cgf, helloworld_sym.coe, sym:helloworld_sym.vhd, helloworld_sym.hex, helloworld_sym.bin, 32;
 
 #include "sifp.mcc";
 #include "sifp_sys.mcc";
@@ -16,54 +16,56 @@
 			.org 0;
 //	Execution starts at location 0
 //	---------------------------------------------------------------------------
-			NOP;
+			INTOFF;		// pro-forma, IE flag is cleared by reset
+			TRACEOFF;	// pro-forma, TE flag is cleared by reset
 			JUMP;
-			.to @Init;
+			.absolute Init;
 			
 //	---------------------------------------------------------------------------
 //	interrupt handling routine
 //	---------------------------------------------------------------------------
 			.org 8;
-			//TRACEON;
-			PUSHA;
+IntHandler:	PUSHA;
 			PUSHX;
 			PUSHY;
 
+			TRACEON;
+			
 			MARK2;
 			BRANCH;
-			.into @GetOldCrsXY - $;
+			.relative GetOldCrsXY;
 			PUSHY;
 			PUSHX;
 			MARK2;
 			BRANCH;
-			.into @GetRowBase - $;
+			.relative GetRowBase;
 			LDA, M[Y+X];	// get character from VGA RAM
 			ANDI;
 			.data 0xFF7F;	// revert to original
 			STA, M[Y+X];
 			MARK2;
 			BRANCH;
-			.into @GetCursorXY - $;
+			.relative GetCursorXY;
 			CPX, M[POP];	// new X - old X
 			CPY, M[POP];	// new Y - old Y
 			IF_XZ;
-			.branchto @CheckY - $;
+			.relative CheckY;
 			BRANCH;
-			.to @NoFlip - $; 
+			.relative NoFlip; 
 CheckY:		IF_YZ;
-			.branchto @Flip - $;
+			.relative Flip;
 NoFlip:		MARK2;
 			BRANCH;
-			.into @SetOldCrsXY - $;
+			.relative SetOldCrsXY;
 			BRANCH;
-			.to @IntExit - $;
+			.relative IntExit;
 			
 Flip:		MARK2;
 			BRANCH;
-			.into @GetCursorXY - $;
+			.relative GetCursorXY;
 			MARK2;
 			BRANCH;
-			.into @GetRowBase - $;
+			.relative GetRowBase;
 			LDA, M[Y+X];	// get character from VGA RAM
 			XORI;
 			.data 0x0080;	// reverse back and forth
@@ -78,25 +80,58 @@ IntExit:	POPY;
 
 Init:		MARK2;
 			BRANCH;
-			.into @VGA_Init - $;
+			.relative VGA_Init;
+
+			MARK2;
+			BRANCH;
+			.relative UART_Init;
+
+			//TRACEON;
+			INTON;
+PrintLoop:	MARK2;
+			BRANCH;
+			.relative UART_GetChr;
+PrintLoop1:	MARK2;
+			BRANCH;
+			.relative PrintChr;
+			PUSHA;
+			XORI;
+			.data ETX;
+			IF_AZ;
+			.relative Continue;
+			POPA;
+			XORI;
+			.data CR;
+			IF_AZ;
+			.relative PrintLF;
+			BRANCH;
+			.relative PrintLoop;
+PrintLF:	LDAI;
+			.data LF;
+			BRANCH;
+			.relative PrintLoop1; 
+			
+Continue:	POPA;
 			LDXI;
 			.data @StrReady;
 			MARK2;
 			BRANCH;
-			.into @VGA_OutStr - $;
+			.relative PrintChr;
 
-			TRACEON; 
-
+			MARK2;	// set proper cursor X, Y...
+			BRANCH;
+			.relative GetCursorXY;
 			MARK2;
 			BRANCH;
-			.into @UART_Init - $;
-			LDXI;
-			.data @StrReady;
+			.relative SetOldCrsXY;
+			
+			LDAI;
+			.data 0x89AB;
 			MARK2;
 			BRANCH;
-			.into @UART_OutStr - $;
-
-			INTON;	// enable interrupts
+			.relative PrintHex;
+			
+			INTON;	// and then enable interrupts
 			
 // -------------------------------------
 // MainLoop START
@@ -111,43 +146,43 @@ TxtClear:	STA, M[Y+X];
 			CPXI;
 			.data TXTBUFLEN;
 			IF_XC;
-			.branchto @TxtCleared - $;
+			.relative TxtCleared;
 			INX, BRANCH;
-			.to @TxtClear - $;
+			.relative TxtClear;
 
-TxtCleared: TRACEON;
-
+TxtCleared: LDXI;
+			.data 0;	// X holds position of cursor within the buffer
 			// edit within the text buffer
 			MARK2;
 			BRANCH;
-			.into @CmdEdit - $;
+			.relative CmdEdit;
 			IF_AC;
-			.branchto @ErrOrBrk - $;
-
+			.relative ErrOrBrk;
+			
 			// print text buffer
 			MARK2;
 			BRANCH;
-			.into @Print - $;
-			
+			.relative Print;
+
 			// execute command in text buffer
 			MARK2;
 			BRANCH;
-			.into @CmdExec - $;
+			.relative CmdExec;
 			IF_AC;
-			.branchto @ErrOrBrk - $;
+			.relative ErrOrBrk;
 
 			// dead loop
 			BRANCH;
-			.to @MainLoop - $;
+			.relative MainLoop;
 // -------------------------------------
 // MainLoop END
 // -------------------------------------
 
 CmdExec:	MARK2;
 			BRANCH;
-			.into @UART_IsBrk - $;
+			.relative UART_IsBrk;
 			IF_AC;
-			.branchto @CmdBreak - $;
+			.relative CmdBreak;
 			LDAI;
 			.data 0xFFFF;
 			SRC;	
@@ -155,63 +190,64 @@ CmdBreak:	RTS;	// just return now with an error code
 			
 ErrOrBrk:	LDYI;
 			.data @StrBreak;
-			ANDI;
-			.data 0xFFFF;	// check if 0
-			IF_AZ;
-			.branchto @Print - $;
-			PUSHA;			// save error code
+			LDXI;
+			.data ETX;	
+			CPX, A;		// A = CTRLC?
+			IF_AZ;		// yes, just print break message
+			.relative Print;
+			PUSHA;		// save error code
 			LDYI;
 			.data @StrError;
 			MARK2;
 			BRANCH;
-			.into @Print - $;
-			POPA;			// restore error code
+			.relative Print;
+			POPA;		 // restore error code
 			MARK2;
 			BRANCH;
-			.into @PrintHexA - $;
+			.relative PrintHexA;
 			LDYI;
 			.data @StrEnd;
 			BRANCH;
-			.to @Print - $;
+			.relative Print;
 
 CmdEdit:	MARK2;
 			BRANCH;
-			.into @UART_GetChr - $;
+			.relative UART_GetChr;
 			PUSHA;
 
 			MARK2;
 			BRANCH;
-			.into @PrintChr - $;
+			.relative PrintChr;
 
 			LDA, M[S];
 			XORI;
 			.data CR;	// Enter? 
 			IF_AZ;
-			.branchto @LeaveEdit - $;
+			.relative LeaveEdit;
 			
 			LDA, M[S];
 			XORI;
 			.data ETX;	// CTRL-C? 
 			IF_AZ;
-			.branchto @BrkEdit - $;
+			.relative BrkEdit;
 			
 			LDA, M[S];
 			XORI;
 			.data CLS;	// CLS? 
 			IF_AZ;
-			.branchto @BrkEdit - $;
+			.relative BrkEdit;
 
 			LDA, M[S];
 			XORI;
 			.data HOME;	// HOME? 
 			IF_AZ;
-			.branchto @BrkEdit - $;
+			.relative BrkEdit;
 			
 			LDA, M[S];
 			XORI;
 			.data BS;
 			IF_AZ;
-			.branchto @BSEdit - $;
+			.relative BSEdit;
 			
 			// "regular character"
 			POPA;
@@ -219,17 +255,19 @@ CmdEdit:	MARK2;
 			CPXI;
 			.data TXTBUFLEN;
 			IF_XZ;
-			.branchto @BumpEnd - $;
+			.relative BumpEnd;
 			LDAI;
 			.data 0;
 			STA, M[Y+X];
 			INX, BRANCH;
-			.to @CmdEdit - $;
+			.relative CmdEdit;
 
 			// break edit mode with AC set
 BrkEdit:	POPA;
 			LDAI;
 			.data 1;
+			LDAI;
+			.data ETX;	// ETX code denoted break, not error
 			SRC;
 			RTS;
 			
@@ -249,9 +287,9 @@ BSEdit:		POPA;
 			CPXI;
 			.data 0;
 			IF_XZ;
-			.branchto @BumpStart - $;
+			.relative BumpStart;
 			DEX, BRANCH;
-			.to @CmdEdit - $;
+			.relative CmdEdit;
 
 BumpStart:	PUSHX;
 			PUSHY;
@@ -259,18 +297,18 @@ BumpStart:	PUSHX;
 			.data @StrBeep;
 Bumped:		MARK2;
 			BRANCH;
-			.into @Print - $;
+			.relative Print;
 			POPY;
 			POPX;
 			BRANCH;
-			.to @CmdEdit - $;
+			.relative CmdEdit;
 			
 BumpEnd:	PUSHX;
 			PUSHY;
 			LDYI;
 			.data @StrBack;
 			BRANCH;
-			.to @Bumped - $;
+			.relative Bumped;
 			
 #include "utils.sif";
 #include "uart.sif";

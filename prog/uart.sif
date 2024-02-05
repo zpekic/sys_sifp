@@ -9,21 +9,24 @@ UART_Init: 	LDYI;
 			STA, M[Y];
 			RTS;
 
-UART_GetChr:PUSHY;
+UART_GetChr:PUSHF;
+			TRACEOFF;
+			PUSHY;
 			LDYI;
 			.data UART_STATUS;
 RdStatus0:	MARK2;
 			BRANCH;
-			.into @GetStatus - $;
+			.relative GetStatus;
 			ANDI;
 			.data 0x0001; // check if RDRF (bit 0, receiver data register full) is 1
 			IF_AZ;
-			.branchto @RdStatus0 - $;
+			.relative RdStatus0;
 GetChr:		INY;		// point to UART data register
 			LDA, M[Y];
 			ANDI;
 			.data 0x00FF;	// UART is connected to LSB
 			POPY;
+			POPF;			// restore TRACE flag
 			RTS;
 
 UART_IsBrk: PUSHA;
@@ -32,23 +35,25 @@ UART_IsBrk: PUSHA;
 			.data UART_STATUS;
 			MARK2;
 			BRANCH;
-			.into @GetStatus - $;
+			.relative GetStatus;
 			ANDI;
 			.data 0x0001; // check if RDRF (bit 0, receiver data register full) is 1
 			IF_AZ;
-			.branchto @NoBrk - $;
+			.relative NoBrk;
 
 			INY;		// point to UART data register
 			LDA, M[Y];	// get received character
+			ANDI;
+			.data 0x00FF;
 			XORI;
 			.data ETX;	// compare with CTRL/C
 			IF_AZ;
-			.branchto @Brk - $;
+			.relative Brk;
 
 NoBrk:		LDAI;
 			.data 0;
 			BRANCH;
-			.to @BrkExit - $;
+			.relative BrkExit;
 Brk:		LDAI;
 			.data 1;
 			SRC;		// AC carry, indicates break character detection;
@@ -64,11 +69,11 @@ UART_OutChr:PUSHY;
 			.data UART_STATUS;
 RdStatus1:	MARK2;
 			BRANCH;
-			.into @GetStatus - $;
+			.relative GetStatus;
 			ANDI;
 			.data 0x0002; // check if TDRE (bit 1, transmit register empty) is 1
 			IF_AZ;
-			.branchto @RdStatus1 - $;
+			.relative RdStatus1;
 OutChr:		INY, LDA, M[POP];	// Y points to UART data register, get the char back		
 			STA, M[Y];
 			POPY;
@@ -79,19 +84,19 @@ GetStatus:	LDA, M[Y];
 			LDA, M[Y];
 			XOR, M[S];
 			IF_AZ;
-			.branchto @StIsStable - $;
+			.relative StIsStable;
 			POPA;
 			BRANCH;
-			.to @GetStatus - $;
+			.relative GetStatus;
 StIsStable:	POPA;
 			RTS;
 			
 UART_OutStr:LDA, M[X];
 			IF_AZ;
-			.branchto @UART_Done - $;
+			.relative UART_Done;
 			MARK2;
 			BRANCH;
-			.into @UART_OutChr - $;
+			.relative UART_OutChr;
 			INX, BRANCH;
-			.data @UART_OutStr - $;
+			.relative UART_OutStr;
 UART_Done:	RTS;

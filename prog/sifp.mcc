@@ -88,9 +88,8 @@ data16		.valfield r_p .. r_s values * default 0;
 						
 // "aliases" are evaluated as simple text replacement of label with everything between .alias and ; 
 .data		.alias  data16 = ;
-.to			.alias  data16 = ;
-.branchto	.alias  data16 = ;
-.into		.alias 	data16 = ;
+.absolute	.alias  data16 = @;
+.relative	.alias  data16 = !$ + 1 + @;	// same as @foo - $
 // Base + offset addressing mode
 M[Y+X]		.alias  r_x = M[X], r_y = M[Y];
 M[X+Y]		.alias  r_x = M[X], r_y = M[Y];

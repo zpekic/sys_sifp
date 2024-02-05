@@ -48,6 +48,8 @@ entity SIFP16 is
 			  HOLDA: out STD_LOGIC;
 			  INTA: out STD_LOGIC;
 			  TRACEOUT: out STD_LOGIC;
+			  IE: out STD_LOGIC;
+			  TE: out STD_LOGIC;
 			  OPCNT: out STD_LOGIC_VECTOR(3 downto 0);	-- operations per instruction
            FETCH : out  STD_LOGIC);
 end SIFP16;
@@ -115,10 +117,10 @@ constant cpu_program: mem16x32 := (
 	if_cont & X"0" & X"0" & "010100" & c_LDP,
 	
 	-- unused, reserved for future use
-	-- D: unreachable nop
-	if_cont & X"0" & X"0" & "000100" & c_NOP,
-	-- E: unreachable nop
-	if_cont & X"0" & X"0" & "000100" & c_NOP,
+	-- D: unreachable halt
+	if_cont & X"0" & X"0" & "000100" & c_HALT,
+	-- E: unreachable halt
+	if_cont & X"0" & X"0" & "000100" & c_HALT,
 	
 	-- bus hold routine
 	-- F: hold (tri-state) until HOLD signal detected low, otherwise execute
@@ -200,6 +202,7 @@ alias opr_x: std_logic is opr_vector(2);
 alias opr_y: std_logic is opr_vector(1);
 alias opr_s: std_logic is opr_vector(0);
 signal opr_nop: std_logic;
+signal ie_delay: std_logic_vector(3 downto 0);
 
 begin
 
@@ -217,6 +220,8 @@ DONE <= (not reg_clk) and int_done;
 FETCH <= cpu_fetch;
 HOLDA <= cpu_hlda;
 INTA <= cpu_inta;
+IE <= flag_ie;
+TE <= flag_te;
 
 int_done <= (not int_trace) when (cpu_irexe = '1') else cpu_done;
 
@@ -278,7 +283,11 @@ begin
 		int_intr <= '0';
 	else
 		if (rising_edge(INT)) then
-			int_intr <= flag_ie;
+			if (ie_delay = "0000") then
+				int_intr <= flag_ie;
+			else
+				int_intr <= '0';
+			end if;
 		end if;
 	end if;
 end process;
@@ -295,6 +304,7 @@ begin
 		int_trace <= '0';
 		reg_i <= c_NOP;	-- has no effect, won't be executed
 		reg_f <= X"0001";	-- initialize C,Z flags to reflect register values
+		ie_delay <= "0000";	-- hack needed because there is not atomic "RTI" instruction
 	else
 		if (rising_edge(reg_clk)) then
 			-- next instruction / state
@@ -314,6 +324,8 @@ begin
 			-- load Flags register
 			if (i_is_popf = '1') then
 				reg_f <= DBUS;
+				-- delay servicing interrupts for next 4 reg cycles
+				ie_delay <= "0001";
 			else
 				-- only change the used bits of 16 bits in F[lags] register
 				-- coming from special instructions
@@ -328,6 +340,8 @@ begin
 				flag_yz <= reg_yz;
 				flag_sc <= reg_sc;
 				flag_sz <= reg_sz;
+				-- let the ie service delay expire...
+				ie_delay <= ie_delay(2 downto 0) & '0';
 			end if;
 		end if;
 	end if;

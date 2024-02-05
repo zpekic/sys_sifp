@@ -9,7 +9,7 @@ CURSOR_Y	.alias RAM_BASE + 63;
 // Initialize display
 VGA_Init:	MARK2;
 			BRANCH;
-			.into @CLC - $;
+			.relative CLC;
 			LDAI;
 			.data VGA_COLS;
 			PUSHA;
@@ -24,19 +24,18 @@ RowOffLoop:	LDA, M[Y];		// previous row
 			INY, ADC, M[S];	// add number of columns, point to current row
 			DEX, STA, M[Y];
 			IF_XZ;
-			.branchto @RowOffDone - $;
+			.relative RowOffDone;
 			BRANCH;
-			.to @RowOffLoop - $;
+			.relative RowOffLoop;
 RowOffDone:	POPA;
 			LDX, LDY, M[IMM];		// X, Y = 0
 			.data 0;
 			MARK2;
 			BRANCH;
-			.into @SetOldCrsXY - $;	// set "old" cursor (new will be set by CLS)
+			.relative SetOldCrsXY;	// set "old" cursor (new will be set by CLS)
 			LDAI;
 			.data CLS;
 			// continue with "clear screen"
-			//TRACEON;
 			
 // Display ASCII in A at CURSOR_X, CURSOR_Y
 VGA_OutChr: PUSHX;
@@ -46,41 +45,41 @@ VGA_OutChr: PUSHX;
 			XORI;
 			.data HOME;
 			IF_AZ; 
-			.branchto @VGA_HOME - $;
+			.relative VGA_HOME;
 			
 			LDA, M[S];
 			XORI;
 			.data CLS;
 			IF_AZ; 
-			.branchto @VGA_CLS - $;
+			.relative VGA_CLS;
 
 			LDA, M[S];
 			XORI;
 			.data BEL;
 			IF_AZ; 
-			.branchto @VGA_Ignore - $;
+			.relative VGA_Ignore;
 			
 			MARK2;
 			BRANCH;
-			.into @GetCursorXY - $;	// get cursor row, col from RAM
+			.relative GetCursorXY;	// get cursor row, col from RAM
 
 			LDA, M[S];
 			XORI;
 			.data CR;		
 			IF_AZ;
-			.branchto @VGA_CR - $;
+			.relative VGA_CR;
 
 			LDA, M[S];
 			XORI;
 			.data LF;		
 			IF_AZ; 
-			.branchto @VGA_LF - $;
+			.relative VGA_LF;
 
 			LDA, M[S];
 			XORI;
 			.data BS;
 			IF_AZ;
-			.branchto @VGA_BS - $;
+			.relative VGA_BS;
 			
 //			default "printable" character output
 			POPA;
@@ -89,13 +88,13 @@ VGA_Print:	NOP;
 			PUSHY;
 			MARK2;
 			BRANCH;
-			.into @GetRowBase - $;
+			.relative GetRowBase;
 			STA, M[Y+X];
 			INX, POPY;
 			CPXI;
 			.data VGA_COLS;
 			IF_X_GE;
-			.branchto @NextRow - $;
+			.relative NextRow;
 SetCursorXY:PUSHY;
 			LDYI;
 			.data CURSOR_X;
@@ -130,9 +129,9 @@ NextRow1:	INY;
 			CPYI;
 			.data VGA_ROWS;
 			IF_Y_GE;
-			.branchto @ScrollUp - $;
+			.relative ScrollUp;
 			BRANCH;
-			.to @SetCursorXY - $;
+			.relative SetCursorXY;
 
 ScrollUp:	LDYI;
 			.data 0;
@@ -141,7 +140,7 @@ NxtRow:		PUSHY; 		// we will need row later
 			.data 0;
 			MARK2;
 			BRANCH;
-			.into @GetRowBase - $;
+			.relative GetRowBase;
 NxtCol:		PUSHY;		// destination base on stack
 			ADYI;		// add to get source base
 			.data VGA_COLS;
@@ -152,17 +151,17 @@ NxtCol:		PUSHY;		// destination base on stack
 			CPXI;
 			.data VGA_COLS;
 			IF_X_GE;
-			.branchto @ChkRow - $;
+			.relative ChkRow;
 			BRANCH;
-			.to @NxtCol - $;
+			.relative NxtCol;
 ChkRow:		POPY;
 			INY;
 			CPYI;
 			.data VGA_ROWS - 1;
 			IF_Y_GE;
-			.branchto @ClrLastRow - $;
+			.relative ClrLastRow;
 			BRANCH;
-			.to @NxtRow - $;
+			.relative NxtRow;
 			// clear last row
 ClrLastRow:	NOP;
 			LDYI;
@@ -170,36 +169,36 @@ ClrLastRow:	NOP;
 			PUSHY;	
 			MARK2;
 			BRANCH;
-			.into @ClearRow - $;
+			.relative ClearRow;
 			POPY;		// set cursor position to X = 0, Y = ROWS - 1
 			BRANCH;
-			.to @SetX0 - $;
+			.relative SetX0;
 				
 VGA_CR:		POPA;
 SetX0:		LDXI;
 			.data 0;
 			BRANCH;
-			.to @SetCursorXY - $;
+			.relative SetCursorXY;
 
 VGA_BS:		POPA;
 			CPXI;
 			.data 0;
 			IF_XZ;
-			.branchto @PrevRow - $;
+			.relative PrevRow;
 			DEX, BRANCH;
-			.to @SetCursorXY - $;
+			.relative SetCursorXY;
 PrevRow:	CPYI;
 			.data 0;
 			IF_YZ;
-			.branchto @SetCursorXY - $;
+			.relative SetCursorXY;
 			LDXI;
 			.data VGA_COLS - 1;
 			DEY, BRANCH;
-			.to @SetCursorXY - $;
+			.relative SetCursorXY;
 			
 VGA_LF:		POPA;
 			BRANCH;
-			.to @NextRow1 - $;
+			.relative NextRow1;
 
 VGA_CLS:	POPA;
 			LDAI;
@@ -209,35 +208,35 @@ VGA_CLS:	POPA;
 ClrNextRow:	PUSHY; 
 			MARK2;
 			BRANCH;
-			.into @ClearRow - $;
+			.relative ClearRow;
 			POPY;
 			INY;
 			CPYI;
 			.data VGA_ROWS;
 			IF_Y_GE;
-			.branchto @vga_home1 - $;
+			.relative vga_home1;
 			BRANCH;
-			.to @ClrNextRow - $;
+			.relative ClrNextRow;
 			
 ClearRow: 	MARK2;
 			BRANCH;
-			.into @GetRowBase - $;
+			.relative GetRowBase;
 			LDAI;
 			.data ' ';
 			LDXI;
 			.data VGA_COLS / 8 - 1; // bar on the left just to save time
 ClrRLoop:	STA, M[Y+X];
 			IF_XZ;
-			.branchto @ClrDone - $;
+			.relative ClrDone;
 			DEX, BRANCH;
-			.to @ClrRLoop - $;
+			.relative ClrRLoop;
 ClrDone:	RTS;			
 			
 VGA_HOME:	POPA;
 vga_home1:	LDX, LDY, M[IMM];
 			.data 0;			// X, Y <= 0
 			BRANCH;
-			.to @SetCursorXY - $;
+			.relative SetCursorXY;
 
 GetOldCrsXY:LDYI;
 			.data CUR_OLDX;
@@ -246,7 +245,7 @@ GetOldCrsXY:LDYI;
 			LDXI;
 			.data CUR_OLDY;
 			BRANCH;
-			.to @GetCursorY - $;
+			.relative GetCursorY;
 
 GetCursorXY:LDYI;
 			.data CURSOR_X;
@@ -268,10 +267,10 @@ GetRowBase:	PUSHA;
 			
 VGA_OutStr:	LDA, M[X];
 			IF_AZ;
-			.branchto @OutStrDone - $;
+			.relative OutStrDone;
 			MARK2;
 			BRANCH;
-			.into @VGA_OutChr - $;
+			.relative VGA_OutChr;
 			INX, BRANCH;
-			.to @VGA_OutStr - $;
+			.relative VGA_OutStr;
 OutStrDone:	RTS;

@@ -8,9 +8,9 @@ TXTBUFFER	.alias 0xFF40;	// command buffer start
 TXTBUFLEN	.alias 0x0010;	// TODO: change to 64 words length
 
 // UART looks like a much simplified M6850 device
-UART_CONTROL	.alias 0xE000;	// when writing
-UART_STATUS		.alias 0xE000;	// when reading
-UART_DATA		.alias 0xE001;	// when reading and writing
+UART_CONTROL	.alias 0x2000;	// when writing
+UART_STATUS		.alias 0x2000;	// when reading
+UART_DATA		.alias 0x2001;	// when reading and writing
 
 CLS:		.alias 0x1;			// ASCII code, clear device
 HOME:		.alias 0x2;			// ASCII code, cursor to top, left

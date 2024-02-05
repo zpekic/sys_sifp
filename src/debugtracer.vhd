@@ -165,9 +165,9 @@ with chrSel select char <=
 --	char_hex when X"9", 	-- D
 --	char_hex when X"A", 	-- D
 --	char_hex when X"B", 	-- D
-	char_CR when X"C",
-	char_LF when X"D",
-	X"00" when X"E",
+	X"20" when X"C",
+	char_CR when X"D",
+	char_LF when X"E",
 	X"00" when X"F",
 	char_hex when others;
 	
