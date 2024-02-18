@@ -56,7 +56,7 @@ NoBrk:		LDAI;
 			.relative BrkExit;
 Brk:		LDAI;
 			.data 1;
-			SRC;		// AC carry, indicates break character detection;
+			RRC;		// AC carry, indicates break character detection;
 BrkExit:	POPY;
 			POPA;
 			RTS;

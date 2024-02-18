@@ -29,10 +29,10 @@ r_p			.valfield 4 values
 //				
 // 16-bit accumulator (has own carry (AC) and zero (AZ) flags, changes only during execute phases)
 r_a			.valfield 3 values
-				NOA,	// no operation on A register 
+				NOA,	// no operation on A register
+				SBC,	// substract incoming data (AC, AZ)
 				XOR,	// logical xor with incoming data (AZ)
-				SLC,	// shift left through carry	(AC, AZ)
-				SRC,	// shift right through carry (AC, AZ)
+				RRC,	// rotate right through carry (AC, AZ)
 				LDA,	// load with incoming data (AZ)
 				ADC,	// add incoming data and carry flag (AC, AZ)
 				AND,	// logical and with incoming data (AZ)

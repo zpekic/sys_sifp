@@ -63,7 +63,7 @@ begin
 	else
 		if (rising_edge(clk)) then
 			case operation is
-				when r_a_LDA | r_a_XOR | r_a_SLC | r_a_SRC | r_a_ADC | r_a_AND =>
+				when r_a_LDA | r_a_SBC | r_a_XOR | r_a_RRC | r_a_ADC | r_a_AND =>
 					r <= y(16 downto 1);
 				when others =>
 					null;
@@ -75,9 +75,9 @@ end process;
 -- ALU is adder generating carry_out and zero flags
 with operation select y <=
       '0' & din & '0' when r_a_LDA,
+      std_logic_vector(unsigned('0' & r & ci) + unsigned('0' & (din xor X"FFFF") & ci)) when r_a_SBC,
 		'0' & (r xor din) & '0' when r_a_XOR,
-      r & ci & '0' when r_a_SLC,
-		'0' & ci & r when r_a_SRC,
+		'0' & ci & r when r_a_RRC,
       std_logic_vector(unsigned('0' & r & ci) + unsigned('0' & din & ci)) when r_a_ADC,
       '0' & (r and din) & '0' when r_a_AND,
 		'0' & r & '0' when others;
@@ -93,8 +93,8 @@ with operation select zo <=
 -- carry flag output
 with operation select co <=
       y(17) when r_a_ADC,
-      y(17) when r_a_SLC,
-      y(0) when r_a_SRC,
+      y(17) when r_a_SBC,
+      y(0) when r_a_RRC,
 		ci when others;
 
 -- value
@@ -112,9 +112,9 @@ active <= '0' when (operation = r_a_NOA) else '1';
 ---- Start boilerplate code (use with utmost caution!)
 -- with cpu_r_a select r_a <=
 --      NOA when r_a_NOA, -- default value
---      XOR when r_a_XOR,
---      SLC when r_a_SLC,
---      SRC when r_a_SRC,
+--      XOR when r_a_SBC,
+--      RLC when r_a_XOR,
+--      RRC when r_a_RRC,
 --      LDA when r_a_LDA,
 --      ADC when r_a_ADC,
 --      AND when r_a_AND,

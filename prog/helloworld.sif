@@ -150,8 +150,8 @@ TxtClear:	STA, M[Y+X];
 			INX, BRANCH;
 			.relative TxtClear;
 
-TxtCleared: LDXI;
-			.data 0;	// X holds position of cursor within the buffer
+TxtCleared: LDXI; // X holds position of cursor within the buffer
+			.data 0;
 			// edit within the text buffer
 			MARK2;
 			BRANCH;
@@ -185,7 +185,7 @@ CmdExec:	MARK2;
 			.relative CmdBreak;
 			LDAI;
 			.data 0xFFFF;
-			SRC;	
+			RRC;	
 CmdBreak:	RTS;	// just return now with an error code
 			
 ErrOrBrk:	LDYI;
@@ -266,9 +266,9 @@ CmdEdit:	MARK2;
 BrkEdit:	POPA;
 			LDAI;
 			.data 1;
+			RRC;
 			LDAI;
 			.data ETX;	// ETX code denoted break, not error
-			SRC;
 			RTS;
 			
 			// break edit mode with AC cleared
@@ -276,7 +276,7 @@ LeaveEdit:	POPA;
 			LDAI;
 			.data 0;
 			STA, M[Y+X];
-			SRC;
+			RRC;
 			RTS;
 			
 			// clear current character and move one left
@@ -284,8 +284,7 @@ BSEdit:		POPA;
 			LDAI;
 			.data 0;
 			STA, M[Y+X];
-			CPXI;
-			.data 0;
+			CPX, A;		// test if X == 0
 			IF_XZ;
 			.relative BumpStart;
 			DEX, BRANCH;

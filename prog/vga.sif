@@ -233,8 +233,8 @@ ClrRLoop:	STA, M[Y+X];
 ClrDone:	RTS;			
 			
 VGA_HOME:	POPA;
-vga_home1:	LDX, LDY, M[IMM];
-			.data 0;			// X, Y <= 0
+vga_home1:	LDX, LDY, M[IMM]; // X, Y <= 0
+			.data 0;
 			BRANCH;
 			.relative SetCursorXY;
 

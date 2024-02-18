@@ -3,7 +3,7 @@
 CLC:		PUSHA;	// save A
 			LDAI;	// clear A
 			.data 0;
-ACSet:		SLC;	// clear or set AC
+ACSet:		RRC;	// clear or set AC
 			POPA;	// restore A
 ACDone:		RTS;
 
@@ -48,7 +48,7 @@ SrcLoopX:	CPXI;
 			.data 0;
 			IF_XZ;
 			.relative PrintNib; 
-			DEX, SRC, BRANCH;
+			DEX, RRC, BRANCH;
 			.relative SrcLoopX; 
 			
 PrintNib:	ANDI;
