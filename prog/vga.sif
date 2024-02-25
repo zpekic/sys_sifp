@@ -28,8 +28,7 @@ RowOffLoop:	LDA, M[Y];		// previous row
 			BRANCH;
 			.relative RowOffLoop;
 RowOffDone:	POPA;
-			LDX, LDY, M[IMM];		// X, Y = 0
-			.data 0;
+			CLRXY;
 			MARK2;
 			BRANCH;
 			.relative SetOldCrsXY;	// set "old" cursor (new will be set by CLS)
@@ -123,8 +122,7 @@ SetOldCrsXY:PUSHY;
 			STY, M[X];	// M[CUR_OLDY] <= Y
 			RTS;
 			
-NextRow:	LDXI;
-			.data 0;
+NextRow:	CLRX;
 NextRow1:	INY;
 			CPYI;
 			.data VGA_ROWS;
@@ -133,11 +131,9 @@ NextRow1:	INY;
 			BRANCH;
 			.relative SetCursorXY;
 
-ScrollUp:	LDYI;
-			.data 0;
+ScrollUp:	CLRY;
 NxtRow:		PUSHY; 		// we will need row later
-			LDXI;
-			.data 0;
+			CLRX;
 			MARK2;
 			BRANCH;
 			.relative GetRowBase;
@@ -181,8 +177,7 @@ SetX0:		LDXI;
 			.relative SetCursorXY;
 
 VGA_BS:		POPA;
-			CPXI;
-			.data 0;
+			CLRX;
 			IF_XZ;
 			.relative PrevRow;
 			DEX, BRANCH;
@@ -203,8 +198,7 @@ VGA_LF:		POPA;
 VGA_CLS:	POPA;
 			LDAI;
 			.data ' ';	// use space character to clear screen
-			LDYI;
-			.data 0;
+			CLRY;
 ClrNextRow:	PUSHY; 
 			MARK2;
 			BRANCH;
@@ -233,8 +227,7 @@ ClrRLoop:	STA, M[Y+X];
 ClrDone:	RTS;			
 			
 VGA_HOME:	POPA;
-vga_home1:	LDX, LDY, M[IMM]; // X, Y <= 0
-			.data 0;
+vga_home1:	CLRXY; // X, Y <= 0
 			BRANCH;
 			.relative SetCursorXY;
 

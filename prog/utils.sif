@@ -1,8 +1,7 @@
 			.org $;
 // Clear carry flag
 CLC:		PUSHA;	// save A
-			LDAI;	// clear A
-			.data 0;
+			CLRA;	// clear A
 ACSet:		RRC;	// clear or set AC
 			POPA;	// restore A
 ACDone:		RTS;

@@ -50,8 +50,7 @@ UART_IsBrk: PUSHA;
 			IF_AZ;
 			.relative Brk;
 
-NoBrk:		LDAI;
-			.data 0;
+NoBrk:		CLRA;
 			BRANCH;
 			.relative BrkExit;
 Brk:		LDAI;

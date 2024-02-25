@@ -116,6 +116,13 @@ CPYI		.alias  r_p = M[IMM], r_y = CPY;
 LDSI		.alias  r_p = M[IMM], r_s = LDS;
 ADSI		.alias  r_p = M[IMM], r_s = ADS;
 CPSI		.alias  r_p = M[IMM], r_s = CPS;
+// Convenient clear operations (internal data bus is 0 by default if not driven)
+CLRA		.alias  r_p = NOP, r_a = LDA, r_x = NOX, r_y = NOY, r_s = NOS;	
+CLRX		.alias  r_p = NOP, r_a = NOA, r_x = LDX, r_y = NOY, r_s = NOS;	
+CLRY		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = LDY, r_s = NOS;	
+CLRAX		.alias  r_p = NOP, r_a = LDA, r_x = LDX, r_y = NOY, r_s = NOS;	
+CLRXY		.alias  r_p = NOP, r_a = NOA, r_x = LDX, r_y = LDY, r_s = NOS;	
+CLRAXY		.alias  r_p = NOP, r_a = LDA, r_x = LDX, r_y = LDY, r_s = NOS;	
 
 //
 // Special case instruction combinations

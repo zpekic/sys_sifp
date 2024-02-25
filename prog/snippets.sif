@@ -44,8 +44,7 @@ DEC2:		ADCI;
 MulU:		PUSHX;		// multiplicand will be at the top of stack
 			LDXI;
 			.data 16;	// 16 iterations
-			LDAI;
-			.data 0;	// clear upper 16-bits of product
+			CLRA;		// clear upper 16-bits of product
 
 CheckY0:	PUSHA;		// check LSB of Y
 			LDA, Y;
@@ -85,8 +84,7 @@ ContY:		PUSHY;
 			.branchto @ContA - $;
 			HALT;	// ERROR!
 ContA:		PUSHA;
-			LDA, LDY, LDX, M[IMM];
-			.data 0;
+			CLRAXY;
 			POPA;
 			POPY;
 			POPX;

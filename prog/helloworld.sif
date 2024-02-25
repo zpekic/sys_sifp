@@ -140,8 +140,7 @@ MainLoop:	LDYI;
 			.data TXTBUFFER;
 			
 			// clear text buffer
-			LDX, LDA, M[IMM];
-			.data 0;
+			CLRAX;
 TxtClear:	STA, M[Y+X];
 			CPXI;
 			.data TXTBUFLEN;
@@ -150,8 +149,7 @@ TxtClear:	STA, M[Y+X];
 			INX, BRANCH;
 			.relative TxtClear;
 
-TxtCleared: LDXI; // X holds position of cursor within the buffer
-			.data 0;
+TxtCleared: CLRX; // X holds position of cursor within the buffer
 			// edit within the text buffer
 			MARK2;
 			BRANCH;
@@ -256,8 +254,7 @@ CmdEdit:	MARK2;
 			.data TXTBUFLEN;
 			IF_XZ;
 			.relative BumpEnd;
-			LDAI;
-			.data 0;
+			CLRA;
 			STA, M[Y+X];
 			INX, BRANCH;
 			.relative CmdEdit;
@@ -281,8 +278,7 @@ LeaveEdit:	POPA;
 			
 			// clear current character and move one left
 BSEdit:		POPA;
-			LDAI;
-			.data 0;
+			CLRA;
 			STA, M[Y+X];
 			CPX, A;		// test if X == 0
 			IF_XZ;
