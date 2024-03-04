@@ -105,6 +105,7 @@ POPY		.alias  r_y = LDY, r_s = M[POP];
 // Convenient immediate operations
 LDAI		.alias  r_p = M[IMM], r_a = LDA;
 XORI		.alias  r_p = M[IMM], r_a = XOR;
+SBCI		.alias  r_p = M[IMM], r_a = SBC;
 ADCI		.alias  r_p = M[IMM], r_a = ADC;
 ANDI		.alias  r_p = M[IMM], r_a = AND;
 LDXI		.alias  r_p = M[IMM], r_x = LDX;
@@ -134,4 +135,10 @@ INTON		.alias  r_p = NOP, r_a = A, r_x = X, r_y = Y, r_s = S;			// Enable interr
 INTOFF		.alias  r_p = STP4, r_a = A, r_x = X, r_y = Y, r_s = S;			// Disable interrupts (set flag_ie to 0)
 TRACEON		.alias  r_p = STP2, r_a = A, r_x = X, r_y = Y, r_s = S;			// Enable tracing (set flag_te to 1)
 TRACEOFF	.alias  r_p = STP, r_a = A, r_x = X, r_y = Y, r_s = S;			// Disable tracing (set flag_te to 0)
+
+//
+// Multi line (can reuse all aliases defined above)
+JMP			.alias JUMP \ .absolute;
+JSR			.alias MARK2 \ BRANCH \ .relative;
+RTF			.alias POPF \ RTS;
 

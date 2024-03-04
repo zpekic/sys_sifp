@@ -55,5 +55,3 @@ StrHex:		.data '0';
 			.data 'D';
 			.data 'E';
 			.data 'F';
-			
-

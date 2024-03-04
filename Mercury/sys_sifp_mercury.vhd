@@ -357,7 +357,7 @@ vram_web <= "" & '0';
 cs_rom <= VMA when (ABUS(15 downto 12) = X"0") else '0';
 
 bootrom: entity work.rom1k generic map(
-		filename => "..\prog\helloworld_code.hex",
+		filename => "..\prog\monitor_code.hex",
 		default_value => X"7FFF"	-- HALT
 	)	
 	port map(

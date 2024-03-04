@@ -29,7 +29,7 @@ use IEEE.NUMERIC_STD.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 use work.sifp_package.all;
-use work.helloworld_code.all;
+use work.monitor_code.all;
 
 entity reg_index is
     Port ( clk : in  STD_LOGIC;

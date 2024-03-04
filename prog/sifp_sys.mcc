@@ -12,10 +12,12 @@ UART_CONTROL	.alias 0x2000;	// when writing
 UART_STATUS		.alias 0x2000;	// when reading
 UART_DATA		.alias 0x2001;	// when reading and writing
 
-CLS:		.alias 0x1;			// ASCII code, clear device
-HOME:		.alias 0x2;			// ASCII code, cursor to top, left
-ETX:		.alias 0x3;			// ASCII code, End of Text == CTRL/C
-CR:			.alias 0xD;			// ASCII code, carriage return
-LF:			.alias 0xA;			// ASCII code, newline
-BEL:		.alias 0x7;			// ASCII code, bell (beep)
-BS:			.alias 0x8;			// ASCII code, backspace
+// https://www.asciitable.com/
+CLS:		.alias 0x1;			// clear device (CTRL/A)
+HOME:		.alias 0x2;			// cursor to top, left (CTRL/B)
+ETX:		.alias 0x3;			// End of Text (CTRL/C)
+BEL:		.alias 0x7;			// bell (beep, CTRL/G)
+BS:			.alias 0x8;			// backspace (CTRL/H)
+TAB:		.alias 0x9;			// tab (CTRL/I)
+LF:			.alias 0xA;			// newline (CTRL/J)
+CR:			.alias 0xD;			// carriage return

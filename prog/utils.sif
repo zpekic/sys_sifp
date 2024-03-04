@@ -15,6 +15,16 @@ CSet:		PUSHA;
 			BRANCH;
 			.relative ACSet;
 
+// Upper case the 8-bit ASCII in A LSB
+ToUpper:	ANDI;
+			.data 0x00FF;	// mask upper byte
+			PUSHA;
+			LDAI;
+			.data 'a';		// lowest lowercase
+			JSR SEC;
+			POPA;
+			RTS;
+
 Print:		LDA, M[Y];
 			IF_AZ;
 			.relative PrintDone;

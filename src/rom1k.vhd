@@ -24,7 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
 use work.sifp_package.all;
-use work.helloworld_code.all;
+use work.monitor_code.all;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.

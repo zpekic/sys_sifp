@@ -7,9 +7,7 @@ CURSOR_Y	.alias RAM_BASE + 63;
 			.org $;
 
 // Initialize display
-VGA_Init:	MARK2;
-			BRANCH;
-			.relative CLC;
+VGA_Init:	JSR CLC;
 			LDAI;
 			.data VGA_COLS;
 			PUSHA;
