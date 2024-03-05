@@ -18,7 +18,7 @@
 //	---------------------------------------------------------------------------
 			INTOFF;		// pro-forma, IE flag is cleared by reset
 			TRACEOFF;	// pro-forma, TE flag is cleared by reset
-			JMP Init;
+			JA Init;
 			
 //	---------------------------------------------------------------------------
 //	interrupt handling routine
@@ -39,8 +39,7 @@ IntHandler:	PUSHA;
 			BRANCH;
 			.relative GetRowBase;
 			LDA, M[Y+X];	// get character from VGA RAM
-			ANDI;
-			.data 0xFF7F;	// revert to original
+			ANDI 0xFF7F;	// revert to original
 			STA, M[Y+X];
 			MARK2;
 			BRANCH;
@@ -66,8 +65,7 @@ Flip:		MARK2;
 			BRANCH;
 			.relative GetRowBase;
 			LDA, M[Y+X];	// get character from VGA RAM
-			XORI;
-			.data 0x0080;	// reverse back and forth
+			XORI 0x0080;	// reverse back and forth
 			STA, M[Y+X];
 			
 IntExit:	POPY;
@@ -93,25 +91,21 @@ PrintLoop1:	MARK2;
 			BRANCH;
 			.relative PrintChr;
 			PUSHA;
-			XORI;
-			.data ETX;
+			XORI ETX;
 			IF_AZ;
 			.relative Continue;
 			POPA;
-			XORI;
-			.data CR;
+			XORI CR;
 			IF_AZ;
 			.relative PrintLF;
 			BRANCH;
 			.relative PrintLoop;
-PrintLF:	LDAI;
-			.data LF;
+PrintLF:	LDAI LF;
 			BRANCH;
 			.relative PrintLoop1; 
 			
 Continue:	POPA;
-			LDXI;
-			.data @StrReady;
+			LDXI @StrReady;
 			MARK2;
 			BRANCH;
 			.relative PrintChr;
@@ -123,8 +117,7 @@ Continue:	POPA;
 			BRANCH;
 			.relative SetOldCrsXY;
 			
-			LDAI;
-			.data 0x89AB;
+			LDAI 0x89AB;
 			MARK2;
 			BRANCH;
 			.relative PrintHex;
@@ -134,14 +127,12 @@ Continue:	POPA;
 // -------------------------------------
 // MainLoop START
 // -------------------------------------
-MainLoop:	LDYI;
-			.data TXTBUFFER;
+MainLoop:	LDYI TXTBUFFER;
 			
 			// clear text buffer
 			CLRAX;
 TxtClear:	STA, M[Y+X];
-			CPXI;
-			.data TXTBUFLEN;
+			CPXI TXTBUFLEN;
 			IF_XC;
 			.relative TxtCleared;
 			INX, BRANCH;
@@ -179,21 +170,17 @@ CmdExec:	MARK2;
 			.relative UART_IsBrk;
 			IF_AC;
 			.relative CmdBreak;
-			LDAI;
-			.data 0xFFFF;
+			LDAI 0xFFFF;
 			RRC;	
 CmdBreak:	RTS;	// just return now with an error code
 			
-ErrOrBrk:	LDYI;
-			.data @StrBreak;
-			LDXI;
-			.data ETX;	
-			CPX, A;		// A = CTRLC?
+ErrOrBrk:	LDYI @StrBreak;
+			LDXI ETX;	
+			CPX, A;		// A = CTRL/C?
 			IF_AZ;		// yes, just print break message
 			.relative Print;
 			PUSHA;		// save error code
-			LDYI;
-			.data @StrError;
+			LDYI @StrError;
 			MARK2;
 			BRANCH;
 			.relative Print;
@@ -201,8 +188,7 @@ ErrOrBrk:	LDYI;
 			MARK2;
 			BRANCH;
 			.relative PrintHexA;
-			LDYI;
-			.data @StrEnd;
+			LDYI @StrEnd;
 			BRANCH;
 			.relative Print;
 
@@ -216,40 +202,34 @@ CmdEdit:	MARK2;
 			.relative PrintChr;
 
 			LDA, M[S];
-			XORI;
-			.data CR;	// Enter? 
+			XORI CR;	// Enter? 
 			IF_AZ;
 			.relative LeaveEdit;
 			
 			LDA, M[S];
-			XORI;
-			.data ETX;	// CTRL-C? 
+			XORI ETX;	// CTRL-C? 
 			IF_AZ;
 			.relative BrkEdit;
 			
 			LDA, M[S];
-			XORI;
-			.data CLS;	// CLS? 
+			XORI CLS;	// CLS? 
 			IF_AZ;
 			.relative BrkEdit;
 
 			LDA, M[S];
-			XORI;
-			.data HOME;	// HOME? 
+			XORI HOME;	// HOME? 
 			IF_AZ;
 			.relative BrkEdit;
 			
 			LDA, M[S];
-			XORI;
-			.data BS;
+			XORI BS;
 			IF_AZ;
 			.relative BSEdit;
 			
 			// "regular character"
 			POPA;
 			STA, M[Y+X];
-			CPXI;
-			.data TXTBUFLEN;
+			CPXI TXTBUFLEN;
 			IF_XZ;
 			.relative BumpEnd;
 			CLRA;
@@ -259,20 +239,16 @@ CmdEdit:	MARK2;
 
 			// break edit mode with AC set
 BrkEdit:	POPA;
-			LDAI;
-			.data 1;
+			LDAI 1;
 			RRC;
-			LDAI;
-			.data ETX;	// ETX code denoted break, not error
+			LDAI ETX;	// ETX code denoted break, not error
 			RTS;
 			
 			// break edit mode with AC cleared
 LeaveEdit:	POPA;
-			LDAI;
-			.data 0;
+			CLRA;
 			STA, M[Y+X];
-			RRC;
-			RTS;
+			RRC, RTS;
 			
 			// clear current character and move one left
 BSEdit:		POPA;
@@ -286,8 +262,7 @@ BSEdit:		POPA;
 
 BumpStart:	PUSHX;
 			PUSHY;
-			LDYI;
-			.data @StrBeep;
+			LDYI @StrBeep;
 Bumped:		MARK2;
 			BRANCH;
 			.relative Print;
@@ -298,8 +273,7 @@ Bumped:		MARK2;
 			
 BumpEnd:	PUSHX;
 			PUSHY;
-			LDYI;
-			.data @StrBack;
+			LDYI @StrBack;
 			BRANCH;
 			.relative Bumped;
 			

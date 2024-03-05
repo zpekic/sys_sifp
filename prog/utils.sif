@@ -10,17 +10,15 @@ ACDone:		RTS;
 SEC:		IF_AC;
 			.relative ACDone;
 CSet:		PUSHA;
-			LDAI;
-			.data -1;
+			LDAI -1;
 			BRANCH;
 			.relative ACSet;
 
 // Upper case the 8-bit ASCII in A LSB
-ToUpper:	ANDI;
-			.data 0x00FF;	// mask upper byte
+// TODO
+ToUpper:	ANDI 0x00FF;	// mask upper byte
 			PUSHA;
-			LDAI;
-			.data 'a';		// lowest lowercase
+			LDAI 'a';		// lowest lowercase
 			JSR SEC;
 			POPA;
 			RTS;
@@ -48,20 +46,17 @@ PrintHex:	PUSHY;
 			LDYI;
 			.absolute StrHex;
 
-			LDXI;
-			.data 12;	// 12, 8, 4, 0 shifts right
+			LDXI 12;	// 12, 8, 4, 0 shifts right
 			PUSHX;
 			PUSHA;
 
-SrcLoopX:	CPXI;
-			.data 0;
+SrcLoopX:	CHKX;
 			IF_XZ;
 			.relative PrintNib; 
 			DEX, RRC, BRANCH;
 			.relative SrcLoopX; 
 			
-PrintNib:	ANDI;
-			.data 0x000F;
+PrintNib:	ANDI 0x000F;
 			LDX, A;
 			LDA, M[Y+X];
 			MARK2;

@@ -138,8 +138,15 @@ alias cpu_done:  std_logic is cpu_instruction(19); -- 1: last machine cycle in i
 alias cpu_bctrl: std_logic is cpu_instruction(18); -- 0: alternative bus control (ABUS = register address; VMA, PnD, RnW = '0')
 alias cpu_irexe: std_logic is cpu_instruction(17); -- 1: execute from instruction register 
 alias cpu_fetch: std_logic is cpu_instruction(16); -- 1: fetch
--- format of lower 16-bit is exactly the same like the instructions stored in external memory!
+-- START MAGIC 
+-- The whole "magic" of SIFP is in the single line below:
+-- SIFP only executes 1 out of 16 32-bit instructions in the internal memory
+-- sometimes, the lower 16-bits of the instruction is replaced by the data from external memory
+-- given that the lower 16-bit of the internal and external instruction formats are same
+-- execution of instruction fetched from external memory does not differ from internal execution
+-- as far as the CPU registers P, A, X, Y, S, F are concerned. 
 alias cpu_i: std_logic_vector(15 downto 0) is cpu_instruction(15 downto 0);
+-- END MAGIC
 
 -- current microinstruction program counter and condition
 signal cpu_upc: std_logic_vector(3 downto 0);

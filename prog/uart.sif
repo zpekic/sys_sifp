@@ -1,76 +1,61 @@
 			.org $;
-UART_Init: 	LDYI;
-			.data UART_CONTROL;
-			LDAI;
-			.data 3;	// reset
+UART_Init: 	LDYI UART_CONTROL;
+			LDAI 3;	// reset
 			STA, M[Y];
-			LDAI;
-			.data 0x10;	// all int off, 8N2, baudrate / 1
+			LDAI 0x10;	// all int off, 8N2, baudrate / 1
 			STA, M[Y];
 			RTS;
 
 UART_GetChr:PUSHF;
 			TRACEOFF;
 			PUSHY;
-			LDYI;
-			.data UART_STATUS;
+			LDYI UART_STATUS;
 RdStatus0:	MARK2;
 			BRANCH;
 			.relative GetStatus;
-			ANDI;
-			.data 0x0001; // check if RDRF (bit 0, receiver data register full) is 1
+			ANDI 0x0001; // check if RDRF (bit 0, receiver data register full) is 1
 			IF_AZ;
 			.relative RdStatus0;
 GetChr:		INY;		// point to UART data register
 			LDA, M[Y];
-			ANDI;
-			.data 0x00FF;	// UART is connected to LSB
+			ANDI 0x00FF;	// UART is connected to LSB
 			POPY;
 			POPF;			// restore TRACE flag
 			RTS;
 
 UART_IsBrk: PUSHA;
 			PUSHY;
-			LDYI;
-			.data UART_STATUS;
+			LDYI UART_STATUS;
 			MARK2;
 			BRANCH;
 			.relative GetStatus;
-			ANDI;
-			.data 0x0001; // check if RDRF (bit 0, receiver data register full) is 1
+			ANDI 0x0001; // check if RDRF (bit 0, receiver data register full) is 1
 			IF_AZ;
 			.relative NoBrk;
 
 			INY;		// point to UART data register
 			LDA, M[Y];	// get received character
-			ANDI;
-			.data 0x00FF;
-			XORI;
-			.data ETX;	// compare with CTRL/C
+			ANDI 0x00FF;
+			XORI ETX;	// compare with CTRL/C
 			IF_AZ;
 			.relative Brk;
 
 NoBrk:		CLRA;
 			BRANCH;
 			.relative BrkExit;
-Brk:		LDAI;
-			.data 1;
-			RRC;		// AC carry, indicates break character detection;
-BrkExit:	POPY;
+Brk:		LDAI 1;
+BrkExit:	RRC, POPY;	// AC carry indicates break character detection
 			POPA;
 			RTS;
 			
-UART_Beep:	LDAI;
-			.data BEL;
+UART_Beep:	LDAI BEL;
 UART_OutChr:PUSHY;
 			PUSHA;
-			LDYI;
-			.data UART_STATUS;
+			LDYI UART_STATUS;
 RdStatus1:	MARK2;
 			BRANCH;
 			.relative GetStatus;
-			ANDI;
-			.data 0x0002; // check if TDRE (bit 1, transmit register empty) is 1
+			ANDI 0x0002; // check if TDRE (bit 1, transmit register empty) is 1
 			IF_AZ;
 			.relative RdStatus1;
 OutChr:		INY, LDA, M[POP];	// Y points to UART data register, get the char back		
