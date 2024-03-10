@@ -95,7 +95,7 @@ M[Y+X]		.alias  r_x = M[X], r_y = M[Y];
 M[X+Y]		.alias  r_x = M[X], r_y = M[Y];
 // Convenient stack operations
 RTS			.alias 	r_p = LDP, r_s = M[POP];
-MARK2		.alias 	r_p = STP2, r_s = M[PUSH];
+//MARK2		.alias 	r_p = STP2, r_s = M[PUSH];
 PUSHA		.alias  r_a = STA, r_s = M[PUSH];
 POPA		.alias  r_a = LDA, r_s = M[POP];
 PUSHX		.alias  r_x = STX, r_s = M[PUSH];
@@ -143,8 +143,21 @@ TRACEOFF	.alias  r_p = STP, r_a = A, r_x = X, r_y = Y, r_s = S;			// Disable tra
 //
 // Multi line (can reuse all aliases defined above)
 JA			.alias JUMP \ .absolute;
-JR			.alias JUMP \ .relative;
-JSA			.alias MARK2 \ BRANCH \ .absolute;
-JSR			.alias MARK2 \ BRANCH \ .relative;
+JR			.alias BRANCH \ .relative;
+JSA			.alias r_p = STP2, r_s = M[PUSH] \ JUMP \ .absolute;
+JSR			.alias r_p = STP2, r_s = M[PUSH] \ BRANCH \ .relative;
 RTF			.alias POPF \ RTS;
 
+// Convenient conditional jumps
+IF_A_GE_THEN	.alias	IF_A_GE \ .relative;						// AC set
+IF_A_LT_THEN	.alias	IF_A_GE \ data16 = 3 \ BRANCH \ .relative;	// AC not set
+IF_A_EQ_THEN	.alias	IF_A_EQ \ .relative;						// AZ set
+IF_A_NE_THEN	.alias	IF_A_EQ \ data16 = 3 \ BRANCH \ .relative;	// AZ not set
+IF_X_GE_THEN	.alias	IF_X_GE \ .relative;						// XC set
+IF_X_LT_THEN	.alias	IF_X_GE \ data16 = 3 \ BRANCH \ .relative;	// XC not set
+IF_X_EQ_THEN	.alias	IF_X_EQ \ .relative;						// XZ set
+IF_X_NE_THEN	.alias	IF_X_EQ \ data16 = 3 \ BRANCH \ .relative;	// XZ not set
+IF_Y_GE_THEN	.alias	IF_Y_GE \ .relative;						// YC set
+IF_Y_LT_THEN	.alias	IF_Y_GE \ data16 = 3 \ BRANCH \ .relative;	// YC not set
+IF_Y_EQ_THEN	.alias	IF_Y_EQ \ .relative;						// YZ set
+IF_Y_NE_THEN	.alias	IF_Y_EQ \ data16 = 3 \ BRANCH \ .relative;	// YZ not set

@@ -10,39 +10,30 @@ UART_GetChr:PUSHF;
 			TRACEOFF;
 			PUSHY;
 			LDYI UART_STATUS;
-RdStatus0:	MARK2;
-			BRANCH;
-			.relative GetStatus;
+RdStatus0:	JSR GetStatus;
 			ANDI 0x0001; // check if RDRF (bit 0, receiver data register full) is 1
-			IF_AZ;
-			.relative RdStatus0;
+			IF_A_EQ_THEN RdStatus0;
 GetChr:		INY;		// point to UART data register
 			LDA, M[Y];
-			ANDI 0x00FF;	// UART is connected to LSB
+			ANDI 0x00FF;// UART is connected to LSB
 			POPY;
-			POPF;			// restore TRACE flag
-			RTS;
+			RTF;		// restore TRACE flag
 
 UART_IsBrk: PUSHA;
 			PUSHY;
 			LDYI UART_STATUS;
-			MARK2;
-			BRANCH;
-			.relative GetStatus;
+			JSR GetStatus;
 			ANDI 0x0001; // check if RDRF (bit 0, receiver data register full) is 1
-			IF_AZ;
-			.relative NoBrk;
+			IF_A_EQ_THEN NoBrk;
 
 			INY;		// point to UART data register
 			LDA, M[Y];	// get received character
 			ANDI 0x00FF;
 			XORI ETX;	// compare with CTRL/C
-			IF_AZ;
-			.relative Brk;
+			IF_A_EQ_THEN Brk;
 
 NoBrk:		CLRA;
-			BRANCH;
-			.relative BrkExit;
+			JR BrkExit;
 Brk:		LDAI 1;
 BrkExit:	RRC, POPY;	// AC carry indicates break character detection
 			POPA;
@@ -52,35 +43,26 @@ UART_Beep:	LDAI BEL;
 UART_OutChr:PUSHY;
 			PUSHA;
 			LDYI UART_STATUS;
-RdStatus1:	MARK2;
-			BRANCH;
-			.relative GetStatus;
+RdStatus1:	JSR GetStatus;
 			ANDI 0x0002; // check if TDRE (bit 1, transmit register empty) is 1
-			IF_AZ;
-			.relative RdStatus1;
+			IF_A_EQ_THEN RdStatus1;
 OutChr:		INY, LDA, M[POP];	// Y points to UART data register, get the char back		
 			STA, M[Y];
 			POPY;
 			RTS;
 			
-GetStatus:	LDA, M[Y];
-			PUSHA;
-			LDA, M[Y];
-			XOR, M[S];
-			IF_AZ;
-			.relative StIsStable;
+GetStatus:	LDA, M[Y];	// read status register
+			PUSHA;		// save
+			LDA, M[Y];	// read again
+			XOR, M[S];	// compare to see if settled
+			IF_A_EQ_THEN StIsStable;
 			POPA;
-			BRANCH;
-			.relative GetStatus;
+			JR GetStatus;
 StIsStable:	POPA;
 			RTS;
 			
 UART_OutStr:LDA, M[X];
-			IF_AZ;
-			.relative UART_Done;
-			MARK2;
-			BRANCH;
-			.relative UART_OutChr;
-			INX, BRANCH;
-			.relative UART_OutStr;
+			IF_A_EQ_THEN UART_Done;
+			JSR UART_OutChr;
+			INX, JR UART_OutStr;
 UART_Done:	RTS;

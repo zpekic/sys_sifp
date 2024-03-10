@@ -17,69 +17,57 @@ VGA_Init:	JSR CLC;
 RowOffLoop:	LDA, M[Y];		// previous row 
 			INY, ADC, M[S];	// add number of columns, point to current row
 			DEX, STA, M[Y];
-			IF_XZ;
-			.relative RowOffDone;
-			BRANCH;
-			.relative RowOffLoop;
-RowOffDone:	POPA;
+			IF_X_NE_THEN RowOffLoop;
+			POPA;
 			CLRXY;
-			MARK2;
-			BRANCH;
-			.relative SetOldCrsXY;	// set "old" cursor (new will be set by CLS)
+			JSR SetOldCrsXY;	// set "old" cursor (new will be set by CLS)
 			LDAI CLS;
 			// continue with "clear screen"
 			
 // Display ASCII in A at CURSOR_X, CURSOR_Y
 VGA_OutChr: PUSHX;
 			PUSHY;
+			ANDI 0x00FF;	// care only about the lower 8-bit
 			PUSHA;
-			
+
 			XORI HOME;
-			IF_AZ; 
-			.relative VGA_HOME;
+			IF_A_EQ_THEN VGA_HOME;
 			
 			LDA, M[S];
 			XORI CLS;
-			IF_AZ; 
-			.relative VGA_CLS;
+			IF_A_EQ_THEN VGA_CLS;
 
 			LDA, M[S];
 			XORI BEL;
-			IF_AZ; 
-			.relative VGA_Ignore;
+			IF_A_EQ_THEN VGA_Ignore;
+
+			LDA, M[S];
+			XORI ETX;
+			IF_A_EQ_THEN VGA_Ignore;
 			
-			MARK2;
-			BRANCH;
-			.relative GetCursorXY;	// get cursor row, col from RAM
+			JSR GetCursorXY;	// get cursor row, col from RAM
 
 			LDA, M[S];
 			XORI CR;		
-			IF_AZ;
-			.relative VGA_CR;
+			IF_A_EQ_THEN VGA_CR;
 
 			LDA, M[S];
 			XORI LF;		
-			IF_AZ; 
-			.relative VGA_LF;
+			IF_A_EQ_THEN VGA_LF;
 
 			LDA, M[S];
 			XORI BS;
-			IF_AZ;
-			.relative VGA_BS;
+			IF_A_EQ_THEN VGA_BS;
 			
 //			default "printable" character output
 			POPA;
 			
-VGA_Print:	NOP; 
-			PUSHY;
-			MARK2;
-			BRANCH;
-			.relative GetRowBase;
+VGA_Print:	PUSHY;
+			JSR GetRowBase;
 			STA, M[Y+X];
 			INX, POPY;
 			CPXI VGA_COLS;
-			IF_X_GE;
-			.relative NextRow;
+			IF_X_GE_THEN NextRow;
 SetCursorXY:PUSHY;
 			LDYI CURSOR_X;
 			STX, M[Y];	// M[CURSOR_X] <= X
@@ -107,17 +95,13 @@ SetOldCrsXY:PUSHY;
 NextRow:	CLRX;
 NextRow1:	INY;
 			CPYI VGA_ROWS;
-			IF_Y_GE;
-			.relative ScrollUp;
-			BRANCH;
-			.relative SetCursorXY;
+			IF_Y_GE_THEN ScrollUp;
+			JR SetCursorXY;
 
 ScrollUp:	CLRY;
 NxtRow:		PUSHY; 		// we will need row later
 			CLRX;
-			MARK2;
-			BRANCH;
-			.relative GetRowBase;
+			JSR GetRowBase;
 NxtCol:		PUSHY;		// destination base on stack
 			ADYI VGA_COLS;	// add to get source base
 			LDA, M[Y+X];	// get character from VGA RAM
@@ -125,88 +109,65 @@ NxtCol:		PUSHY;		// destination base on stack
 			STA, M[Y+X];	// store character to one row below, same column
 			INX;			// next column
 			CPXI VGA_COLS;
-			IF_X_GE;
-			.relative ChkRow;
-			BRANCH;
-			.relative NxtCol;
+			IF_X_GE_THEN ChkRow;
+			JR NxtCol;
 ChkRow:		POPY;
 			INY;
 			CPYI VGA_ROWS - 1;
-			IF_Y_GE;
-			.relative ClrLastRow;
-			BRANCH;
-			.relative NxtRow;
+			IF_Y_GE_THEN ClrLastRow;
+			JR NxtRow;
 			// clear last row
 ClrLastRow:	NOP;
 			LDYI VGA_ROWS - 1;
 			PUSHY;	
-			MARK2;
-			BRANCH;
-			.relative ClearRow;
+			JSR ClearRow;
 			POPY;		// set cursor position to X = 0, Y = ROWS - 1
-			BRANCH;
-			.relative SetX0;
+			JR SetX0;
 				
 VGA_CR:		POPA;
 SetX0:		CLRX;
-			BRANCH;
-			.relative SetCursorXY;
+			JR SetCursorXY;
 
 VGA_BS:		POPA;
 			CLRX;
-			IF_XZ;
-			.relative PrevRow;
-			DEX, BRANCH;
-			.relative SetCursorXY;
+			IF_X_EQ_THEN PrevRow;
+			DEX, JR SetCursorXY;
 PrevRow:	CHKY;
-			IF_YZ;
-			.relative SetCursorXY;
+			IF_Y_EQ_THEN SetCursorXY;
 			LDXI VGA_COLS - 1;
-			DEY, BRANCH;
-			.relative SetCursorXY;
+			DEY, JR SetCursorXY;
 			
 VGA_LF:		POPA;
-			BRANCH;
-			.relative NextRow1;
+			JR NextRow1;
 
 VGA_CLS:	POPA;
 			LDAI ' ';	// use space character to clear screen
 			CLRY;
 ClrNextRow:	PUSHY; 
-			MARK2;
-			BRANCH;
-			.relative ClearRow;
+			JSR ClearRow;
 			POPY;
 			INY;
 			CPYI VGA_ROWS;
-			IF_Y_GE;
-			.relative vga_home1;
-			BRANCH;
-			.relative ClrNextRow;
+			IF_Y_GE_THEN vga_home1;
+			JR ClrNextRow;
 			
-ClearRow: 	MARK2;
-			BRANCH;
-			.relative GetRowBase;
+ClearRow: 	JSR GetRowBase;
 			LDAI ' ';
-			LDXI VGA_COLS / 8 - 1; // bar on the left just to save time
+			LDXI VGA_COLS / 4 - 1; // bar on the left just to save time
 ClrRLoop:	STA, M[Y+X];
-			IF_XZ;
-			.relative ClrDone;
-			DEX, BRANCH;
-			.relative ClrRLoop;
+			IF_X_EQ_THEN ClrDone;
+			DEX, JR ClrRLoop;
 ClrDone:	RTS;			
 			
 VGA_HOME:	POPA;
 vga_home1:	CLRXY; // X, Y <= 0
-			BRANCH;
-			.relative SetCursorXY;
+			JR SetCursorXY;
 
 GetOldCrsXY:LDYI CUR_OLDX;
 			LDX, M[Y];		// X <= M[CURSOR_X]
 			PUSHX;
 			LDXI CUR_OLDY;
-			BRANCH;
-			.relative GetCursorY;
+			JR GetCursorY;
 
 GetCursorXY:LDYI CURSOR_X;
 			LDX, M[Y];		// X <= M[CURSOR_X]
@@ -226,9 +187,7 @@ GetRowBase:	PUSHA;
 VGA_OutStr:	LDA, M[X];
 			IF_AZ;
 			.relative OutStrDone;
-			MARK2;
-			BRANCH;
-			.relative VGA_OutChr;
+			JSR VGA_OutChr;
 			INX, BRANCH;
 			.relative VGA_OutStr;
 OutStrDone:	RTS;

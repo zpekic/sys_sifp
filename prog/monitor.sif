@@ -30,40 +30,23 @@ IntHandler:	PUSHA;
 
 			TRACEON;
 			
-			MARK2;
-			BRANCH;
-			.relative GetOldCrsXY;
+			JSR GetOldCrsXY;
 			PUSHY;
 			PUSHX;
-			MARK2;
-			BRANCH;
-			.relative GetRowBase;
+			JSR GetRowBase;
 			LDA, M[Y+X];	// get character from VGA RAM
 			ANDI 0xFF7F;	// revert to original
 			STA, M[Y+X];
-			MARK2;
-			BRANCH;
-			.relative GetCursorXY;
+			JSR GetCursorXY;
 			CPX, M[POP];	// new X - old X
 			CPY, M[POP];	// new Y - old Y
-			IF_XZ;
-			.relative CheckY;
-			BRANCH;
-			.relative NoFlip; 
-CheckY:		IF_YZ;
-			.relative Flip;
-NoFlip:		MARK2;
-			BRANCH;
-			.relative SetOldCrsXY;
-			BRANCH;
-			.relative IntExit;
+			IF_X_NE_THEN NoFlip;
+CheckY:		IF_Y_EQ_THEN Flip;
+NoFlip:		JSR SetOldCrsXY;
+			JR IntExit;
 			
-Flip:		MARK2;
-			BRANCH;
-			.relative GetCursorXY;
-			MARK2;
-			BRANCH;
-			.relative GetRowBase;
+Flip:		JSR GetCursorXY;
+			JSR GetRowBase;
 			LDA, M[Y+X];	// get character from VGA RAM
 			XORI 0x0080;	// reverse back and forth
 			STA, M[Y+X];
@@ -74,53 +57,34 @@ IntExit:	POPY;
 			RTF;	// F and P were saved when entering the interrupt routine
 //	---------------------------------------------------------------------------			
 
-Init:		MARK2;
-			BRANCH;
-			.relative VGA_Init;
+Init:		JSR VGA_Init;
 
-			MARK2;
-			BRANCH;
-			.relative UART_Init;
+			JSR UART_Init;
 
 			//TRACEON;
 			INTON;
-PrintLoop:	MARK2;
-			BRANCH;
-			.relative UART_GetChr;
-PrintLoop1:	MARK2;
-			BRANCH;
-			.relative PrintChr;
+PrintLoop:	JSR UART_GetChr;
+PrintLoop1:	JSR PrintChr;
 			PUSHA;
 			XORI ETX;
-			IF_AZ;
-			.relative Continue;
+			IF_A_EQ_THEN Continue;
 			POPA;
 			XORI CR;
-			IF_AZ;
-			.relative PrintLF;
-			BRANCH;
-			.relative PrintLoop;
-PrintLF:	LDAI LF;
-			BRANCH;
-			.relative PrintLoop1; 
+			IF_A_EQ_THEN PrintLF;
+			JR PrintLoop;
+PrintLF:	LDYI @StrEnd;
+			JSR Print;
+			JR PrintLoop1; 
 			
 Continue:	POPA;
 			LDXI @StrReady;
-			MARK2;
-			BRANCH;
-			.relative PrintChr;
+			JSR PrintChr;
 
-			MARK2;	// set proper cursor X, Y...
-			BRANCH;
-			.relative GetCursorXY;
-			MARK2;
-			BRANCH;
-			.relative SetOldCrsXY;
+			JSR GetCursorXY;	// set proper cursor X, Y...
+			JSR SetOldCrsXY;
 			
 			LDAI 0x89AB;
-			MARK2;
-			BRANCH;
-			.relative PrintHex;
+			JSR PrintHex;
 			
 			INTON;	// and then enable interrupts
 			
@@ -133,109 +97,77 @@ MainLoop:	LDYI TXTBUFFER;
 			CLRAX;
 TxtClear:	STA, M[Y+X];
 			CPXI TXTBUFLEN;
-			IF_XC;
-			.relative TxtCleared;
-			INX, BRANCH;
-			.relative TxtClear;
+			IF_X_GE_THEN TxtCleared;
+			INX, JR TxtClear;
 
 TxtCleared: CLRX; // X holds position of cursor within the buffer
 			// edit within the text buffer
-			MARK2;
-			BRANCH;
-			.relative CmdEdit;
-			IF_AC;
-			.relative ErrOrBrk;
+			JSR CmdEdit;
+			IF_A_GE_THEN ErrOrBrk;
 			
 			// print text buffer
-			MARK2;
-			BRANCH;
-			.relative Print;
+			JSR Print;
 
 			// execute command in text buffer
-			MARK2;
-			BRANCH;
-			.relative CmdExec;
-			IF_AC;
-			.relative ErrOrBrk;
+			JSR CmdExec;
+			IF_A_GE_THEN ErrOrBrk;
 
 			// dead loop
-			BRANCH;
-			.relative MainLoop;
+			JR MainLoop;
 // -------------------------------------
 // MainLoop END
 // -------------------------------------
 
-CmdExec:	MARK2;
-			BRANCH;
-			.relative UART_IsBrk;
-			IF_AC;
-			.relative CmdBreak;
+CmdExec:	JSR UART_IsBrk;
+			IF_A_GE_THEN CmdBreak;
 			LDAI 0xFFFF;
-			RRC;	
-CmdBreak:	RTS;	// just return now with an error code
+CmdBreak:	RRC, RTS;	// just return now with an error code
 			
 ErrOrBrk:	LDYI @StrBreak;
 			LDXI ETX;	
 			CPX, A;		// A = CTRL/C?
-			IF_AZ;		// yes, just print break message
-			.relative Print;
+			IF_A_EQ_THEN Print;		// yes, just print break message
 			PUSHA;		// save error code
 			LDYI @StrError;
-			MARK2;
-			BRANCH;
-			.relative Print;
+			JSR Print;
 			POPA;		 // restore error code
-			MARK2;
-			BRANCH;
-			.relative PrintHexA;
+			JSR PrintHexA;
 			LDYI @StrEnd;
-			BRANCH;
-			.relative Print;
+			JR Print;
 
-CmdEdit:	MARK2;
-			BRANCH;
-			.relative UART_GetChr;
+CmdEdit:	JSR UART_GetChr;
 			PUSHA;
 
-			MARK2;
-			BRANCH;
-			.relative PrintChr;
+			JSR PrintChr;
 
 			LDA, M[S];
 			XORI CR;	// Enter? 
-			IF_AZ;
-			.relative LeaveEdit;
+			IF_A_EQ_THEN LeaveEdit;
 			
 			LDA, M[S];
 			XORI ETX;	// CTRL-C? 
-			IF_AZ;
-			.relative BrkEdit;
+			IF_A_EQ_THEN BrkEdit;
 			
 			LDA, M[S];
 			XORI CLS;	// CLS? 
-			IF_AZ;
-			.relative BrkEdit;
+			IF_A_EQ_THEN BrkEdit;
 
 			LDA, M[S];
 			XORI HOME;	// HOME? 
-			IF_AZ;
-			.relative BrkEdit;
+			IF_A_EQ_THEN BrkEdit;
 			
 			LDA, M[S];
 			XORI BS;
-			IF_AZ;
-			.relative BSEdit;
+			IF_A_EQ_THEN BSEdit;
 			
 			// "regular character"
 			POPA;
 			STA, M[Y+X];
 			CPXI TXTBUFLEN;
-			IF_XZ;
-			.relative BumpEnd;
+			IF_X_EQ_THEN BumpEnd;
 			CLRA;
 			STA, M[Y+X];
-			INX, BRANCH;
-			.relative CmdEdit;
+			INX, JR CmdEdit;
 
 			// break edit mode with AC set
 BrkEdit:	POPA;
@@ -255,27 +187,21 @@ BSEdit:		POPA;
 			CLRA;
 			STA, M[Y+X];
 			CPX, A;		// test if X == 0
-			IF_XZ;
-			.relative BumpStart;
-			DEX, BRANCH;
-			.relative CmdEdit;
+			IF_X_EQ_THEN BumpStart;
+			DEX, JR CmdEdit;
 
 BumpStart:	PUSHX;
 			PUSHY;
 			LDYI @StrBeep;
-Bumped:		MARK2;
-			BRANCH;
-			.relative Print;
+Bumped:		JSR Print;
 			POPY;
 			POPX;
-			BRANCH;
-			.relative CmdEdit;
+			JR CmdEdit;
 			
 BumpEnd:	PUSHX;
 			PUSHY;
 			LDYI @StrBack;
-			BRANCH;
-			.relative Bumped;
+			JR Bumped;
 			
 #include "utils.sif";
 #include "uart.sif";

@@ -11,8 +11,7 @@ SEC:		IF_AC;
 			.relative ACDone;
 CSet:		PUSHA;
 			LDAI -1;
-			BRANCH;
-			.relative ACSet;
+			JR ACSet;
 
 // Upper case the 8-bit ASCII in A LSB
 // TODO
@@ -26,25 +25,17 @@ ToUpper:	ANDI 0x00FF;	// mask upper byte
 Print:		LDA, M[Y];
 			IF_AZ;
 			.relative PrintDone;
-			MARK2;
-			BRANCH;
-			.relative PrintChr;
-			INY, BRANCH;
-			.relative Print;
+			JSR PrintChr;
+			INY, JR Print;
 PrintDone:	RTS;
 			
-PrintChr:	MARK2;
-			BRANCH;
-			.relative VGA_OutChr;
-			MARK2;
-			BRANCH;
-			.relative UART_OutChr;
-			RTS;
+PrintChr:	JSR VGA_OutChr;
+			JR UART_OutChr;
+			//RTS;
 
 PrintHex:	PUSHY;
 			PUSHX;
-			LDYI;
-			.absolute StrHex;
+			LDYI @StrHex;
 
 			LDXI 12;	// 12, 8, 4, 0 shifts right
 			PUSHX;
@@ -53,15 +44,12 @@ PrintHex:	PUSHY;
 SrcLoopX:	CHKX;
 			IF_XZ;
 			.relative PrintNib; 
-			DEX, RRC, BRANCH;
-			.relative SrcLoopX; 
+			DEX, RRC, JR SrcLoopX; 
 			
 PrintNib:	ANDI 0x000F;
 			LDX, A;
 			LDA, M[Y+X];
-			MARK2;
-			BRANCH;
-			.relative PrintChr;
+			JSR PrintChr;
 
 			POPA;
 			POPX;
@@ -73,8 +61,7 @@ PrintNib:	ANDI 0x000F;
 			DEX;
 			PUSHX;
 			PUSHA;
-			BRANCH;
-			.relative SrcLoopX;
+			JR SrcLoopX;
 			
 PrintHexEx:	POPX;
 			POPY;

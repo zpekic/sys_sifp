@@ -104,7 +104,7 @@ constant cpu_program: mem16x32 := (
 	-- 7: output P, if interrupt then push regs else fetch (new instruction) 
 	if_intr & X"8" & X"0" & "001000" & r_p_STP & r_a_NOA & r_x_NOX & r_y_NOY & r_s_NOS,
 	
-	-- interrupt routine pushes P and F on the stack, disables tracing and interrupts, and then load the int vector
+	-- interrupt routine pushes P and F on the stack, disables tracing and interrupts, and then loads the int vector
 	-- 8: push P, continue
 	if_cont & X"9" & X"9" & "000100" & c_PUSHP,
 	-- 9: push F, continue
