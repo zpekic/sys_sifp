@@ -153,12 +153,9 @@ ClrNextRow:	PUSHY;
 			
 ClearRow: 	JSR GetRowBase;
 			LDAI ' ';
-			LDXI VGA_COLS / 4 - 1; // bar on the left just to save time
-ClrRLoop:	STA, M[Y+X];
-			IF_X_EQ_THEN ClrDone;
-			DEX, JR ClrRLoop;
-ClrDone:	RTS;			
-			
+			LDXI VGA_COLS / 8; // bar on the left just to save time
+			JR MemFill;
+						
 VGA_HOME:	POPA;
 vga_home1:	CLRXY; // X, Y <= 0
 			JR SetCursorXY;

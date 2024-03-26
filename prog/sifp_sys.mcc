@@ -5,7 +5,8 @@ VGA_COLS	.alias 64;	// each character is 8*8 matrix
 VGA_BASE	.alias 0x1000;	// text video memory base address
 RAM_BASE	.alias 0xFF00;	// only 256 words of RAM is sufficient
 TXTBUFFER	.alias 0xFF40;	// command buffer start
-TXTBUFLEN	.alias 0x0010;	// TODO: change to 64 words length
+TXTBUFLEN	.alias 0x0040;	// 64 words length
+TXTBUFPOS	.alias 0xFF80;
 
 // UART looks like a much simplified M6850 device
 UART_CONTROL	.alias 0x2000;	// when writing

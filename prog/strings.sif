@@ -1,6 +1,7 @@
 			.org $;
 
-StrBreak:	.data CR;
+StrBreak:	.data BEL;
+			.data CR;
 			.data LF;
 			.data '*';
 			.data 'B';
@@ -8,10 +9,11 @@ StrBreak:	.data CR;
 			.data 'E';
 			.data 'A';
 			.data 'K';
-			.data BEL;
+			.data ' ';
 			.data 0;
 
-StrError:	.data CR;
+StrError:	.data BEL;
+			.data CR;
 			.data LF;
 			.data '*';
 			.data 'E';
@@ -19,13 +21,12 @@ StrError:	.data CR;
 			.data 'R';
 			.data 'O';
 			.data 'R';
+			.data ' ';
+			.data 0;
+			
 StrBeep:	.data BEL;
 			.data 0;
 
-StrBack:	.data BS;
-			.data BEL;
-			.data 0;
-			
 StrClear:	.data CLS;
 			.data 0;
 			

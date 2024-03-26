@@ -18,17 +18,16 @@
 //	---------------------------------------------------------------------------
 			INTOFF;		// pro-forma, IE flag is cleared by reset
 			TRACEOFF;	// pro-forma, TE flag is cleared by reset
-			JA Init;
+			JA ColdStart;
 			
 //	---------------------------------------------------------------------------
 //	interrupt handling routine
 //	---------------------------------------------------------------------------
 			.org 8;
-IntHandler:	PUSHA;
+IntHandler:	TRACEOFF;
+			PUSHA;
 			PUSHX;
 			PUSHY;
-
-			TRACEON;
 			
 			JSR GetOldCrsXY;
 			PUSHY;
@@ -57,152 +56,124 @@ IntExit:	POPY;
 			RTF;	// F and P were saved when entering the interrupt routine
 //	---------------------------------------------------------------------------			
 
-Init:		JSR VGA_Init;
+ColdStart:	JSR VGA_Init;
 
 			JSR UART_Init;
 
-			//TRACEON;
-			INTON;
-PrintLoop:	JSR UART_GetChr;
-PrintLoop1:	JSR PrintChr;
-			PUSHA;
-			XORI ETX;
-			IF_A_EQ_THEN Continue;
-			POPA;
-			XORI CR;
-			IF_A_EQ_THEN PrintLF;
-			JR PrintLoop;
-PrintLF:	LDYI @StrEnd;
+			TRACEON;
+			//INTON;
+
+			// TODO: other clear
+			LDYI @StrReady;
 			JSR Print;
-			JR PrintLoop1; 
-			
-Continue:	POPA;
-			LDXI @StrReady;
-			JSR PrintChr;
-
-			JSR GetCursorXY;	// set proper cursor X, Y...
-			JSR SetOldCrsXY;
-			
-			LDAI 0x89AB;
-			JSR PrintHex;
-			
-			INTON;	// and then enable interrupts
 			
 // -------------------------------------
-// MainLoop START
+// hot start
 // -------------------------------------
-MainLoop:	LDYI TXTBUFFER;
+HotStart:	LDXI TXTBUFLEN;
+			LDYI TXTBUFFER;
+			JSR MemClear;
 			
-			// clear text buffer
-			CLRAX;
-TxtClear:	STA, M[Y+X];
-			CPXI TXTBUFLEN;
-			IF_X_GE_THEN TxtCleared;
-			INX, JR TxtClear;
-
-TxtCleared: CLRX; // X holds position of cursor within the buffer
-			// edit within the text buffer
 			JSR CmdEdit;
-			IF_A_GE_THEN ErrOrBrk;
+			IF_AC_THEN ErrOrBrk;
 			
 			// print text buffer
+			LDYI TXTBUFFER;
 			JSR Print;
 
 			// execute command in text buffer
 			JSR CmdExec;
-			IF_A_GE_THEN ErrOrBrk;
+			IF_AC_THEN ErrOrBrk;
 
 			// dead loop
-			JR MainLoop;
-// -------------------------------------
-// MainLoop END
-// -------------------------------------
+			JR HotStart;
 
-CmdExec:	JSR UART_IsBrk;
-			IF_A_GE_THEN CmdBreak;
-			LDAI 0xFFFF;
-CmdBreak:	RRC, RTS;	// just return now with an error code
-			
-ErrOrBrk:	LDYI @StrBreak;
-			LDXI ETX;	
-			CPX, A;		// A = CTRL/C?
-			IF_A_EQ_THEN Print;		// yes, just print break message
-			PUSHA;		// save error code
-			LDYI @StrError;
-			JSR Print;
-			POPA;		 // restore error code
-			JSR PrintHexA;
-			LDYI @StrEnd;
-			JR Print;
-
-CmdEdit:	JSR UART_GetChr;
+ErrOrBrk:	PUSHA;	
 			PUSHA;
-
+			XORI ETX;				// A = CTRL-C?
+			IF_A_EQ_THEN BrkMsg;	// yes, just print break message
+			LDYI @StrError;
+			JR ErrMsg;
+BrkMsg:		LDYI @StrBreak;
+ErrMsg:		JSR Print;
+			POPA;		 			// restore error code
+			JSR PrintHex;
+			LDAI ' ';
 			JSR PrintChr;
+			POPA;
+			JSR PrintBin;
+			LDYI @StrEnd;
+			JSR Print;
+			JR HotStart;
 
-			LDA, M[S];
-			XORI CR;	// Enter? 
-			IF_A_EQ_THEN LeaveEdit;
+// -------------------------------------
+// EXECUTE
+// -------------------------------------
+CmdExec:	LDAI 0xFFFF;
+			JR SEC;	// just return now with an error code
 			
-			LDA, M[S];
-			XORI ETX;	// CTRL-C? 
-			IF_A_EQ_THEN BrkEdit;
-			
-			LDA, M[S];
-			XORI CLS;	// CLS? 
-			IF_A_EQ_THEN BrkEdit;
 
-			LDA, M[S];
-			XORI HOME;	// HOME? 
-			IF_A_EQ_THEN BrkEdit;
+// -------------------------------------
+// EDIT SINGLE LINE
+// -------------------------------------
+CmdEdit:	CLRX;			// X holds position in the buffer
+			LDYI TXTBUFFER;	// Y holds start of the buffer
+
+EditLoop:	JSR UART_GetChr;
+			STA, M[Y+X];	// write character to the buffer
+
+			XORI CR;		// Enter? 
+			IF_A_NE_THEN NotEnter;
+			STA, M[Y+X];	// write 0 to terminate buffer
+			LDYI @StrEnd;		
+			JSR Print;		// Print CR, LF
+EditExOk:	LDAI CR;
+			JR CLC;			// A=CR, AC=0, return
 			
-			LDA, M[S];
-			XORI BS;
-			IF_A_EQ_THEN BSEdit;
+NotEnter:	LDA, M[Y+X];	// get the character back
+			XORI ETX;		// CTRL-C? 
+			IF_A_NE_THEN NotBreak;
+			STA, M[Y+X];	// write 0 to terminate buffer
+			LDAI ETX;	
+EditExErr:	JSR PrintChr;
+			JR SEC;			// A=ESC, AC=1, return with error
+			
+NotBreak:	LDA, M[Y+X];
+			XORI CLS;		// CLS? 
+			IF_A_NE_THEN NotCls;
+			STA, M[Y+X];	// write 0 to terminate buffer
+			LDAI CLS;			
+			JR EditExErr;	// indicate break;
+
+NotCls:		LDA, M[Y+X];
+			XORI HOME;		// HOME? 
+			IF_A_NE_THEN NotHome;
+			STA, M[Y+X];	// write 0 to terminate buffer
+			LDAI HOME;			
+			JR EditExErr;	// indicate break;
+			
+NotHome:	LDA, M[Y+X];
+			XORI BS;		// Backspace?
+			IF_A_NE_THEN NotBS;
+			CHKX;
+			IF_X_EQ_THEN Bumper;
+			LDAI BS;
+			JSR PrintChr;
+			DEX, JR EditNext;	// one position back
+
+Bumper:		LDAI BEL;		// warning beep that we are at left of the edit line
+			JSR PrintChr;
+EditNext:	CLRA;
+			STA, M[Y+X];	// write 0 to terminate buffer	
+			JR EditLoop;
 			
 			// "regular character"
-			POPA;
-			STA, M[Y+X];
-			CPXI TXTBUFLEN;
-			IF_X_EQ_THEN BumpEnd;
-			CLRA;
-			STA, M[Y+X];
-			INX, JR CmdEdit;
-
-			// break edit mode with AC set
-BrkEdit:	POPA;
-			LDAI 1;
-			RRC;
-			LDAI ETX;	// ETX code denoted break, not error
-			RTS;
-			
-			// break edit mode with AC cleared
-LeaveEdit:	POPA;
-			CLRA;
-			STA, M[Y+X];
-			RRC, RTS;
-			
-			// clear current character and move one left
-BSEdit:		POPA;
-			CLRA;
-			STA, M[Y+X];
-			CPX, A;		// test if X == 0
-			IF_X_EQ_THEN BumpStart;
-			DEX, JR CmdEdit;
-
-BumpStart:	PUSHX;
-			PUSHY;
-			LDYI @StrBeep;
-Bumped:		JSR Print;
-			POPY;
-			POPX;
-			JR CmdEdit;
-			
-BumpEnd:	PUSHX;
-			PUSHY;
-			LDYI @StrBack;
-			JR Bumped;
-			
+NotBS:		CPXI TXTBUFLEN - 1;
+			IF_X_GE_THEN Bumper;
+			LDA, M[Y+X];	// load saved character
+			JSR PrintChr;
+			INX, JR EditNext; 
+				
 #include "utils.sif";
 #include "uart.sif";
 #include "vga.sif";		

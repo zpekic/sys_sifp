@@ -109,25 +109,30 @@ SBCI		.alias  r_p = M[IMM], r_a = SBC \ data16 =;
 ADCI		.alias  r_p = M[IMM], r_a = ADC \ data16 =;
 ANDI		.alias  r_p = M[IMM], r_a = AND \ data16 =;
 LDXI		.alias  r_p = M[IMM], r_x = LDX \ data16 =;
-ADXI		.alias  r_p = M[IMM], r_x = ADX \ data16 =;
+//ADXI		.alias  r_p = M[IMM], r_x = ADX \ data16 =;
 CPXI		.alias  r_p = M[IMM], r_x = CPX \ data16 =;
 LDYI		.alias  r_p = M[IMM], r_y = LDY \ data16 =;
 ADYI		.alias  r_p = M[IMM], r_y = ADY \ data16 =;
 CPYI		.alias  r_p = M[IMM], r_y = CPY \ data16 =;
-LDSI		.alias  r_p = M[IMM], r_s = LDS \ data16 =;
-ADSI		.alias  r_p = M[IMM], r_s = ADS \ data16 =;
-CPSI		.alias  r_p = M[IMM], r_s = CPS \ data16 =;
+//LDSI		.alias  r_p = M[IMM], r_s = LDS \ data16 =;
+//ADSI		.alias  r_p = M[IMM], r_s = ADS \ data16 =;
+//CPSI		.alias  r_p = M[IMM], r_s = CPS \ data16 =;
 // Convenient clear and check for zero operations (internal data bus is 0 by default if not driven)
 CLRA		.alias  r_p = NOP, r_a = LDA, r_x = NOX, r_y = NOY, r_s = NOS;	
 CLRX		.alias  r_p = NOP, r_a = NOA, r_x = LDX, r_y = NOY, r_s = NOS;	
 CLRY		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = LDY, r_s = NOS;	
-CLRAX		.alias  r_p = NOP, r_a = LDA, r_x = LDX, r_y = NOY, r_s = NOS;	
-CLRAY		.alias  r_p = NOP, r_a = LDA, r_x = NOX, r_y = LDY, r_s = NOS;	
+//CLRAX		.alias  r_p = NOP, r_a = LDA, r_x = LDX, r_y = NOY, r_s = NOS;	
+//CLRAY		.alias  r_p = NOP, r_a = LDA, r_x = NOX, r_y = LDY, r_s = NOS;	
 CLRXY		.alias  r_p = NOP, r_a = NOA, r_x = LDX, r_y = LDY, r_s = NOS;	
-CLRAXY		.alias  r_p = NOP, r_a = LDA, r_x = LDX, r_y = LDY, r_s = NOS;	
-CHKA		.alias  r_p = NOP, r_a = XOR, r_x = NOX, r_y = NOY, r_s = NOS;	
+//CLRAXY	.alias  r_p = NOP, r_a = LDA, r_x = LDX, r_y = LDY, r_s = NOS;	
+//CHKA		.alias  r_p = NOP, r_a = XOR, r_x = NOX, r_y = NOY, r_s = NOS;	
 CHKX		.alias  r_p = NOP, r_a = NOA, r_x = CPX, r_y = NOY, r_s = NOS;	
 CHKY		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = CPY, r_s = NOS;	
+// Rotate left through carry replacement
+RLC			.alias STA, M[PUSH] \ ADC, M[POP];
+// Exchange registers
+//XAX			.alias STA, M[PUSH] \ LDA, X \ LDX, M[POP];
+//XAY			.alias STA, M[PUSH] \ LDA, Y \ LDY, M[POP];
 
 //
 // Special case instruction combinations
@@ -149,6 +154,7 @@ JSR			.alias r_p = STP2, r_s = M[PUSH] \ BRANCH \ .relative;
 RTF			.alias POPF \ RTS;
 
 // Convenient conditional jumps
+IF_AC_THEN		.alias	IF_A_GE \ .relative;						// AC set
 IF_A_GE_THEN	.alias	IF_A_GE \ .relative;						// AC set
 IF_A_LT_THEN	.alias	IF_A_GE \ data16 = 3 \ BRANCH \ .relative;	// AC not set
 IF_A_EQ_THEN	.alias	IF_A_EQ \ .relative;						// AZ set

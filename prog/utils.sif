@@ -13,57 +13,98 @@ CSet:		PUSHA;
 			LDAI -1;
 			JR ACSet;
 
+// ---------------------------------------------
+// clear or fill X words of memory starting at Y
+// ---------------------------------------------
+MemClear:	CLRA;
+MemFill:	PUSHX;
+			CLRX;
+MemCFLoop:	CPX, M[S];
+			IF_X_GE_THEN MemCFExit;
+			STA, M[Y+X];
+			INX, JR MemCFLoop; 
+MemCFExit:	POPX;
+			RTS;
+
+// -----------------------------------			
 // Upper case the 8-bit ASCII in A LSB
-// TODO
+// -----------------------------------
 ToUpper:	ANDI 0x00FF;	// mask upper byte
-			PUSHA;
-			LDAI 'a';		// lowest lowercase
 			JSR SEC;
-			POPA;
+			PUSHA;
+			SBCI 'a';
+			POPA, IF_A_GE_THEN ToUpper1;
+ToUpperEx:	RTS;
+ToUpper1:	PUSHA;
+			SBCI '{';
+			POPA, IF_A_GE_THEN ToUpperEx;
+			SBCI 'a' - 'A' - 1;	// note that AC is 0!
+			RTS;
+			
+// -----------------------------------			
+// Lower case the 8-bit ASCII in A LSB
+// -----------------------------------
+ToLower:	ANDI 0x00FF;	// mask upper byte
+			JSR SEC;
+			PUSHA;
+			SBCI 'A';
+			POPA, IF_A_GE_THEN ToLower1;
+ToLowerEx:	RTS;
+ToLower1:	PUSHA;
+			SBCI '[';
+			POPA, IF_A_GE_THEN ToLowerEx;
+			ADCI 'A' - 'a';	// note that AC is 0!
 			RTS;
 
 Print:		LDA, M[Y];
-			IF_AZ;
-			.relative PrintDone;
+			IF_A_EQ_THEN PrintDone;
 			JSR PrintChr;
 			INY, JR Print;
 PrintDone:	RTS;
 			
-PrintChr:	JSR VGA_OutChr;
-			JR UART_OutChr;
-			//RTS;
+PrintChr:	JSR UART_OutChr;
+			//JR VGA_OutChr;
+			RTS;
 
+// ------------------------------
+// Print value in A in HEX format
+// ------------------------------
 PrintHex:	PUSHY;
 			PUSHX;
-			LDYI @StrHex;
-
-			LDXI 12;	// 12, 8, 4, 0 shifts right
-			PUSHX;
-			PUSHA;
-
-SrcLoopX:	CHKX;
-			IF_XZ;
-			.relative PrintNib; 
-			DEX, RRC, JR SrcLoopX; 
-			
-PrintNib:	ANDI 0x000F;
-			LDX, A;
-			LDA, M[Y+X];
-			JSR PrintChr;
-
+			PUSHA;		// xxxF
+			LDXI 3;
+PushNibLp:	IF_X_EQ_THEN PrintHexLp;
+			RRC;
+			RRC;
+			RRC;
+			RRC;
+			PUSHA;		// push other 3 nibbles
+			DEX, JR PushNibLp;
+PrintHexLp:	CPXI 4;
+			IF_X_GE_THEN PrintHexEx;
 			POPA;
-			POPX;
-			IF_XZ;
-			.relative PrintHexEx;
-			DEX;
-			DEX; 
-			DEX;
-			DEX;
-			PUSHX;
-			PUSHA;
-			JR SrcLoopX;
-			
+			ANDI 0x000F;
+			LDYI @StrHex;
+			ADY, A;
+			LDA, M[Y];
+			JSR PrintChr;
+			INX, JR PrintHexLp; 
 PrintHexEx:	POPX;
 			POPY;
 			RTS;
+
+// ------------------------------
+// Print value in A in BIN format
+// ------------------------------
+PrintBin:	PUSHY;
+			PUSHX;
+			LDXI 16;
+PrintBinLp:	IF_X_EQ_THEN PrintHexEx;
+			RLC;		// get MSB into AC flag
+			LDY, A;		// save to Y 
+			LDAI '0';
+			ADCI 0;		// will remain '0' or become '1'
+			JSR PrintChr;
+			LDA, Y;		// restore from Y
+			DEX, JR PrintBinLp;
 			

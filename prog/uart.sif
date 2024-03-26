@@ -6,6 +6,7 @@ UART_Init: 	LDYI UART_CONTROL;
 			STA, M[Y];
 			RTS;
 
+// Wait until character is received
 UART_GetChr:PUSHF;
 			TRACEOFF;
 			PUSHY;
@@ -15,30 +16,21 @@ RdStatus0:	JSR GetStatus;
 			IF_A_EQ_THEN RdStatus0;
 GetChr:		INY;		// point to UART data register
 			LDA, M[Y];
-			ANDI 0x00FF;// UART is connected to LSB
+NoChar:		ANDI 0x00FF;// UART is connected to LSB
 			POPY;
 			RTF;		// restore TRACE flag
 
-UART_IsBrk: PUSHA;
+// Don't wait for character, return 0x00 if none received
+UART_ChkChr:PUSHF;
+			TRACEOFF;
 			PUSHY;
 			LDYI UART_STATUS;
 			JSR GetStatus;
 			ANDI 0x0001; // check if RDRF (bit 0, receiver data register full) is 1
-			IF_A_EQ_THEN NoBrk;
-
-			INY;		// point to UART data register
-			LDA, M[Y];	// get received character
-			ANDI 0x00FF;
-			XORI ETX;	// compare with CTRL/C
-			IF_A_EQ_THEN Brk;
-
-NoBrk:		CLRA;
-			JR BrkExit;
-Brk:		LDAI 1;
-BrkExit:	RRC, POPY;	// AC carry indicates break character detection
-			POPA;
-			RTS;
+			IF_A_EQ_THEN NoChar;
+			JR GetChr;
 			
+// Output character 
 UART_Beep:	LDAI BEL;
 UART_OutChr:PUSHY;
 			PUSHA;
@@ -46,7 +38,7 @@ UART_OutChr:PUSHY;
 RdStatus1:	JSR GetStatus;
 			ANDI 0x0002; // check if TDRE (bit 1, transmit register empty) is 1
 			IF_A_EQ_THEN RdStatus1;
-OutChr:		INY, LDA, M[POP];	// Y points to UART data register, get the char back		
+OutChr:		INY, POPA;	// Y points to UART data register, get the char back		
 			STA, M[Y];
 			POPY;
 			RTS;
@@ -60,9 +52,3 @@ GetStatus:	LDA, M[Y];	// read status register
 			JR GetStatus;
 StIsStable:	POPA;
 			RTS;
-			
-UART_OutStr:LDA, M[X];
-			IF_A_EQ_THEN UART_Done;
-			JSR UART_OutChr;
-			INX, JR UART_OutStr;
-UART_Done:	RTS;
