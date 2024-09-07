@@ -4,9 +4,19 @@ VGA_ROWS	.alias 32;	// 64*32 characters in 640*480 basic VGA mode (fits in 2k RA
 VGA_COLS	.alias 64;	// each character is 8*8 matrix
 VGA_BASE	.alias 0x1000;	// text video memory base address
 RAM_BASE	.alias 0xFF00;	// only 256 words of RAM is sufficient
-TXTBUFFER	.alias 0xFF40;	// command buffer start
-TXTBUFLEN	.alias 0x0040;	// 64 words length
-TXTBUFPOS	.alias 0xFF80;
+TXTBUFFER	.alias RAM_BASE + 0;	// command buffer start
+TXTBUFLEN	.alias 0x0040;			// 64 words length
+CURSOR_X	.alias RAM_BASE + 0x40;
+CURSOR_Y	.alias RAM_BASE + 0x41;
+CUR_OLDX	.alias RAM_BASE + 0x42;
+CUR_OLDY	.alias RAM_BASE + 0x43;
+TXTBUFPOS	.alias RAM_BASE + 0x44;
+TXTBUFMODE	.alias RAM_BASE + 0x45;
+PINT_ST		.alias RAM_BASE + 0x46;	// ParseInt state
+PINT_VAL	.alias RAM_BASE + 0x47;	// ParseInt value
+VGA_SRC		.alias RAM_BASE + 0x48;
+VGA_DST		.alias RAM_BASE + 0x49;
+
 
 // UART looks like a much simplified M6850 device
 UART_CONTROL	.alias 0x2000;	// when writing

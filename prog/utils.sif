@@ -7,8 +7,7 @@ ACSet:		RRC;	// clear or set AC
 ACDone:		RTS;
 
 // Set carry flag
-SEC:		IF_AC;
-			.relative ACDone;
+SEC:		IF_AC_THEN ACDone;
 CSet:		PUSHA;
 			LDAI -1;
 			JR ACSet;
@@ -33,11 +32,13 @@ ToUpper:	ANDI 0x00FF;	// mask upper byte
 			JSR SEC;
 			PUSHA;
 			SBCI 'a';
-			POPA, IF_A_GE_THEN ToUpper1;
+			POPA;
+			IF_A_GE_THEN ToUpper1;
 ToUpperEx:	RTS;
 ToUpper1:	PUSHA;
 			SBCI '{';
-			POPA, IF_A_GE_THEN ToUpperEx;
+			POPA;
+			IF_A_GE_THEN ToUpperEx;
 			SBCI 'a' - 'A' - 1;	// note that AC is 0!
 			RTS;
 			
@@ -48,11 +49,13 @@ ToLower:	ANDI 0x00FF;	// mask upper byte
 			JSR SEC;
 			PUSHA;
 			SBCI 'A';
-			POPA, IF_A_GE_THEN ToLower1;
+			POPA;
+			IF_A_GE_THEN ToLower1;
 ToLowerEx:	RTS;
 ToLower1:	PUSHA;
 			SBCI '[';
-			POPA, IF_A_GE_THEN ToLowerEx;
+			POPA;
+			IF_A_GE_THEN ToLowerEx;
 			ADCI 'A' - 'a';	// note that AC is 0!
 			RTS;
 
@@ -63,7 +66,7 @@ Print:		LDA, M[Y];
 PrintDone:	RTS;
 			
 PrintChr:	JSR UART_OutChr;
-			//JR VGA_OutChr;
+			JR VGA_OutChr;
 			RTS;
 
 // ------------------------------
@@ -101,10 +104,272 @@ PrintBin:	PUSHY;
 			LDXI 16;
 PrintBinLp:	IF_X_EQ_THEN PrintHexEx;
 			RLC;		// get MSB into AC flag
-			LDY, A;		// save to Y 
+			TAY;		// save to Y 
 			LDAI '0';
 			ADCI 0;		// will remain '0' or become '1'
 			JSR PrintChr;
-			LDA, Y;		// restore from Y
-			DEX, JR PrintBinLp;
+			TYA, DEX, JR PrintBinLp;
 			
+// -------------------------------------------------------------------------------------
+// Parse a string of chars pointed by Y into 2s complement integer in A
+// Enter: 
+// - Y = string pointer
+// - A = 0 for "open parsing" or 'B','O','X','D' format char
+// - X = preserved
+// Exit:
+// - return with AC set in case of error, A is garbage, Y is at last parsed character
+// - return with AC cleared if A contains parsed value, Y is at last not parsed character
+// -------------------------------------------------------------------------------------
+// Parsing state flags:
+// SPL0_0000_ffff_ffff
+// S ... sign
+// P ... digit parsed
+// L ... leading zero parsed
+// ffffffff: ASCI code of format
+// 'D' ... decimal format determined (or set)
+// 'X' ... hex format set
+// 'O' ... octal format set
+// 'B' ... binary format set
+// --------------------------------------------------------------------
+ParseInt:	PUSHX;				// X at M[S+3]
+			ANDI 0x00FF;		// sanitize input format if any
+			JSR ToUpper;
+			PUSHA;				// parse state at M[S+2]
+			CLRA;
+			PUSHA;				// value at M[S+1]
+			
+PIntGetChr:	LDA, M[Y];
+			IF_A_EQ_THEN PIntExit;	// bail if end of string found
+			JSR ToUpper;
+			PUSHA;					// character at M[S], which is stack top
+			LDXI 2;					// M[S+X] points to state
+
+			CASE ' ';
+			IF_A_NE_THEN PIntNosp;
+			// handle whitespace or tab
+PIntSpace:	LDA, M[S+X];
+			ANDI 0b0110000000000000;// check P, L flags
+			IF_A_NE_THEN PIntOk;	// we parsed at least one digit (including leading zero)
+			LDA, M[S+X];
+			ANDI 0x00FF;			// any format set but no digit parsed
+			IF_A_NE_THEN PIntErr;	// error such as 0b_ 0o_ 0x_
+			POPA;
+			INY, JR PIntGetChr;		// seems we are at the beginning, eat space and continue
+
+PIntNosp:	CASE TAB;
+			IF_A_EQ_THEN PIntSpace;	// TAB is same as whitespace
+
+			CASE '+';
+			IF_A_NE_THEN PIntNotPl;
+			// handle + sign
+			JR PIntSpace;			// TODO: should it be same like space?
+
+PIntNotPl:	CASE '-';
+			IF_A_NE_THEN PIntNotMi;
+			// handle - sign
+			LDA, M[S+X];			// load state
+			ANDI 0b0110000000000000;// check P, L flags
+			IF_A_NE_THEN PIntOk;	// we parsed at least one digit
+			LDA, M[S+X];
+			ANDI 0x00FF;			// format set but not followed by any digit
+			IF_A_NE_THEN PIntErr;	// error such as 0b- 0o- 0x-
+			LDA, M[S+X];			// reload state
+			XORI 0b1000000000000000;// flip sign indicator
+PIntUState:	STA, M[S+X];			// update state
+			POPA;
+			INY, JR PIntGetChr;		// parse next char
+
+PIntNotMi:	CASE 'B';
+			IF_A_NE_THEN PIntNotBin;
+			// handle binary format indicator
+PIntSetF:	LDXI 2;
+			LDA, M[S+X];			// load state
+			ANDI 0x00FF;			// care only for format
+			XORI 'X';				// is it hex?
+			IF_A_EQ_THEN PIntX1;	// yes, parse as hex value B
+			LDA, M[S+X];			// reload status
+			ANDI 0b0110000000000000;// check P, L flags
+			XORI 0b0010000000000000;// valid only if L is set!
+			IF_A_NE_THEN PIntErr;	
+			LDA, M[S+X];
+			ANDI 0b1000000000000000;// we need to preserve S flag
+			IF_A_EQ_THEN PIntClrS;
+			LDA, M[S];				// load B, O, X character
+			XORI 0b1000000000000000;// set S flag
+			JR PIntUState;			// store state
+PIntClrS:	LDA, M[S];
+			JR PIntUState;			// store state, S is 0
+
+PIntNotBin:	CASE 'O';
+			IF_A_EQ_THEN PIntSetF;	// set octal format indicator
+
+PIntNotOct: CASE 'X';
+			IF_A_EQ_THEN PIntSetF; 	// set hex format indicator
+
+			CASE '0';
+			IF_A_NE_THEN PIntNot0;
+			// handle zero
+			LDA, M[S+X];			// load state
+			ANDI 0x4000;			// check P(arse) flag
+			IF_A_NE_THEN PIntBODX;	// it was set, so this zero goes into value 
+			INY, JR PIntGetChr;		// not set, means this is leading zero, parse next char
+			LDA, M[S+X];
+			ANDI 0b1101111111111111;
+			XORI 0b0010000000000000;// set L flag
+			JR PIntUState;
+			
+ForceDec:	LDXI 2;
+			LDA, M[S+X];
+			ANDI 0xFF00;			// clear format
+			XORI 'D';				// set D(ecimal) format
+			DEY, JR PIntUState;		// re-parse same digit in decimal mode!
+			
+PIntBODX:	LDXI 2;
+			LDA, M[S+X];			// load state
+			ANDI 0x00FF;			// only care for format
+			IF_A_EQ_THEN ForceDec;	// not set, force decimal format
+			XORI 'B';				// check for binary
+			IF_A_NE_THEN PIntODX;
+			// parse as binary character, it can be only 0x30 or 0x31 so we need only the LSB
+			DEX;					
+			DEX;					// point to character
+			LDA, M[S+X];			// get character
+			INX, RRC;				// extract LSB into AC, point to value
+			LDA, M[S+X];			// get value
+			RLC;					// shift in 0 or 1
+			IF_AC_THEN PIntErr;		// AC here means overflow!
+PIntSetV:	STA, M[S+X];			// store updated value
+			LDXI 2;
+			LDA, M[S+X];
+			ANDI 0b1011111111111111;
+			XORI 0b0100000000000000;// set P flag
+			JR PIntUState;
+
+PIntODX:	LDA, M[S+X];			// load state
+			ANDI 0x00FF;			// only care for format
+			IF_A_EQ_THEN ForceDec;	// not set, force decimal format
+			XORI 'O';				// check for octal
+			IF_A_NE_THEN PIntDX;
+			// parse as octal character
+			DEX;					// point to value
+			LDA, M[S+X];			// get value
+			JSR CLC;
+			RLC;
+			JSR CLC;
+			RLC;
+			JSR CLC;
+			RLC;
+			IF_AC_THEN PIntErr;		// overflow!
+			STA, M[S+X];			// store value
+			DEX;					// point to character
+			LDA, M[S+X];			// get character
+			INX, ANDI 0x0007;		// care only about 3 LSBs, point to value
+			ADC, M[S+X];			// combine with previously shifted value
+			JR PIntSetV;			// store value, set P flag, continue parsing
+
+PIntDX:		LDA, M[S+X];			// load state
+			ANDI 0x00FF;			// only care for format
+			IF_A_EQ_THEN ForceDec;	// not set, force decimal format
+			XORI 'D';				// check for decimal
+			IF_A_NE_THEN PIntX;
+			// parse as decimal character
+			DEX;					// point to value
+			LDA, M[S+X];			// get value
+			LDX, A;					// X = V					
+			JSR CLC;
+			RLC;					// A = 2V
+			JSR CLC;
+			RLC;
+			JSR CLC;				// A = 4V
+			ADC, X;					// A = 4V + V = 5V
+			JSR CLC;
+			RLC;					// A = 2A = 10V
+			IF_AC_THEN PIntErr;		// AC means there was overflow!
+PIntSetDX:	LDXI 1;					// point to value
+			STA, M[S+X];			// write new value which is 10* (or 16*) previous
+			DEX;					// point to char
+			LDA, M[S+X];			// get ASCII code
+			INX, ANDI 0x000F;		// we care about last 4 bits, point to value
+			ADC, M[S+X];			// combine with value
+			JR PIntSetV;			// write back, set P flag, continue parsing
+
+PIntX:		LDA, M[S+X];			// load state
+			ANDI 0x00FF;			// only care for format
+			XORI 'X';				// check for hex
+			IF_A_NE_THEN PIntErr;
+			// parse as hex character
+PIntX1:		DEX;					// point to value
+			LDA, M[S+X];			// get value
+			JSR CLC;
+			RLC;
+			JSR CLC;
+			RLC;
+			JSR CLC;
+			RLC;
+			JSR CLC;
+			RLC;					// A = 16*V
+			IF_AC_THEN PIntErr;		// overflow!
+			JR PIntSetDX;
+
+PIntNot0:	CASE '1';
+			IF_A_EQ_THEN PIntBODX;
+
+			CASE '2';
+			IF_A_EQ_THEN PIntODX;
+
+			CASE '3';
+			IF_A_EQ_THEN PIntODX;
+
+			CASE '4';
+			IF_A_EQ_THEN PIntODX;
+
+			CASE '5';
+			IF_A_EQ_THEN PIntODX;
+
+			CASE '6';
+			IF_A_EQ_THEN PIntODX;
+
+			CASE '7';
+			IF_A_EQ_THEN PIntODX;
+
+			CASE '8';
+			IF_A_EQ_THEN PIntDX;
+
+			CASE '9';
+			IF_A_EQ_THEN PIntDX;
+
+			CASE 'A';
+			IF_A_EQ_THEN PIntX;
+
+//			CASE 'B';				// already handled
+//			IF_A_EQ_THEN PIntX;
+
+			CASE 'C';
+			IF_A_EQ_THEN PIntX;
+
+			CASE 'D';
+			IF_A_EQ_THEN PIntX;
+
+			CASE 'E';
+			IF_A_EQ_THEN PIntX;
+
+			CASE 'F';
+			IF_A_EQ_THEN PIntX;
+
+// Fall through for any other character. Parsing ends, with:
+// success if P flag is set, at that point use S flag to negate (TODO: handle -0x8000 case!)
+// failure if P flag is not set
+PIntExit:	LDXI 2;					// point to state
+			LDA, M[S+X];			//
+			ANDI 0b0100000000000000;// extract P flag
+			IF_A_EQ_THEN PIntErr;	// not set, fail!
+PIntOk:		POPA;					// discard
+			POPA;					// value
+			POPX;					// discard
+			POPX;					// saved X
+			JR CLC;					// indicate success
+PIntErr:	POPA;					// discard
+			POPA;					// value (may be of use as "error code")
+			POPX;					// discard
+			POPX;					// saved X
+			JR SEC;					// indicate error

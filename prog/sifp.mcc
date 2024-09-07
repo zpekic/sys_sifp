@@ -93,6 +93,8 @@ data16		.valfield r_p .. r_s values * default 0;
 // Base + offset addressing mode
 M[Y+X]		.alias  r_x = M[X], r_y = M[Y];
 M[X+Y]		.alias  r_x = M[X], r_y = M[Y];
+M[S+X]		.alias  r_x = M[X], r_s = M[S];
+M[S+Y]		.alias  r_y = M[Y], r_s = M[S];
 // Convenient stack operations
 RTS			.alias 	r_p = LDP, r_s = M[POP];
 //MARK2		.alias 	r_p = STP2, r_s = M[PUSH];
@@ -130,9 +132,11 @@ CHKX		.alias  r_p = NOP, r_a = NOA, r_x = CPX, r_y = NOY, r_s = NOS;
 CHKY		.alias  r_p = NOP, r_a = NOA, r_x = NOX, r_y = CPY, r_s = NOS;	
 // Rotate left through carry replacement
 RLC			.alias STA, M[PUSH] \ ADC, M[POP];
-// Exchange registers
-//XAX			.alias STA, M[PUSH] \ LDA, X \ LDX, M[POP];
-//XAY			.alias STA, M[PUSH] \ LDA, Y \ LDY, M[POP];
+// Transfer registers
+TAY			.alias LDY, A;
+TYA			.alias LDA, Y;
+// Load A from stack top, and xor with immediate value (for match)
+CASE		.alias r_a = LDA, r_s = M[S] \ r_p = M[IMM], r_a = XOR \ data16 =;
 
 //
 // Special case instruction combinations

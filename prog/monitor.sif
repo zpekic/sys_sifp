@@ -6,8 +6,8 @@
 // Full description: 
 // https://hackaday.io/project/173996-sifp-single-instruction-format-processor
 //---------------------------------------------------------------------------------------------
-			.code 12, 16, *_code.mif, *_code.cgf, *_code.coe, cpu:*_code.vhd, *_code.hex, *_code.bin, 2;
-			.symbol 12, 256, *_symbol.mif, *_symbol.cgf, *_symbol.coe, sym:*_symbol.vhd, *_symbol.hex, *_symbol.bin, 32;
+			.code 11, 16, *_code.mif, *_code.cgf, *_code.coe, cpu:*_code.vhd, *_code.hex, *_code.bin, 2;
+			.symbol 11, 256, *_symbol.mif, *_symbol.cgf, *_symbol.coe, sym:*_symbol.vhd, *_symbol.hex, *_symbol.bin, 32;
 
 #include "sifp.mcc";
 #include "sifp_sys.mcc";
@@ -70,7 +70,20 @@ ColdStart:	JSR VGA_Init;
 // -------------------------------------
 // hot start
 // -------------------------------------
-HotStart:	LDXI TXTBUFLEN;
+HotStart:	LDAI ' ';
+HotStart1:	PUSHA;
+			JSR PrintChr;
+			POPA;
+			ANDI 0x00FF;
+			IF_A_EQ_THEN HotStart;
+			IF_AC_THEN NextPrint;
+			ADCI 1;
+			JR HotStart1;
+NextPrint:	ADCI 0;
+			JR HotStart1;
+			
+			
+			LDXI TXTBUFLEN;
 			LDYI TXTBUFFER;
 			JSR MemClear;
 			
@@ -78,8 +91,8 @@ HotStart:	LDXI TXTBUFLEN;
 			IF_AC_THEN ErrOrBrk;
 			
 			// print text buffer
-			LDYI TXTBUFFER;
-			JSR Print;
+			//LDYI TXTBUFFER;
+			//JSR Print;
 
 			// execute command in text buffer
 			JSR CmdExec;
@@ -109,9 +122,12 @@ ErrMsg:		JSR Print;
 // -------------------------------------
 // EXECUTE
 // -------------------------------------
-CmdExec:	LDAI 0xFFFF;
-			JR SEC;	// just return now with an error code
-			
+CmdExec:	LDYI TXTBUFFER;			
+			CLRA;					// accept any valid format
+			JSR ParseInt;
+			IF_AC_THEN CmdExecEx;
+			JSR PrintHex;			// print successfully parsed integer
+CmdExecEx:	RTS;	
 
 // -------------------------------------
 // EDIT SINGLE LINE

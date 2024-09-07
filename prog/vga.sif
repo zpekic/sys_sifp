@@ -1,27 +1,7 @@
-ROW_OFFSET	.alias RAM_BASE + 0;	// space to mark first address of up to 61 rows
-CUR_OLDX	.alias RAM_BASE + 60;
-CUR_OLDY	.alias RAM_BASE + 61;
-CURSOR_X	.alias RAM_BASE + 62;
-CURSOR_Y	.alias RAM_BASE + 63;
-
 			.org $;
 
 // Initialize display
-VGA_Init:	JSR CLC;
-			LDAI VGA_COLS;
-			PUSHA;
-			LDAI VGA_BASE;	// base address is the start of video RAM
-			LDXI VGA_ROWS;
-			LDYI ROW_OFFSET;
-			STA, M[Y];
-RowOffLoop:	LDA, M[Y];		// previous row 
-			INY, ADC, M[S];	// add number of columns, point to current row
-			DEX, STA, M[Y];
-			IF_X_NE_THEN RowOffLoop;
-			POPA;
-			CLRXY;
-			JSR SetOldCrsXY;	// set "old" cursor (new will be set by CLS)
-			LDAI CLS;
+VGA_Init:	LDAI CLS;
 			// continue with "clear screen"
 			
 // Display ASCII in A at CURSOR_X, CURSOR_Y
@@ -98,28 +78,47 @@ NextRow1:	INY;
 			IF_Y_GE_THEN ScrollUp;
 			JR SetCursorXY;
 
-ScrollUp:	CLRY;
-NxtRow:		PUSHY; 		// we will need row later
+ScrollUp: 	LDAI VGA_BASE;
+			LDXI VGA_DST;
+			STA, M[X];
+			JSR CLC;
+			ADCI VGA_COLS;
+			LDXI VGA_SRC;
+			STA, M[X];
+			CLRY;
+
+ScrollUpY:	PUSHY;
 			CLRX;
-			JSR GetRowBase;
-NxtCol:		PUSHY;		// destination base on stack
-			ADYI VGA_COLS;	// add to get source base
-			LDA, M[Y+X];	// get character from VGA RAM
-			POPY;			// destination base
-			STA, M[Y+X];	// store character to one row below, same column
-			INX;			// next column
+
+ScrollUpX:	PUSHX;
+			PUSHX;
+			LDXI VGA_SRC;
+			LDY, M[X];
+			POPX;
+			LDA, M[Y+X];
+			LDXI VGA_DST;
+			LDY, M[X];
+			POPX;
+			STA, M[Y+X];
+			INX;
 			CPXI VGA_COLS;
-			IF_X_GE_THEN ChkRow;
-			JR NxtCol;
-ChkRow:		POPY;
+			IF_X_LT_THEN ScrollUpX;
+			
+			LDXI VGA_DST;
+			LDYI VGA_SRC;
+			LDA, M[X];
+			STA, M[Y];	// M[VGA_SRC] <= M[VGA_DST];
+			LDA, M[X];
+			JSR CLC;
+			ADCI VGA_COLS;
+			STA, M[X];	// M[VGA_DST] += VGA_COLS
+			
+			POPY;
 			INY;
 			CPYI VGA_ROWS - 1;
-			IF_Y_GE_THEN ClrLastRow;
-			JR NxtRow;
+			IF_Y_LT_THEN ScrollUpY;
 			// clear last row
-ClrLastRow:	NOP;
-			LDYI VGA_ROWS - 1;
-			PUSHY;	
+ClrLastRow:	PUSHY;	
 			JSR ClearRow;
 			POPY;		// set cursor position to X = 0, Y = ROWS - 1
 			JR SetX0;
@@ -175,9 +174,17 @@ GetCursorY:	LDY, M[X];		// Y <= M[CURSOR_Y]
 			RTS;	
 
 GetRowBase:	PUSHA;
-			ADYI ROW_OFFSET;
-			LDA, M[Y];		// row start address in VGA memory
-			LDY, A;			// to Y as index base
+			TYA;			// row into A
+			ANDI 0x001F;	// sanitize row 0 - 31
+			JSR CLC;		
+			RLC;			// 6 left is *64
+			RLC;
+			RLC;
+			RLC;
+			RLC;
+			RLC;
+			TAY;			// to Y as row offset
+			ADYI VGA_BASE;	// add VRAM base
 			POPA;
 			RTS;
 			

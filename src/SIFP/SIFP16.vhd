@@ -202,6 +202,7 @@ signal reg_p_d, reg_a_d, reg_x_d, reg_y_d, reg_s_d: std_logic;
 signal int_abus: std_logic_vector(15 downto 0);
 signal int_dbus, int_fdbus: std_logic_vector(15 downto 0);
 signal int_rnw, int_vma, int_pnd: std_logic;
+signal cpu_hiz: std_logic;
 signal opr_vector: std_logic_vector(4 downto 0);
 alias opr_p: std_logic is opr_vector(4);
 alias opr_a: std_logic is opr_vector(3);
@@ -216,10 +217,11 @@ begin
 --------------------------------------------------------------------------
 -- CPU control bus outputs 
 --------------------------------------------------------------------------
--- tristate
-RnW <= 'Z' when (cpu_hlda = '1') else (cpu_bctrl and int_rnw);
-VMA <= 'Z' when (cpu_hlda = '1') else (cpu_bctrl and int_vma);
-PnD <= 'Z' when (cpu_hlda = '1') else (cpu_bctrl and int_pnd);
+-- tristate (also when in Reset mode)
+cpu_hiz <= cpu_hlda or RESET;
+RnW <= 'Z' when (cpu_hiz = '1') else (cpu_bctrl and int_rnw);
+VMA <= 'Z' when (cpu_hiz = '1') else (cpu_bctrl and int_vma);
+PnD <= 'Z' when (cpu_hiz = '1') else (cpu_bctrl and int_pnd);
 -- not tristate
 HALT <= i_is_halt;
 TRACEOUT <= int_trace;
@@ -235,7 +237,7 @@ int_done <= (not int_trace) when (cpu_irexe = '1') else cpu_done;
 ----------------------------------------------------------------------------
 -- CPU Address bus output
 ----------------------------------------------------------------------------
-ABUS <= "ZZZZZZZZZZZZZZZZ" when (cpu_hlda = '1') else int_abus;	
+ABUS <= "ZZZZZZZZZZZZZZZZ" when (cpu_hiz = '1') else int_abus;	
 
 -- internal address bus is either:
 -- addition of all registers that project address (VMA = 1, RnW = 0/1, normal memory read/write)
@@ -257,7 +259,7 @@ int_pnd <= reg_p_a;
 -- CPU data bus outputs
 ---------------------------------------------------------------------------
 -- internal data bus is logical OR of all registers that project data
-DBUS <= "ZZZZZZZZZZZZZZZZ" when (((int_rnw and cpu_bctrl) or cpu_hlda) = '1') else int_fdbus;
+DBUS <= "ZZZZZZZZZZZZZZZZ" when (((int_rnw and cpu_bctrl) or cpu_hiz) = '1') else int_fdbus;
 
 -- memory write if valid memory address and trying to output at least 1 register
 int_rnw <= not(reg_p_d or reg_a_d or reg_x_d or reg_y_d or reg_s_d or i_is_ftos or i_is_pushf) when (int_vma = '1') else '1';

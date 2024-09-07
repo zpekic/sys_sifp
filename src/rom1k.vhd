@@ -23,7 +23,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
-use work.sifp_package.all;
+--use work.sifp_package.all;
 use work.monitor_code.all;
 
 -- Uncomment the following library declaration if instantiating
@@ -37,7 +37,7 @@ entity rom1k is
 		default_value: STD_LOGIC_VECTOR(15 downto 0) := X"7FFF" -- HALT instruction
 	);
 	Port ( 
-		A : in  STD_LOGIC_VECTOR (11 downto 0);
+		A : in  STD_LOGIC_VECTOR (10 downto 0);
 		D : out  STD_LOGIC_VECTOR (15 downto 0);
 		CS : in  STD_LOGIC;
 		OE : in  STD_LOGIC

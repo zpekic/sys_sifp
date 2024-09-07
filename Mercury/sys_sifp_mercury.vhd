@@ -185,6 +185,7 @@ signal led_flash: std_logic;
 signal perfcnt_value: std_logic_vector(31 downto 0);
 signal in_or_op: std_logic_vector(3 downto 0);
 signal reset_delay: std_logic_vector(15 downto 0) := X"0000";
+signal dout_bootram: std_logic_vector(15 downto 0);
 
 begin   
 
@@ -356,17 +357,29 @@ vram_web <= "" & '0';
 -- 0x0XXX
 cs_rom <= VMA when (ABUS(15 downto 12) = X"0") else '0';
 
-bootrom: entity work.rom1k generic map(
-		filename => "..\prog\monitor_code.hex",
-		default_value => X"7FFF"	-- HALT
-	)	
-	port map(
-		D => DBUS,
-		A => ABUS(11 downto 0),
-		CS => cs_rom, 
-		OE => RnW
-	);
-
+--bootrom: entity work.rom1k generic map(
+--		filename => "..\prog\monitor_code.hex",
+--		default_value => X"7FFF"	-- HALT
+--	)	
+--	port map(
+--		D => DBUS,
+--		A => ABUS(10 downto 0),
+--		CS => cs_rom, 
+--		OE => RnW
+--	);
+  bootram : entity work.ram2k16
+    PORT MAP (
+      --Port A
+      ENA        => cs_rom,
+      WEA        => vram_wea,				-- simply inverted RnW signal
+      ADDRA      => ABUS(10 downto 0),	
+      DINA       => DBUS,
+      DOUTA      => dout_bootram,
+		CLKA       => CLK
+   );
+	-- connect to system data bus using 3-state driver
+	DBUS <= dout_bootram when ((cs_rom and RnW) = '1') else "ZZZZZZZZZZZZZZZZ";
+	
 -- SYSTEM RAM (2k words)
 -- 0xFXXX (repeats twice)
 cs_ram <= VMA when (ABUS(15 downto 12) = X"F") else '0';
@@ -467,18 +480,18 @@ begin
 	);
 end generate;
 		
--- count instructions or operations per 1 second
-perfcnt: entity work.freqcounter Port map ( 
-		reset => RESET,
-      clk => freq1Hz,
-      freq => OPCNT(3),
-		bcd => '1',
-		add(31 downto 4) => X"0000000",
-		add(3 downto 0) => in_or_op,
-		cin => '0',
-		cout => open,
-      value => perfcnt_value
-	);
+---- count instructions or operations per 1 second
+--perfcnt: entity work.freqcounter Port map ( 
+--		reset => RESET,
+--      clk => freq1Hz,
+--      freq => OPCNT(3),
+--		bcd => '1',
+--		add(31 downto 4) => X"0000000",
+--		add(3 downto 0) => in_or_op,
+--		cin => '0',
+--		cout => open,
+--      value => perfcnt_value
+--	);
 	
 in_or_op <= X"2" when (btn_ledsel = '0') else OPCNT(2 downto 0) & '0'; -- double both because base period is 0.5s
 	
