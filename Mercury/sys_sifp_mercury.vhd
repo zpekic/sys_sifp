@@ -132,9 +132,9 @@ alias sw_trace: std_logic is switch(7);
 signal button: std_logic_vector(3 downto 0);
 alias btn_traceload: std_logic is button(0);
 alias btn_continue: std_logic is button(1);
-alias btn_ledsel: std_logic is button(2);
 alias btn_int: std_logic is button(2);
 alias btn_clk: std_logic is button(3);
+alias btn_ledsel: std_logic is button(3);
 
 --- frequency signals
 signal clkgen_vga: std_logic;	-- should be 25MHz
@@ -186,16 +186,23 @@ signal perfcnt_value: std_logic_vector(31 downto 0);
 signal in_or_op: std_logic_vector(3 downto 0);
 signal reset_delay: std_logic_vector(15 downto 0) := X"0000";
 signal dout_bootram: std_logic_vector(15 downto 0);
+-- 
+signal dumper_debug, loader_debug: std_logic_vector(15 downto 0);
+signal reset_sys: std_logic;
+signal dumper_txd, tracer_txd: std_logic;
+signal dumper_busy, loader_busy: std_logic;
 
 begin   
 
 -- master reset
 RESET <= USR_BTN when (reset_delay = X"FFFF") else '1';
+-- system reset (assert while loading / dumping memory)
+reset_sys <= reset or loader_busy or dumper_busy;
 
 -- CPU!
 cpu: entity work.SIFP16 Port map (
 		CLK => clkgen_cpu,
-		RESET => RESET,
+		RESET => reset_sys,
 		READY => tracer_ready,
 		TRACEIN => sw_trace,
 		HOLD => '0',
@@ -221,19 +228,22 @@ cpu: entity work.SIFP16 Port map (
 DBUS <= X"0008" when ((INTA and RnW) = '1') else "ZZZZZZZZZZZZZZZZ";
 INT <= btn_int when (TRACEOUT = '1') else freq1Hz;
 
+-- Debug serial can come either from tracer or mem dumper
+PMOD_RXD0 <= dumper_txd when (dumper_busy = '1') else tracer_txd;
+
 -- Tracer watches system bus activity and if signal match is detected, freezes the CPU in 
 -- the cycle by asserting low READY signal, and outputing the trace record to serial port
 -- After that, cycle will continue if continue signal is high, or stop there.	 
 	tracer: entity work.debugtracer Port map(
-			reset => RESET,
+			reset => reset_sys,
 			cpu_clk => clkgen_cpu,
 			txd_clk => clkgen_baudrate,
 			continue => continue,  
 			enable => TRACEOUT,
-			ready => tracer_ready,			-- freezes CPU when low
-			txd => PMOD_RXD0,					-- output trace (to any TTY of special tracer running on the host
-			load => btn_traceload,			-- load mask register if high
-			sel(3 downto 0) => sw_tracesel,		-- set mask register
+			ready => tracer_ready,				-- freezes CPU when low
+			txd => tracer_txd,					-- output trace (to any TTY of special tracer running on the host
+			load => btn_traceload,				-- load mask register if high
+			sel(3 downto 0) => sw_tracesel,	-- set mask register
 			REGW => RegWrite,
 			FETCH => FETCH,
 			MEMW => MemWrite,
@@ -356,18 +366,7 @@ vram_web <= "" & '0';
 -- SYSTEM ROM (4k words of ROM contains the system software) 
 -- 0x0XXX
 cs_rom <= VMA when (ABUS(15 downto 12) = X"0") else '0';
-
---bootrom: entity work.rom1k generic map(
---		filename => "..\prog\monitor_code.hex",
---		default_value => X"7FFF"	-- HALT
---	)	
---	port map(
---		D => DBUS,
---		A => ABUS(10 downto 0),
---		CS => cs_rom, 
---		OE => RnW
---	);
-  bootram : entity work.ram2k16
+bootram : entity work.ram2k16
     PORT MAP (
       --Port A
       ENA        => cs_rom,
@@ -379,6 +378,38 @@ cs_rom <= VMA when (ABUS(15 downto 12) = X"0") else '0';
    );
 	-- connect to system data bus using 3-state driver
 	DBUS <= dout_bootram when ((cs_rom and RnW) = '1') else "ZZZZZZZZZZZZZZZZ";
+	
+-- intitialize memory from binary stream received from the host
+bootloader: entity work.bin2mem port map (
+	reset => RESET,
+   rxd => PMOD_TXD0,
+   rxd_clk4  => clkgen_baudrate4,	-- 57600*4,
+   delay_clk => freq1Hz,
+   busy => loader_busy,
+	-- system bus takeover while writing to memory
+   a => ABUS,
+   d => DBUS,
+   rnW => RnW,
+	vma => VMA,
+	pnD => PnD,
+	debug => loader_debug
+);
+	
+-- emit memory range in format similar to .mif file
+memdumper: entity work.mem2mif port map (
+	reset => RESET,
+   txd => dumper_txd,
+   txd_clk  => clkgen_baudrate,	-- 57600*1,
+	enable => not loader_busy,
+   busy => dumper_busy,
+	-- system bus takeover while reading from memory
+   a => ABUS,
+   d => DBUS,
+   rnW => RnW,
+	vma => VMA,
+	pnD => PnD,
+	debug => dumper_debug
+);
 	
 -- SYSTEM RAM (2k words)
 -- 0xFXXX (repeats twice)
@@ -415,7 +446,7 @@ port map(
 cs_acia0 <= VMA when (ABUS(15 downto 12) = X"2") else '0';
 		
 acia0: entity work.uart Port map (
-			reset => Reset,
+			reset => reset_sys,
 			clk => clkgen_cpu,
 			clk_txd => clkgen_baudrate,	-- 38400
 			clk_rxd => clkgen_baudrate4,	-- 115200
@@ -429,21 +460,17 @@ acia0: entity work.uart Port map (
 		);
 
 -- LEDs
-LED(0) <= TE; --TRACEOUT;  
-LED(1) <= IE; --INTA;
+LED(0) <= RESET;		--TE; --TRACEOUT;  
+LED(1) <= reset_sys; --IE; --INTA;
 	
 -- 7segment LED 
 led4x7: entity work.fourdigitsevensegled port map ( 
 	  -- inputs
-	  data => led_data(15 downto 0),
+	  data => loader_debug, --led_data(15 downto 0),
 	  digsel(1) => freq50Hz,
 	  digsel(0) => freq100Hz,
 	  showdigit => "1111",
 	  showdot => led_data(19 downto 16),
-	  --showdot(3) => VMA,
-	  --showdot(2) => PnD,
-	  --showdot(1) => FETCH,
-	  --showdot(0) => RnW,
 	  showsegments => led_flash,	-- flash when CPU is halted
 	  -- outputs
 	  anode => AN,
@@ -453,12 +480,10 @@ led4x7: entity work.fourdigitsevensegled port map (
 
 led_flash <= freq1Hz or (not HALT);
 led_data <= led_bus when (TRACEOUT = '1') else led_perf;
-led_bus <= (VMA & PnD & FETCH & RnW & ABUS) when (btn_ledsel = '1') else (VMA & PnD & FETCH & RnW & DBUS);
+led_bus <= (VMA & PnD & FETCH & RnW & DBUS) when (btn_ledsel = '1') else (VMA & PnD & FETCH & RnW & ABUS);
 led_perf <= "0001" & perfcnt_value(15 downto 0) when (perfcnt_value(31 downto 16) = X"0000") else "0100" & perfcnt_value(31 downto 16);
---bus_valid <= VMA or (not RnW);	-- bus signals defined if valid memory address, or register debug output
 			 
 -- generate debouncers for 4 buttons and 8 for switches to clean input signals
---switch <= SW;
 debouncer_generate: for i in 0 to 7 generate
 begin
 	dbc: if (i < 4) generate
@@ -483,16 +508,16 @@ end generate;
 ---- count instructions or operations per 1 second
 --perfcnt: entity work.freqcounter Port map ( 
 --		reset => RESET,
---      clk => freq1Hz,
---      freq => OPCNT(3),
+--    clk => freq1Hz,
+--    freq => OPCNT(3),
 --		bcd => '1',
 --		add(31 downto 4) => X"0000000",
 --		add(3 downto 0) => in_or_op,
 --		cin => '0',
 --		cout => open,
---      value => perfcnt_value
+--    value => perfcnt_value
 --	);
 	
-in_or_op <= X"2" when (btn_ledsel = '0') else OPCNT(2 downto 0) & '0'; -- double both because base period is 0.5s
+--in_or_op <= X"2" when (btn_ledsel = '0') else OPCNT(2 downto 0) & '0'; -- double both because base period is 0.5s
 	
 end;

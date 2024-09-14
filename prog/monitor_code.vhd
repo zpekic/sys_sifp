@@ -204,7 +204,7 @@ constant r_s_S: 	std_logic_vector(2 downto 0) := O"7";
 ---- End boilerplate code
 
 --
--- L0087.data16: .valfield r_p .. r_s values * default 0;
+-- L0094.data16: .valfield r_p .. r_s values * default 0;
 --
 alias cpu_data16: 	std_logic_vector(15 downto 0) is cpu_uinstruction(15 downto 0);
 -- Values from X"0000" to X"FFFF" allowed

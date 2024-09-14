@@ -90,6 +90,7 @@ on_rxd_clk: process(rxd_clk, reset, frame_valid, sr)
 begin
 	if (reset = '1') then
 		sr <= (others => '1');
+		ready <= '0';
 	else
 		if (rising_edge(rxd_clk)) then
 			ready <= frame_valid;

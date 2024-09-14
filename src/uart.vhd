@@ -47,26 +47,6 @@ end uart;
 
 architecture Behavioral of uart is
 
-component uart_par2ser is
-    Port ( reset : in  STD_LOGIC;
-			  txd_clk: in STD_LOGIC;
-			  send: in STD_LOGIC;
-			  mode: in STD_LOGIC_VECTOR(2 downto 0);
-			  data: in STD_LOGIC_VECTOR(7 downto 0);
-           ready : buffer STD_LOGIC;
-           txd : out  STD_LOGIC);
-end component;
-
-component uart_ser2par is
-    Port ( reset : in  STD_LOGIC;
-           rxd_clk : in  STD_LOGIC;
-           mode : in  STD_LOGIC_VECTOR (2 downto 0);
-           char : out  STD_LOGIC_VECTOR (7 downto 0);
-           ready : buffer  STD_LOGIC;
-           valid : out  STD_LOGIC;
-           rxd : in  STD_LOGIC);
-end component;
-
 signal d_out, rdr, status, control: std_logic_vector(7 downto 0);
 signal tdre, rdrf, rdr_ok, send, received, ready, valid: std_logic; 
 signal err_parity, err_frame, err_overrun: std_logic;
@@ -107,7 +87,7 @@ with control(4 downto 2) select mode <=
 	"000" when others;	-- no 7 bit data supported, default to 8-N-1
 
 reset_sender <= reset or int_reset; 
-sender: uart_par2ser Port map (
+sender: entity work.uart_par2ser Port map (
 			reset => reset_sender,
 			txd_clk => int_txdclk,
 			send => send,
@@ -118,7 +98,7 @@ sender: uart_par2ser Port map (
 		);
 
 reset_receiver <= reset or int_reset or received;
-receiver: uart_ser2par Port map ( 
+receiver: entity work.uart_ser2par Port map ( 
 			reset => reset_receiver, 
 			rxd_clk => int_rxdclk,
 			mode => mode, 

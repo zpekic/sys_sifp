@@ -76,11 +76,18 @@ r_s			.valfield 3 values
 				default NOS;
 
 // other registers
-// F ... 16bit flags register (MSByte = not used, LSByte = Flags for A, X, Y, S)
+
+// F ... 16bit flags register (MSByte = IE, TE; LSByte = Flags for A, X, Y, S)
 //			during execute phase, F is updated either from:
 //			A, X, Y, S flags -OR-
 //			memory data bus if stack pointer "pops" and all other registers as inactive (NOP)
 //			it can be saved during execute phase if stack pointer "pushes" and all other registers are inactive (NOP)
+// Flag bits arrangement:
+//	15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
+//	IE | TE | ?? | ?? | ?? | ?? | ?? | ?? | AC | XC | YC | SC | AZ | XZ | YZ | SZ |
+//	IE ... set to 1 to enable interrupts (cleared on reset)
+//  TE ... set to 1 to enable "tracing" (output register values after each instruction, cleared on reset)
+
 // I ... 16bit instruction register, loaded from memory data bus during fetch phase only
 
 // 16-bit data can be directly in instruction stream (immediate value, relative or absolute address)
